@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include "Test.h"
 
-//参考文章:https://blog.csdn.net/qq_42475711/article/details/85224010
-
 int main()
 {
     int a = N; //宏常量
