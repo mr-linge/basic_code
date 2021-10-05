@@ -1,8 +1,5 @@
 #include "Test.h"
 
-void DoNothing(void)
-{
-    ;
-
+void DoNothing(void) {
     return;
 }
