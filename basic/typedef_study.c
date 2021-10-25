@@ -6,6 +6,7 @@ typedef unsigned int UInterger;
 typedef float Float;
 typedef Integer MyInteger;//在别名的基础上再起一个别名
 typedef char* String;//typedef也可以给指针起别名
+
 // 定义一个结构体
 struct MyPoint {
     float x;
@@ -14,10 +15,16 @@ struct MyPoint {
 // 起别名
 typedef struct MyPoint Point;//给结构体起别名
 typedef struct MyPoint* pointAddress;//给指向结构体的指针起别名
+typedef struct {
+    char *name;
+    int age;
+} Person; // 定义结构体并同时起别名
+
 // 定义枚举类型
 enum SeasonN {springN, summerN, autumnN, winterN};
 // 给枚举类型起别名
 typedef enum SeasonN SeasN;
+
 // 定义一个sum函数，计算a跟b的和
 int sumN(int a, int b) {
     int c = a + b;
@@ -50,6 +57,10 @@ int main() {
     // 利用指针变量访问结构体成员
     printf("x=%f，y=%f\n", pAdd->x, pAdd->y);
     
+    Person per = {"JOJO",20};
+    per.age = 18;
+    printf("Person name = %s, age = %d\n", per.name, per.age);
+
     // 定义枚举变量
     SeasN s = springN;
     //等价于下面这句

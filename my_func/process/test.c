@@ -10,6 +10,6 @@ int main(int argc, char * argv[]) {
    }
    int pid = atoi(argv[1]);
    char * name = get_process_name(pid);   
-   printf("process pid = %d, it's name is %s\n",pid,name);
+   printf("process pid = %d, it's name is: %s\n",pid,name);
   return 0;
 }

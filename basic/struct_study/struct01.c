@@ -38,22 +38,29 @@ int main() {
     //结构体的初始化
     //将各成员的初值，按顺序地放在一对大括号{}中，并用逗号分隔，一一对应赋值。
     struct Student stu = {"MJ", 27};
-    printf("name:%s\n", stu.name);
-    
+    printf("stu name:%s\n", stu.name);
     // 访问stu的age成员
     stu.age = 29;
-    printf("age:%d\n", stu.age);
-    
+    printf("stu age:%d\n", stu.age);
+
+    // 直接使用stu2 结构体变量
+    stu2.name = "stu2 name";
+    printf("stu2.name = %s\n",stu2.name);
+
+    // 直接使用stu3 结构体变量
+    stu3.name = "stu3 name";
+    printf("stu3.name = %s\n",stu3.name);
+
     //如果某个成员也是结构体变量，可以连续使用成员运算符"."访问最低一级成员
     struct Student4 stu4;
     stu4.name = "Dio Brand";
     stu4.birthday.year = 1986;
     stu4.birthday.month = 9;
     stu4.birthday.day = 10;
-    printf("name:%s,birthday year:%d,month:%d,day:%d\n",stu4.name,stu4.birthday.year,stu4.birthday.month,stu4.birthday.day);
+    printf("stu4 name:%s,birthday year:%d,month:%d,day:%d\n",stu4.name,stu4.birthday.year,stu4.birthday.month,stu4.birthday.day);
     
     //相同类型的结构体变量之间可以进行整体赋值 如将stu直接赋值给stu2
-    struct Student stu2 = stu;
-    printf("name:%s,age:%d\n",stu2.name,stu2.age);
+    struct Student stu5 = stu;
+    printf("stu5 name:%s,age:%d\n",stu5.name,stu5.age);
     return 0;
 }
