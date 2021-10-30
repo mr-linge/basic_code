@@ -6,6 +6,9 @@
 function:
 int fprintf(FILE *stream, const char *format, ...)
 
+Description:
+向 stream 所指的文件 输入 后面的 字符串
+
 params:
 stream -- 这是指向 FILE 对象的指针，该 FILE 对象标识了流。
 format -- 这是 C 字符串，包含了要被写入到流 stream 中的文本。它可以包含嵌入的 format 标签，format 标签可被随后的附加参数中指定的值替换，并按需求进行格式化。format 标签属性是 %[flags][width][.precision][length]specifier，具体讲解如下：
@@ -61,8 +64,8 @@ int main()
 {
    FILE * fp;
 
-   fp = fopen ("file.txt", "w+");
-   fprintf(fp, "%s %s %s %d", "We", "are", "in", 2014);
+   fp = fopen("file.txt", "w+");
+   fprintf(fp, "%s %s %s %d", "We", "are", "in", 2025);
    
    fclose(fp);  
    return(0);

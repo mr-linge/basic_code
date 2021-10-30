@@ -26,12 +26,12 @@ prot	代表映射区域的保护方式，有下列组合：
 	PROT_NONE  映射区域不能存取。
 flags	会影响映射区域的各种特性：
 	MAP_FIXED  如果参数 start 所指的地址无法成功建立映射时，则放弃映射，不对地址做修正。通常不鼓励用此旗标。
-	MAP_SHARED  对应射区域的写入数据会复制回文件内，而且允许其他映射该文件的进程共享。
-	MAP_PRIVATE  对应射区域的写入操作会产生一个映射文件的复制，即私人的"写入时复制" (copy on write)对此区域作的任何修改都不会写回原来的文件内容。
+	MAP_SHARED  对映射区域的写入数据会复制回文件内，而且允许其他映射该文件的进程共享。
+	MAP_PRIVATE  对映射区域的写入操作会产生一个映射文件的复制，即私人的"写入时复制" (copy on write)对此区域作的任何修改都不会写回原来的文件内容。
 	MAP_ANONYMOUS  建立匿名映射，此时会忽略参数fd，不涉及文件，而且映射区域无法和其他进程共享。
-	MAP_DENYWRITE  只允许对应射区域的写入操作，其他对文件直接写入的操作将会被拒绝。
+	MAP_DENYWRITE  只允许对映射区域的写入操作，其他对文件直接写入的操作将会被拒绝。
 	MAP_LOCKED  将映射区域锁定住，这表示该区域不会被置换(swap)。
-fd	open()返回的文件描述词，代表欲映射到内存的文件。
+fd	open()返回的文件描述符，代表欲映射到内存的文件。
 offset	文件映射的偏移量，通常设置为0，代表从文件最前方开始对应，offset必须是分页大小的整数倍。
 
 return value:
@@ -42,6 +42,17 @@ return value:
 	EINVAL  参数start、length 或offset 有一个不合法。
 	EAGAIN  文件被锁住，或是有太多内存被锁住。
 	ENOMEM  内存不足。
+
+
+相关函数
+int munmap(void * addr, size_t len)
+成功执行时，munmap()返回0。失败时，munmap返回-1，error返回标志和mmap一致；
+该调用在进程地址空间中解除一个映射关系，addr是调用mmap()时返回的地址，len是映射区的大小；
+当映射关系解除后，对原来映射地址的访问将导致段错误发生。
+
+int msync( void *addr, size_t len, int flags )
+一般说来，进程在映射空间的对共享内容的改变并不直接写回到磁盘文件中，往往在调用munmap（）后才执行该操作。
+可以通过调用msync()实现磁盘上文件内容与共享内存区的内容一致。
  * */
 int main() {
     int fd;
