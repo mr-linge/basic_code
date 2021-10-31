@@ -8,7 +8,7 @@ function:
 void *memcpy(void *str1, const void *str2, size_t n)
 
 Description:
-从存储区 str2 复制 n 个字节到存储区 str1
+将 str2 起始地址 后 n 个 数据，复制到 sr1 所指向的区域
 
 params:
 str1 -- 指向用于存储复制内容的目标数组，类型强制转换为 void* 指针。
@@ -21,10 +21,10 @@ return value:
 int main ()
 {
 	const char src[50] = "Hello world! To be  linux expert.";
-	
+
 	char d[50];
 	// 将字符串复制到数组 d1 中
-	memcpy(d, src, strlen(src)+1);
+	memcpy(d, src, strlen(src));
 	printf("d = %s\n", d);
 
 

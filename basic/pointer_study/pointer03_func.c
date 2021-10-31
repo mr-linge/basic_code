@@ -6,14 +6,6 @@
    array 就是通过 pointer 实现的，数组名就是首地址指针,指针也可以通过下标取值
    Type *p = (Type *) malloc(n * sizeof(Type)); 
    *(p + (i * sizeof(Type))) == p[i]
-
-   example:
-   char * p = "Hello World!";
-   &(p[0]) == p
-   p[0]    == *(p + sizeof(char))
-   ....
-   &(p[n])  == p + (n * sizeof(char))
-   p[n]  == *(p + (n * sizeof(char)))
  * */
 int main() {
 	long arr[5] = {101,102,103,104,105};
