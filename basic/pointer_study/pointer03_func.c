@@ -3,8 +3,8 @@
 
 /*
    pointer and array
-   array 就是通过 pointer 实现的，数组名就是首地址指针,指针也可以通过下标取值
-   Type *p = (Type *) malloc(n * sizeof(Type)); 
+   array 就是通过 pointer 实现的，数组名就是首地址指针,指针也可以通过下标管理数据
+   type * p = (type *) malloc(n * sizeof(type)); 
    *(p + (i * sizeof(Type))) == p[i]
  * */
 int main() {

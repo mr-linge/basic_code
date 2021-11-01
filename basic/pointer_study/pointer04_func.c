@@ -11,14 +11,14 @@
     void * memset(void * buffer, int c, size_t num);
  * */
 int main() {
-	int num = 999;
+	short num = 999;
 	
-	int *a = &num;
+	short *a = &num;
 	void *pi;
 	// 可以用任意类型的指针对 void 指针赋值,无需进行强制类型转换
 	pi = a;
 	// 将 void 指针 p 赋给其他类型的指针，则需要强制类型转换
-	int *b = (int *) pi;
+	short *b = (short *) pi;
 	printf("num = %d\n", *b);
 
 	return 0;
