@@ -4,19 +4,19 @@
 /*
    header file: #include <string.h>
 
-function:
-void *memcpy(void *str1, const void *str2, size_t n)
-
-Description:
-将 str2 起始地址 后 n 个 数据，复制到 sr1 所指向的区域
-
-params:
-str1 -- 指向用于存储复制内容的目标数组，类型强制转换为 void* 指针。
-str2 -- 指向要复制的数据源，类型强制转换为 void* 指针。
-n -- 要被复制的字节数。
-
-return value:
-该函数返回一个指向目标存储区 str1 的指针。
+   function:
+   void *memcpy(void *str1, const void *str2, size_t n)
+   
+   Description:
+   将 str2 起始地址 后 n 个 数据，复制到 sr1 所指向的区域
+   
+   params:
+   str1 -- 指向用于存储复制内容的目标数组，类型强制转换为 void* 指针。
+   str2 -- 指向要复制的数据源，类型强制转换为 void* 指针。
+   n -- 要被复制的字节数。
+   
+   return value:
+   该函数返回一个指向目标存储区 str1 的指针。
  * */
 int main ()
 {
