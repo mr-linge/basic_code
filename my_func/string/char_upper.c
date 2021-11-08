@@ -1,4 +1,4 @@
-#include "./string_handle.h"
+#include <stdio.h>
 
 char * to_upper(char *str){
     // 先保留最初的地址。因为等会str指向的位置会变来变去的。
@@ -18,4 +18,13 @@ char * to_upper(char *str){
     }
     // 返回字符串
     return dest;
+}
+
+int main() {
+    // 定义一个字符串变量
+    char str[] = "lmjdfdfdfd";
+    // char * str = "lmjdfdfdfd";// 会报错,  char * str  ==  const char * str
+    // 调用函数
+    char *dest = to_upper(str);
+    printf("%s\n", dest);
 }
