@@ -9,20 +9,16 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+uint8_t *mem;
+char *shstrtab;
+
 Elf64_Ehdr *ehdr;
 Elf64_Phdr *phdr;
 Elf64_Shdr *shdr;
-uint8_t *mem;
-
-// 描述 ELF Header
-void descrite_ELF_header();
-// 描述 Program Header
-void descrite_Program_header();
 
 int main(int argc, char ** argv) {
 	int fd;
 	struct stat st;
-	char *StringTable;
 
 	if(argc < 2) {
 		printf("Usage: %s <executable>\n",argv[0]);
@@ -48,32 +44,10 @@ int main(int argc, char ** argv) {
 	}
 
 	/*
-	 * Check to see if the ELF magic (The first 4 bytes)
-	 * match up as 0x7f ELF.
-	 * */
-	if(!(mem[0] == 0x7f && strcmp((char *)&mem[1], "ELF"))) {
-		fprintf(stderr, "%s is not ELF file\n", argv[1]);
-		exit(-1);
-	}
-
-	/*
 	 * The initial ELF Header starts at offset 0
 	 * of our mapped memory.
 	 * */
 	ehdr = (Elf64_Ehdr *)mem;
-	// printf("ELF header start address(vaddr): %p\n", ehdr);
-
-	/*
-	 * We are only parsing executales with this code.
-	 * so ET_EXEC marks an executable.
-	 * */
-	if(ehdr->e_type != ET_EXEC) {
-		fprintf(stderr, "%s is not an executable\n", argv[1]);
-		exit(-1);
-	}
-
-	printf("\nProgram Entry point: 0x%lx\n", ehdr->e_entry);
-	descrite_ELF_header(ehdr);
 
 	/*
 	 * The phdr table and shdr table offsets are
@@ -82,66 +56,26 @@ int main(int argc, char ** argv) {
 	phdr = (Elf64_Phdr *)&mem[ehdr->e_phoff];
 	shdr = (Elf64_Shdr *)&mem[ehdr->e_shoff];
 
-	descrite_Program_header(ehdr, phdr);
-
-
-	/* 
-	 * We find the string table for the section header
-	 * names with e_shstrndx which gives the index of
-	 * which section holds the string table.
-	 * */
-	StringTable = &mem[shdr[ehdr->e_shstrndx].sh_offset];
 
 	/*
-	 * Print each section header name and address.
-	 * Notice we get the index into the string table
-	 * that contains each section header name with
-	 * the shdr.sh_name member.
+	 * Check to see if the ELF magic (The first 4 bytes)
+	 * match up as 0x7f ELF.
 	 * */
-	printf("\n***********  Section header list  ***********\n\n");
-	for(int i = 1; i < ehdr->e_shnum; i++){
-		printf("%s: 0x%lx\n", &StringTable[shdr[i].sh_name], shdr[i].sh_addr);
+	if(!(*mem == 0x7f && strcmp((char *)(mem + 1), "ELF"))) {
+		fprintf(stderr, "%s is not ELF file\n", argv[1]);
+		exit(-1);
 	}
 
-	return 0;
-}
+	printf("Program Entry point: 0x%lx\n", ehdr->e_entry);
 
-
-void descrite_ELF_header() {
-	printf("\n***********  ELF header  ***********\n\n");
-	for(int i = 0; i < EI_NIDENT; i++) {
-		printf("e_ident[%x]:%02x\t", i,  ehdr->e_ident[i]);
-	}
-	printf("\n");
-	printf("e_type  	: %04x\n", ehdr->e_type);
-	printf("e_machine 	: %04x\n", ehdr->e_machine);
-	printf("e_version 	: %08x\n", ehdr->e_version);
-	printf("e_entry 	: %016lx\n", ehdr->e_entry);
-	printf("e_phoff 	: %016lx\n", ehdr->e_phoff);
-	printf("e_shoff 	: %016lx\n", ehdr->e_shoff);
-	printf("e_flags 	: %08x\n", ehdr->e_flags);
-	printf("e_ehsize 	: %04x\n", ehdr->e_ehsize);
-	printf("e_phentsize 	: %04x\n", ehdr->e_phentsize);
-	printf("e_phnum 	: %04x\n", ehdr->e_phnum);
-	printf("e_shentsize 	: %04x\n", ehdr->e_shentsize);
-	printf("e_shnum 	: %04x\n", ehdr->e_shnum);
-	printf("e_shstrndx 	: %04x\n", ehdr->e_shstrndx);
-}
-
-
-void descrite_Program_header() {
 	/*
 	 * Print out each segment name, and address.
 	 * Except for PT_INTERP we print the path to
 	 * the dynamic linker (Interpreter).
 	 * */
 	printf("\n***********  Program header list  ***********\n\n");
-	char * segment_type;
 	for(int i = 0; i < ehdr->e_phnum; i++) {
 		switch(phdr[i].p_type) {
-			case PT_NULL:
-				segment_type = "null";
-				break;
 			case PT_LOAD:
 				/*
 				 * We know that text segment starts
@@ -150,49 +84,74 @@ void descrite_Program_header() {
 				 * which is the data segment.
 				 * */
 				if(phdr[i].p_offset == 0) {
-					segment_type = "Text";
+					printf("Text segment: 0x%lx\n", phdr[i].p_vaddr);
 				} else {
-					segment_type = "Data";
+					printf("Data segment: 0x%lx\n", phdr[i].p_vaddr);
 				}
 				break;
-			case PT_DYNAMIC:
-				segment_type = "Dynamic";
-				break;
 			case PT_INTERP:
-				segment_type = "Interpreter";
-				char *interp = strdup((char *)&mem[phdr[i].p_offset]);
-				printf("Interpreter: %s\n", interp);
+				{
+					char *interp = strdup((char *)&mem[phdr[i].p_offset]);
+					printf("Interpreter: %s\n", interp);
+				}
 				break;
 			case PT_NOTE:
-				segment_type = "Note";
+				printf("Note segment: 0x%lx\n", phdr[i].p_vaddr);
 				break;
-			case PT_SHLIB:
-				segment_type = "SHLIB";
+			case PT_DYNAMIC:
+				printf("Dynamic segment: 0x%lx\n", phdr[i].p_vaddr);
 				break;
 			case PT_PHDR:
-				segment_type = "PHDR";
-				break;
-			case PT_LOPROC:
-				segment_type = "LOPROC";
-				break;
-			case PT_HIPROC:
-				segment_type = "HIPROC";
-				break;
-			case PT_GNU_STACK:
-				segment_type = "GNU_STACK";
-				break;
-			case PT_GNU_EH_FRAME:
-				segment_type = "GNU_EH_FRAME";
-				break;
-			case PT_GNU_RELRO:
-				segment_type = "GNU_RELRO";
+				printf("Phdr segment: 0x%lx\n", phdr[i].p_vaddr);
 				break;
 			default:
-				segment_type = "NOT_Support";
+				printf("Unknown segment\n");
 				break;
 
 		}
-		printf("%s segment\n p_type: %016x, p_offset: %016lx, p_vaddr: %016lx, p_paddr: %016lx, p_filesz: %016lx, p_memsz: %016lx, p_flags: %016x, p_align: %016lx\n", segment_type, phdr[i].p_type, phdr[i].p_offset, phdr[i].p_vaddr, phdr[i].p_paddr, phdr[i].p_filesz, phdr[i].p_memsz, phdr[i].p_flags, phdr[i].p_align);
 	}
-}
 
+
+	/* 
+	 * We find the string table for the section header
+	 * names with e_shstrndx which gives the index of
+	 * which section holds the string table.
+	 * */
+	shstrtab = (char *)(mem + shdr[ehdr->e_shstrndx].sh_offset);
+
+	/*
+	 * Print each section header name and address.
+	 * Notice we get the index into the string table
+	 * that contains each section header name with
+	 * the shdr.sh_name member.
+	 * */
+	printf("\n***********  Section header list  ***********\n\n");
+	char *strtab;
+	Elf64_Sym *symtab;
+	int NumOfSym;
+	for(int i = 1; i < ehdr->e_shnum; i++) {
+		printf("%s: sh_addr: 0x%lx\tsh_offset:%lx\n", (char *)(shstrtab + shdr[i].sh_name), shdr[i].sh_addr, shdr[i].sh_offset);
+		switch(shdr[i].sh_type) {
+			case SHT_STRTAB:
+				//strtab = (char *) (mem + shdr[i].sh_offset);
+				//printf("strtab :%s\n", strtab);
+				break;
+			case SHT_SYMTAB:
+				{
+					strtab = (char *) (mem + shdr[shdr[i].sh_link].sh_offset);
+					symtab = (Elf64_Sym *) (mem + shdr[i].sh_offset);
+					NumOfSym = shdr[i].sh_size / sizeof(Elf64_Sym);
+				}
+				break;
+		}
+	}
+
+	printf("\n***********  Symbol list  ***********\n\n");
+	printf("NumOfSym = %d\n", NumOfSym);
+	for (int j = 0; j < NumOfSym; j++) {
+		char * name = (char *) (strtab + symtab[j].st_name);
+		printf("%2d  name: %s  st_name: %u  st_value: %lu  st_shndx: %u\n", j, name, symtab[j].st_name, symtab[j].st_value, symtab[j].st_shndx);
+	}
+
+	return 0;
+}

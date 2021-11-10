@@ -20,22 +20,21 @@ typedef struct handle {
 	Elf64_Phdr *phdr; 
 	Elf64_Shdr *shdr; 
 	uint8_t *mem;     
-	char *symname;    // function name 需要下断点的函数
+	char *symname;    // function name 需要下断点的函数name
 	Elf64_Addr symaddr; // function address 需要下断点的函数的地址
 	struct user_regs_struct pt_reg;
 	char *exec; // executable file address 可执行文件路径
 } handle_t;
 
-int global_pid;
-
 /**
- * @brief 根据符号名查找符号地址 
+ * 根据符号名查找符号地址 
  */
 Elf64_Addr lookup_symbol(handle_t *, const char *);
 // 根据pid获取 进程路径
 char * get_pid_path(int pid);
 // 信号处理
 void sighandler(int);
+int global_pid;
 
 #define EXE_MODE 0  // 调试 mode
 #define PID_MODE 1  // attach mode
@@ -96,7 +95,8 @@ int main(int argc, char **argv, char **envp)
 		args[0] = h.exec;
 		args[1] = NULL;
 	}
-
+	
+	global_pid = pid;
 	signal(SIGINT, sighandler);
 
 	/* 打开指定文件 */
@@ -165,7 +165,7 @@ int main(int argc, char **argv, char **envp)
 			execve(h.exec, args, envp);	
 			exit(0);
 		}
-	} else  {
+	} else {
 		// 若为 attach 模式，直接附加
 		if (ptrace(PTRACE_ATTACH, pid, NULL, NULL) < 0) {
 			perror("PTRACE_ATTACH");
@@ -175,8 +175,6 @@ int main(int argc, char **argv, char **envp)
 
 	/* 等待子进程运行终止，获取子进程状态放入status中 */
 	wait(&status);
-
-	global_pid = pid;
 
 	printf("Beginning analysis of pid: %d at %lx\n", pid, h.symaddr);
 
@@ -263,8 +261,7 @@ trace:
 		printf("Completed tracing pid: %d\n", pid);
 
 	exit(0);
-
-}	
+}
 
 Elf64_Addr lookup_symbol(handle_t *h, const char *symname)
 {
@@ -280,13 +277,13 @@ Elf64_Addr lookup_symbol(handle_t *h, const char *symname)
 			strtab = (char *) (h->mem + h->shdr[h->shdr[i].sh_link].sh_offset);
 
 			/* 此段代码为测试分析，输出字符串表中可视字符 */
-			// printf("0x%x\n", h->shdr[29].sh_offset);
-			// for (j = 0; j < h->shdr[29].sh_size; j++) {
-			//     if (strtab[j] >= 0x20 && strtab[j] <= 0x7e) {
-			//         printf("%c", strtab[j]);
-			//     }
-			// }
-			// puts("");
+			//printf("0x%lx\n", h->shdr[29].sh_offset);
+			//for (j = 0; j < h->shdr[29].sh_size; j++) {
+			//    if (strtab[j] >= 0x20 && strtab[j] <= 0x7e) {
+			//        printf("%c", strtab[j]);
+			//    }
+			//}
+			//puts("");
 
 			/* 获取符号表的首地址 */
 			symtab = (Elf64_Sym *) &h->mem[h->shdr[i].sh_offset];
@@ -294,6 +291,8 @@ Elf64_Addr lookup_symbol(handle_t *h, const char *symname)
 			NumOfSym = h->shdr[i].sh_size / sizeof(Elf64_Sym);
 
 			for (j = 0; j < NumOfSym; j++) {
+				//char *name = (char *) &strtab[symtab->st_name];
+				//printf("\nsymbol name : %s\n", name);
 				/* st_name为符号名在字符串表中的下标 */
 				if (!strncmp(&strtab[symtab->st_name], symname, strlen(symname)))  {
 					/* st_value 为符号的地址 */
@@ -304,7 +303,7 @@ Elf64_Addr lookup_symbol(handle_t *h, const char *symname)
 		}
 	}
 
-	return 0;	
+	return 0;
 }
 
 char * get_pid_path(int pid) {
@@ -323,8 +322,7 @@ char * get_pid_path(int pid) {
 	return dir;
 }
 
-void sighandler(int sig)
-{
+void sighandler(int sig) {
 	printf("Caught SIGINT: Detaching from %d\n", global_pid);
 
 	if (ptrace(PTRACE_DETACH, global_pid, NULL, NULL) < 0 && errno) {

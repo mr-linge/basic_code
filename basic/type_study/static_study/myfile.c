@@ -1,16 +1,8 @@
 #include <stdio.h>
 /*
- * static
- * static 修饰后 无论是var还是function,对应的符号前都会加上文件名、方法名(如果在方法内)
- * static int num; (是全局变量)
- * 等价于
- * static int myfile_num
- *
- * static int mun; (在函数内,假设在main函数内)
- * 等价于
- * static int myfile_main_num
- * 
- * 因此 static 修饰的 变量和方法 不会出现符号冲突,但作用范围只在当前 .c 文件内
+ * static 修饰的 变量和方法
+ * 若在不同的 .c 文件里 symbol 名可以相同，此时编译后 symbol 名相同但 st_shndx 不同(所属 segment 不同)
+ * 若在同一个 .c 文件、不同的方法里 symbol 名可以相同，此时 st_shndx 也相同,但是 symbol 名后会加上不同的随机变量
  * */
 void func();
 

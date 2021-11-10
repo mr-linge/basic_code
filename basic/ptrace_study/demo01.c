@@ -6,19 +6,20 @@
 #include <sys/reg.h>
 #include <sys/syscall.h>   /* For SYS_write etc */
 
-int main()
-{   
+int main() {
 	pid_t child;
 	long orig_eax, eax;
 	long params[3];
 	int status;
 	int insyscall = 0;
 	child = fork();
-	if(child == 0) {
+	if (child < 0) {
+		puts("fork error");
+		return -1;
+	}else if(child == 0) {
 		ptrace(PTRACE_TRACEME, 0, NULL, NULL);
 		execl("/bin/ls", "ls", NULL);
-	}
-	else {
+	}else {
 		while(1) {
 			wait(&status);
 			if(WIFEXITED(status))
