@@ -6,13 +6,13 @@ int main() {
  
    	fp = fopen("/tmp/test.txt", "r");
    	fscanf(fp, "%s", buff);
-   	printf("1: %s\n", buff );
+   	printf("1: %s\n", buff);
  
 	fgets(buff, 255, (FILE*)fp);
-   	printf("2: %s\n", buff );
+   	printf("2: %s\n", buff);
    
    	fgets(buff, 255, (FILE*)fp);
-   	printf("3: %s\n", buff );
+   	printf("3: %s\n", buff);
   	fclose(fp);
 
 	return 0;

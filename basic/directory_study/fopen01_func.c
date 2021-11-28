@@ -1,6 +1,7 @@
 #include <stdio.h>
 /*
 FILE *fopen( const char * filename, const char * mode );
+Description: 打开一个文件，如果文件不存在就创建
 
 params:
 filename 是字符串，用来命名文件
