@@ -17,6 +17,7 @@
 
 int main () {
 	char str[80];
+	memset(str,'\0',sizeof(str));
 	strcpy (str,"these ");
 	strcat (str,"strings ");
 	strcat (str,"are ");

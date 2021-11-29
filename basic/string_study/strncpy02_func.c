@@ -19,10 +19,8 @@
 
 // 生成解密目录
 void decrypt_directory(char *a2) {
-//	printf("func a2 length : %lu\n",sizeof(a2));
-//	printf("func a2 length : %lu\n",strlen(a2));
-//
-	char new_path[512];
+	char new_path[512];// 这样定义数组后接下来最好初始化一下，不然以后使用时可能会有些脏数据
+	memset(new_path,'\0',sizeof(new_path));
 	strncpy(new_path,a2,strlen(a2)-5);
 	printf("func \n%s====\n",new_path);
 	printf("func new_path length : %lu\n",sizeof(new_path));
@@ -31,40 +29,6 @@ void decrypt_directory(char *a2) {
 
 int main(int argc,char *argv[]) {
 	char a2[] = "./test/name1.txt.temp";
-	puts("");
-	//printf("\t");
-//	decrypt_directory(a2);
-//        printf("a2 length : %lu\n",sizeof(a2));
-//        printf("a2 length : %lu\n",strlen(a2));
-//
-//	char new_path[512];
-//	strncpy(new_path,a2,strlen(a2)-5);
-//        printf("\n%s====\n",new_path);
-//        printf("new_path length : %lu\n",sizeof(new_path));
-//        printf("new_path length : %lu\n",strlen(new_path));
-//
-//	printf("\n**************************************\n");
-
 	decrypt_directory(a2);
-//	int c = 0;
-//	while((c = getopt(argc,argv,"ed")) != -1){
-//		switch(c){
-//			case 'e':
-//				{
-//					char path22[] = "./test/name1.txt";
-//				}
-//				break;
-//			case 'd':
-//				{
-//					char path22[] = "./test/name1.txt.temp";
-//					decrypt_directory(path22);
-//				}
-//				break;
-//			default:
-//				printf("not find in optstring, optarg = %s\n",optarg);
-//				break;
-//		}
-//	}
-//
 	return 0;
 }

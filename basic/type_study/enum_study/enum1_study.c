@@ -9,10 +9,10 @@ enum Season2 {spring2, summer2, autumn2, winter2} s2;
 enum {spring3, summer3, autumn3, winter3} s3;
 
 int main() {
-//    enum Season {spring, summer, autumn, winter} s;
-    // 遍历枚举元素
-    for (s = spring; s <= winter; s++) {
-        printf("枚举元素：%d \n", s);
-    }
-    return 0;
+	//    enum Season {spring, summer, autumn, winter} s;
+	// 遍历枚举元素
+	for (s = spring; s <= winter; s++) {
+		printf("枚举元素：%d \n", s);
+	}
+	return 0;
 }

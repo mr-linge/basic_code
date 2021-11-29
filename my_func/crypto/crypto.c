@@ -6,8 +6,12 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <dirent.h>
 
 #include "./aes128.h"
+
+enum CryptoType {encrypt,decrypt};
+enum CryptoType ctype;
 
 // 根据路径获取目录里的内容
 char * get_message(char *path) {
@@ -54,6 +58,7 @@ void encrypt_directory(char *path) {
 	}
 	printf("\n");
 	char new_path[512];
+	memset(new_path,'\0',sizeof(new_path));
 	strcat(new_path,path);
 	strcat(new_path,".temp");
 	write_message(new_path, blocks, block_num*16);
@@ -72,10 +77,11 @@ void decrypt_directory(char *path) {
 	aesDecryptCBC(blocks,key,block_num,iv);
 	printf("plaintext:\n%s\n",blocks);
 	char new_path[512];
+	memset(new_path,'\0',sizeof(new_path));
 	strncpy(new_path,path,strlen(path)-5);
 	printf("\n%s====\n",new_path);
-	printf("new_path length : %lu\n",sizeof(new_path));
-	printf("new_path length : %lu\n",strlen(new_path));
+//	printf("new_path length : %lu\n",sizeof(new_path));
+//	printf("new_path length : %lu\n",strlen(new_path));
 
 	write_message(new_path, blocks, block_num*16);
 	int ret = remove(path);//删除文件
@@ -85,22 +91,63 @@ void decrypt_directory(char *path) {
 	free(blocks);
 }
 
+void readFileList(char *basePath) {
+        DIR *dir;
+        struct dirent *ptr;
+        char base[512];
+
+        if ((dir=opendir(basePath)) == NULL) {
+                perror("Open dir error...");
+                exit(1);
+        }
+
+        while ((ptr=readdir(dir)) != NULL) {
+                if (strcmp(ptr->d_name,".")==0 || strcmp(ptr->d_name,"..") == 0) {    ///current dir OR parrent dir
+                        continue;
+		} else if (ptr->d_type == 8 || ptr->d_type == 10) {    ///file or link file
+                  //      printf("d_name:%s/%s\n",basePath,ptr->d_name);
+			char current_path[512];
+			memset(current_path,'\0',sizeof(current_path));
+		//	printf("basePath : %s\n", basePath);
+			strcat(current_path,basePath);
+			strcat(current_path,"/");
+			strcat(current_path,ptr->d_name);
+			printf("current_path:\n %s\n",current_path);
+			if (ctype == encrypt) {
+				encrypt_directory(current_path);
+			} else if (ctype == decrypt) {
+				decrypt_directory(current_path);
+			}
+		} else if (ptr->d_type == 4) {    ///dir
+                        memset(base,'\0',sizeof(base));
+                        strcpy(base,basePath);
+                        strcat(base,"/");
+                        strcat(base,ptr->d_name);
+                        readFileList(base);
+                }
+        }
+        closedir(dir);
+}
+
+
 int main(int argc,char *argv[]) {
 	int c = 0;
 	while((c = getopt(argc,argv,"ed")) != -1){
 		switch(c){
 			case 'e':
 				{
-					char path[] = "./test/name1.txt";
-					puts("");
-					encrypt_directory(path);
+					char path[] = "./test";
+					ctype = encrypt;
+					readFileList(path);
+				//	encrypt_directory(path);
 				}
 				break;
 			case 'd':
 				{
-					char path[] = "./test/name1.txt.temp";
-					puts("");
-					decrypt_directory(path);
+					char path[] = "./test";
+					ctype = decrypt;
+					readFileList(path);
+				//	decrypt_directory(path);
 				}
 				break;
 			default:
