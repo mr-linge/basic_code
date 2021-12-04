@@ -289,13 +289,19 @@ int splitBlock(uint8_t * message, unsigned long len, uint8_t ** blocks){
 	if(mod > 0){
 		block_num++;
 	}
-	*blocks = (uint8_t *)malloc(block_num*16);
+	puts("splitBlock 11 ----->");
+	//*blocks = (uint8_t *)malloc(block_num*16);
+	*blocks = (uint8_t *)calloc(block_num,16);
+	puts("splitBlock 12 ----->");
 	if (*blocks == NULL) {
 		printf("malloc fail");
 		exit(-1);
 	}
+	puts("splitBlock 13 ----->");
 	memcpy(*blocks, message, len);
+	puts("splitBlock 14 ----->");
 	memset(*blocks+len,0,16-mod);
+	puts("splitBlock 15 ----->");
 	return (int)block_num;
 }
 

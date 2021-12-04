@@ -239,15 +239,6 @@ int invSubBytes(uint8_t (*state)[4]) {
     return 0;
 }
 
-void print_matrix(uint8_t target[4][4]) {
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            printf("%02X ", target[i][j]);
-        }
-        puts("");
-    }
-    puts("");
-}
 
 void aesEncryptBlock(uint8_t * mblock,uint8_t * cblock,uint8_t * key){
     AESKEY aeskey;
@@ -267,7 +258,6 @@ void aesEncryptBlock(uint8_t * mblock,uint8_t * cblock,uint8_t * key){
     subBytes(state);
     shiftRows(state);
     addRoundKey(state, ekPointer);
-	print_matrix(state);
     storeStateArray(state, cblock);
 }
 
@@ -336,29 +326,25 @@ void aesDecryptCBC(uint8_t * blocks,uint8_t * key,int block_num,uint8_t * iv){
 }
 
 int main(int argc, const char * argv[]) {
-    uint8_t key[16] = {0x3C, 0xA1, 0x0B, 0x21, 0x57, 0xF0, 0x19, 0x16, 0x90, 0x2E, 0x13, 0x80, 0xAC, 0xC1, 0x07,0xBD};
-    uint8_t cblock[16] = "abcdefghijklmnop";
+    char message[]="1qazxcvfredsw2345tgb";
+    uint8_t key[16]="1234567890abcdef";
+    uint8_t iv[16]="qwertyuiopasdfgh";
     
-      AESKEY aeskey;
-      uint8_t state[4][4]={0};
-      KeyExpansion(key, &aeskey);
-      loadStateArray(state, cblock);
-      uint32_t * dkPointer = aeskey.dK;
-      addRoundKey(state, dkPointer);
+    uint8_t * blocks = NULL;
+    int block_num = splitBlock(message,&blocks);
 
-      for(int i=1;i<10;i++){
-          dkPointer += 4;
-          invShiftRows(state);
-          invSubBytes(state);
-          addRoundKey(state, dkPointer);
-          invMixColumns(state);
+    aesEncryptCBC(blocks,key,block_num,iv);
 
-      }
-      dkPointer += 4;
-      invSubBytes(state);
-      invShiftRows(state);
-      addRoundKey(state, dkPointer);
-      print_matrix(state);
+    printf("加密密文：");
+    for(int i=0;i<block_num*16;i++){
+       printf("\\x%02x",blocks[i]);
+    }
+    printf("\n");
 
+    aesDecryptCBC(blocks,key,block_num,iv);
+
+    printf("解密明文：%s\n",blocks);
+    free(blocks);
     return 0;
+    
 }

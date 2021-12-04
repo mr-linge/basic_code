@@ -19,7 +19,7 @@ uint8_t * get_message(char *path, unsigned long * len) {
 	stat(path, &buf);
 	*len = buf.st_size;
 	//char *buffer = (char *) malloc(buf.st_size);
-	uint8_t *buffer = (uint8_t *) malloc((*len) * sizeof(uint8_t));
+	uint8_t *buffer = (uint8_t *) calloc(*len, sizeof(uint8_t));
 	//char *buffer = (char *) malloc(buf.st_size + 1);
 	int fd = open(path, O_RDONLY);
 	int size = read(fd, buffer, *len);
@@ -54,7 +54,7 @@ uint8_t iv[16]="1234567890123456";
 // 生成加密目录
 void encrypt_directory(char *path) {
 	unsigned long *len = (unsigned long *)malloc(sizeof(unsigned long));
-	char *new_path = (char *)malloc(512);
+	char *new_path = (char *)calloc(512,1);
 	uint8_t *plaintext = get_message(path,len);
 	//printf("*len = %lu\n", *len);
 	uint8_t * blocks = NULL;
@@ -67,14 +67,17 @@ void encrypt_directory(char *path) {
 	printf("\n");
 	//	char new_path[512];
 	//	char *new_path = (char *)malloc(512);
-	memset(new_path,'\0',512);
+	//memset(new_path,'\0',512);
 	strcat(new_path,path);
 	strcat(new_path,".temp");
 	write_message(new_path, blocks, block_num*16);
-	int ret = remove(path);//删除文件
-	if(ret < 0) {
-		perror("delete directory fail!");
-		exit(1);
+	if(access(path, F_OK) == 0) {
+		int ret = remove(path);//删除文件
+		puts("common_func 16 ---->");
+		if(ret < 0) {
+			perror("delete directory fail!");
+			exit(1);
+		}
 	}
 	free(new_path);
 	free(plaintext);
@@ -84,43 +87,40 @@ void encrypt_directory(char *path) {
 }
 // 生成解密目录
 void decrypt_directory(char *path) {
-	puts("20 --->");
-	char *new_path = (char *)malloc(512);
-	if (new_path == NULL) {
-		printf("malloc fail");
-		exit(-1);
-	}
-	unsigned long *len=(unsigned long *)malloc(sizeof(unsigned long));
+	puts("decrypt_directory 15 --->");
+	unsigned long *len = (unsigned long *)malloc(sizeof(unsigned long));
+	char *new_path = (char *)calloc(512,1);
+	puts("decrypt_directory 16 --->");
 	uint8_t *ciphertext = get_message(path,len);
 	//printf("*len = %lu\n", *len);
 	uint8_t * blocks = NULL;
 	int block_num = splitBlock(ciphertext,*len,&blocks);
 	aesDecryptCBC(blocks,key,block_num,iv);
 	printf("plaintext:\n%s\n",blocks);
-	//char new_path[512];
-	//char *new_path = (char *)malloc(512);
-	memset(new_path,'\0',512);
 	strncpy(new_path,path,strlen(path)-5);
-	printf("new_path2 : %s\n", new_path);
+	printf("new_path : %s\n", new_path);
 	write_message(new_path, blocks, block_num*16);
-	int ret = remove(path);//删除文件
-	if (ret < 0) {
-		perror("delete directory fail!");
-		exit(1);
+	if(access(path, F_OK) == 0) {
+		int ret = remove(path);//删除文件
+		puts("common_func 16 ---->");
+		if(ret < 0) {
+			perror("delete directory fail!");
+			exit(1);
+		}
 	}
-	puts("10 --->");
+	puts("decrypt_directory 10 --->");
 	if (new_path != NULL)
 		free(new_path);
-	puts("11 --->");
+	puts("decrypt_directory 11 --->");
 	if (ciphertext != NULL)
 		free(ciphertext);
-	puts("12 --->");
+	puts("decrypt_directory 12 --->");
 	if (blocks != NULL)
 		free(blocks);
-	puts("13 --->");
+	puts("decrypt_directory 13 --->");
 	if (len != NULL)
 		free(len);
-	puts("14 --->");
+	puts("decrypt_directory 14 --->");
 	if (path != NULL)
 		free(path);
 }
@@ -128,9 +128,13 @@ void decrypt_directory(char *path) {
 void readFileList(char *basePath) {
 	DIR *dir;
 	struct dirent *ptr;
-	char base[512];
-	memset(base,'\0',sizeof(base));
-	//char *base = (char *) malloc(512);
+	puts("readFileList 20 ----->");
+	puts("<<<<<<<<<");
+//	char base[512];
+//	memset(base,'\0',sizeof(base));
+	char *base = (char *) calloc(512,1);
+	puts(">>>>>>>>>>");
+	puts("readFileList 21 ----->");
 
 	if ((dir=opendir(basePath)) == NULL) {
 		printf("basePath:%s\n",basePath);
@@ -139,6 +143,7 @@ void readFileList(char *basePath) {
 	}
 
 	while ((ptr=readdir(dir)) != NULL) {
+		puts("readFileList 22 ----->");
 		if (strcmp(ptr->d_name,".") == 0 || strcmp(ptr->d_name,"..") == 0) {    ///current dir OR parrent dir
 			continue;
 		} else if (ptr->d_type == 8 || ptr->d_type == 10) {    ///file or link file
@@ -146,35 +151,41 @@ void readFileList(char *basePath) {
 			//char current_path[512];
 			//memset(current_path,'\0',sizeof(current_path));
 			//	printf("basePath : %s\n", basePath);
-			char *current_path = (char *)malloc(512);
-			memset(current_path,'\0',512);
+			puts("readFileList 11 ----->");
+			char *current_path = (char *)calloc(512,1);
+			//memset(current_path,'\0',512);
 			strcat(current_path,basePath);
 			strcat(current_path,"/");
 			strcat(current_path,ptr->d_name);
-			printf("current_path:\n %s\n",current_path);
-
-			//	pid_t pid = fork();
-			//	if (pid == 0) {
-			if (ctype == encrypt) {
+			printf("readFileList current_path:\n %s\n",current_path);
+			char *suffix = strrchr(ptr->d_name, '.');
+			//printf("suffix : %s\n", suffix);
+			//			pid_t pid = fork();
+			//			if (pid == 0) {
+			if (ctype == encrypt && (strcmp(suffix,".temp") != 0)) {
 				encrypt_directory(current_path);
-			} else if (ctype == decrypt) {
-				puts("31 ----->");
+			} else if (ctype == decrypt && (strcmp(suffix,".temp") == 0)) {
+				puts("readFileList 12 ----->");
 				decrypt_directory(current_path);
 			}
-			//			} else if (pid < 0) {
-			//				printf("fork fail\n");
-			//				exit(-1);
-			//			}
-
+			//} else if (pid < 0) {
+			//	printf("fork fail\n");
+			//	exit(-1);
+			//}
+			//puts("readFileList 25 ----->");
 			//free(current_path);
 		} else if (ptr->d_type == 4) {    ///dir
+			puts("readFileList 23 ----->");
 			strcpy(base,basePath);
 			strcat(base,"/");
 			strcat(base,ptr->d_name);
+			puts("readFileList 24 ----->");
 			readFileList(base);
-			//free(base);
+			puts("readFileList 25 ----->");
+			free(base);
 		}
 	}
+	puts("readFileList 25 ----->");
 	closedir(dir);
 }
 

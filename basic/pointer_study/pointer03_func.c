@@ -6,6 +6,10 @@
    array 就是通过 pointer 实现的，数组名就是首地址指针,指针也可以通过下标管理数据
    type * p = (type *) malloc(n * sizeof(type)); 
    *(p + (i * sizeof(Type))) == p[i]
+
+   区别:
+   数组编译时就确定，存储在 Stack栈上
+   指针运行时确定，  存储在 Heap堆上 
  * */
 int main() {
 	long arr[5] = {101,102,103,104,105};
