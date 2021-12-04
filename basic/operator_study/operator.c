@@ -58,4 +58,13 @@ void main() {
 
 	uint8_t res2 = a1 ^ a1;
 	printf("%02X\n", res2);
+
+	uint8_t b1 = 0xB3;
+	uint8_t b2 = 0xCD;
+	uint8_t res3 = b1 ^ b2;
+	printf("res3 = b1 ^b2  = %X\n", res);
+	uint8_t b3 = res3 ^ b1;
+	printf("b3 = res3 ^b1  = %X\n", b3);
+	uint8_t b4 = res3 ^ b2;
+	printf("b4 = res3 ^b2  = %X\n", b4);
 }

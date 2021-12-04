@@ -6,10 +6,10 @@
  * */
 int main() {
 	// 可以省略 n, 开辟空间后直接赋值
-	int arr[] = {12,34,34,34,54,36,36,46,32,67,43,65,32,77};
+	int arr[] = {0x0,0x1,0x2,0x3,0x4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf};
 	unsigned long len = (unsigned long) (sizeof(arr) / sizeof(int));
 	for(int i = 0; i < len; i++) {
-		printf("arr[%d] = %d\t", i, arr[i]);
+		printf("arr[%X] = %d\t", i, arr[i]);
 	}
 
 	printf("\n\n************************\n\n");
