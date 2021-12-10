@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
 
 /*
    头文件：#include <sys/types.h>    #include <sys/stat.h>    #include <fcntl.h>
@@ -74,23 +75,39 @@
    EADF 参数fd 非有效的文件描述词, 或该文件已关闭.
  * */
 
+/*
+ 头文件：#include <unistd.h>
+
+定义函数：ssize_t read(int fd, void * buf, size_t count);
+
+函数说明：read()会把参数fd 所指的文件传送count 个字节到buf 指针所指的内存中. 若参数count 为0, 则read()不会有作用并返回0. 返回值为实际读取到的字节数, 如果返回0, 表示已到达文件尾或是无可读取的数据,此外文件读写位置会随读取到的字节移动.
+
+附加说明：
+如果顺利 read()会返回实际读到的字节数, 最好能将返回值与参数count 作比较, 若返回的字节数比要求读取的字节数少, 则有可能读到了文件尾、从管道(pipe)或终端机读、read()被信号中断了读取动作.
+
+当有错误发生时则返回-1, 错误代码存入errno 中, 而文件读写位置则无法预期.
+
+错误代码：
+EINTR 此调用被信号所中断.
+EAGAIN 当使用不可阻断I/O 时(O_NONBLOCK), 若无数据可读取则返回此值.
+EBADF 参数fd 非有效的文件描述词, 或该文件已关闭.
+ * */
+
 int main(int argc, char * argv[]) {
 	char s[] = "Linux Programmer!\n", buffer[80];
 	int fd = open("/tmp/temp", O_WRONLY|O_CREAT);
 	if(fd < 0)  {
-		printf("open file fail");
-		return -1;
+		perror("open file fail");
 	}
-	int size_w = write(fd, s, sizeof(s));
+	unsigned long size_w = write(fd, s, sizeof(s));
 	if (size_w < 0) {
-		printf("write fail!");
+		perror("write fail!");
 	}
 	close(fd);
 	fd = open("/tmp/temp", O_RDONLY);
-	int size_r = read(fd, buffer, sizeof(buffer));
+	unsigned long size_r = read(fd, buffer, sizeof(buffer));
 	if(size_r < 0){
-		printf("read file fail");
-		return -1;
+		perror("read file fail");
 	}
 	close(fd);
 	printf("%s", buffer);
