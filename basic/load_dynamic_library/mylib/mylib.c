@@ -1,4 +1,3 @@
-//动态库
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -16,7 +15,7 @@ typedef struct __test {
 void __register(Test *p);
 
 static void __printf(Test *p) {
-    printf("i = %dn", p->i);
+    printf("i = %d\n", p->i);
 }
  
 //动态库申请一个全局变量空间。这种 ".成员"的赋值方式为c99标准
@@ -27,6 +26,6 @@ static Test config = {
  
 //加载动态库的自动初始化函数
 void _init(void) {
-    printf("initn");
+    printf("init\n");
     __register(&config);//调用主程序的注册函数
 }

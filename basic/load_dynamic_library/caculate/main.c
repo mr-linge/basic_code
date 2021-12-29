@@ -3,7 +3,7 @@
 #include <dlfcn.h>
 
 /*
-  gcc -rdynamic -o main main.c -ldl
+  gcc -rdynamic main.c -o main -ldl
  * */
 
 //动态链接库路径
@@ -41,7 +41,7 @@ int main() {
 	cac_func = (CAC_FUNC)dlsym(handle, "mul");
 	printf("mul: %d\n", cac_func(3,2));
 
-	cac_func = (CAC_FUNC)dlsym(handle, "div");
+	cac_func = dlsym(handle, "div");
 	printf("div: %d\n", cac_func(8,2));
 
 	//关闭动态链接库
