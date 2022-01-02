@@ -2,12 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
-#include <unistd.h>
 
 void readFileList(char *basePath) {
 	DIR *dir;
 	struct dirent *ptr;
-	char base[1000];
 
 	if ((dir=opendir(basePath)) == NULL)
 	{
@@ -25,6 +23,7 @@ void readFileList(char *basePath) {
 			printf("d_name:%s/%s\n",basePath,ptr->d_name);
 		else if(ptr->d_type == 4)    ///dir
 		{
+			char base[256];
 			memset(base,'\0',sizeof(base));
 			strcpy(base,basePath);
 			strcat(base,"/");
@@ -36,7 +35,7 @@ void readFileList(char *basePath) {
 }
 
 int main(void) {
-	char * path = "/home/dio/Repositories/C_study/my_func/crypto/test";
+	char * path = "/home/dio/Desktop/test";
 	readFileList(path);
 	//    DIR *dir;
 	//    char basePath[1000];
@@ -50,5 +49,5 @@ int main(void) {
 	//    memset(basePath,'\0',sizeof(basePath));
 	//    strcpy(basePath,"./XL");
 	//    readFileList(basePath);
-	//    return 0;
+	return 0;
 }

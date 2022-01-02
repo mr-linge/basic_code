@@ -1,0 +1,3 @@
+gcc -no-pie inject.c -o inject
+
+./inject `pidof ./tracee`

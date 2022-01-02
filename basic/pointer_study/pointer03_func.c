@@ -3,7 +3,8 @@
 
 /*
    pointer and array
-   array 就是通过 pointer 实现的，数组名就是首地址指针,指针也可以通过下标管理数据
+   array 就是通过 pointer 实现的，数组名是一个地址（首元素地址），即是一个指针常量。（不是指针变量）
+   指针也可以通过下标管理数据
    type * p = (type *) malloc(n * sizeof(type)); 
    *(p + (i * sizeof(Type))) == p[i]
 

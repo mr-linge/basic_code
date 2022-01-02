@@ -1,6 +1,5 @@
 #include <stdio.h>
-#include <elf.h>
-
+#include <stdint.h>
 
 /*
  * 根据定义，size_t是sizeof关键字（注：sizeof是关键字，并非运算符）运算结果的类型。

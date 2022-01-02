@@ -1,14 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 
-uint8_t * get_message(char *path, unsigned long * len) {
+void get_message(unsigned long * len) {
 	*len = 10;
-	return NULL;
 }
 
 void main() {
 	unsigned long *len = (unsigned long *)malloc(sizeof(unsigned long));
-	get_message(NULL,len);
+	get_message(len);
 	printf("%lu\n", *len);
 }
