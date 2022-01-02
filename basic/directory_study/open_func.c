@@ -99,13 +99,13 @@ int main(int argc, char * argv[]) {
 	if(fd < 0)  {
 		perror("open file fail");
 	}
-	int size_w = write(fd, s, sizeof(s));
+	unsigned long size_w = write(fd, s, sizeof(s));
 	if (size_w < 0) {
 		perror("write fail!");
 	}
 	close(fd);
 	fd = open("/tmp/temp", O_RDONLY);
-	int size_r = read(fd, buffer, sizeof(buffer));
+	unsigned long size_r = read(fd, buffer, sizeof(buffer));
 	if(size_r < 0){
 		perror("read file fail");
 	}
