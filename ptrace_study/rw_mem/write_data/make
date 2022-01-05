@@ -1,0 +1,3 @@
+gcc -no-pie write.c -o main
+
+./main `pidof ./target` 94265875448480  zzzzz

@@ -47,7 +47,7 @@ int main(int argc, char **argv, char **envp)
 	long trap, orig;
 	int status, pid;
 	char * args[2];
-
+	struct user_regs_struct pt_reg2;
 	if (argc < 3) {
 		printf("Usage: %s [-ep <exe>/<pid>] [-f <fname>]\n", argv[0]);
 		exit(0);
@@ -177,7 +177,6 @@ int main(int argc, char **argv, char **envp)
 	wait(&status);
 
 	printf("Beginning analysis of pid: %d at %lx\n", pid, h.symaddr);
-
 	/* 读取被追踪进程中地址为h.symaddr处的数据 */
 	orig = ptrace(PTRACE_PEEKTEXT, pid, h.symaddr, NULL);
 
