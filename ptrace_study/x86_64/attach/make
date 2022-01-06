@@ -1,0 +1,3 @@
+gcc -no-pie ptrace_attach01.c -o main
+
+./main `pidof ./tracee`

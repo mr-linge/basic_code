@@ -63,8 +63,7 @@ int main(int argc, char **argv) {
 	attach_process(target_pid);
 
 	unsigned long len = 32;
-	uint8_t *dst = (uint8_t *) malloc(len);
-	memset(dst, 0, 32);
+	uint8_t *dst = (uint8_t *) calloc(len);
 	getdata(target_pid, addr, dst, len);
 
 	printf("dst:%p\nvalue:%s\n", (void *) addr, dst);

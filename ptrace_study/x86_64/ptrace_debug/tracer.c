@@ -39,8 +39,7 @@ int global_pid;
 #define EXE_MODE 0  // 调试 mode
 #define PID_MODE 1  // attach mode
 
-int main(int argc, char **argv, char **envp)
-{
+int main(int argc, char **argv, char **envp) {
 	int fd, c, mode = 0;
 	handle_t h;
 	struct stat st;
@@ -199,7 +198,7 @@ trace:
 	wait(&status);
 
 	/* 由于breakpoint断点、trap终止运行 */
-	// 判断进程是否正常终止,及终止号是否为 SIGTRAP
+	// 判断进程是否被暂停,及暂停号是否为 SIGTRAP (SIGTRAP 实现相关的硬件异常。一般是调试异常)
 	if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTRAP) {
 		/* 获取寄存器内容 */
 		if (ptrace(PTRACE_GETREGS, pid, NULL, &h.pt_reg) < 0) {
@@ -262,8 +261,7 @@ trace:
 	exit(0);
 }
 
-Elf64_Addr lookup_symbol(handle_t *h, const char *symname)
-{
+Elf64_Addr lookup_symbol(handle_t *h, const char *symname) {
 	int i, j, NumOfSym;
 	char *strtab;
 	Elf64_Sym *symtab;
@@ -321,6 +319,7 @@ char * get_pid_path(int pid) {
 	return dir;
 }
 
+// 当 Ctrl + C 给当前进程发中断信号时，用这个函数处理中断信号。这个涵数的功能是通过 PTRACE_DETACH 结束跟踪目标进程，然后当前进程通过 exit结束
 void sighandler(int sig) {
 	printf("Caught SIGINT: Detaching from %d\n", global_pid);
 

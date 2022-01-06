@@ -67,4 +67,6 @@ void main() {
 	printf("b3 = res3 ^b1  = %X\n", b3);
 	uint8_t b4 = res3 ^ b2;
 	printf("b4 = res3 ^b2  = %X\n", b4);
+
+	printf("~0xff = %x\n",~0xff);
 }

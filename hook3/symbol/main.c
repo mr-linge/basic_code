@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
         exit(0);
     }*/
     //初始化 handle_t h
-    memset(&h, 0, sizeof(handle_t));
+    memset(&h, 0, sizeof(handle_t));	
 
     pid = atoi(argv[1]);
     h.exec = get_pid_path(pid);
