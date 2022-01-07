@@ -8,7 +8,7 @@ pid: 要操作的目标进程ID
 addr: 要监控的目标内存地址    
 data: 保存读取出或者要写入的数据   
 
-### enum __ptrace_request  参数的命令, 会让子进程处于挂起状态   
+// enum __ptrace_request  参数的命令, 会让子进程处于挂起状态   
 PTRACE_TRACEME    
 PTRACE_PEEKTEXT   
 PTRACE_PEEKDATA   
@@ -23,7 +23,7 @@ PTRACE_SETFPREGS
 PTRACE_SYSCALL    
 PTRACE_SINGLESTEP   
 
-### enum __ptrace_request 参数的命令 会结束子进程的挂起状态   
+// enum __ptrace_request 参数的命令 会结束子进程的挂起状态   
 PTRACE_DETACH   结束父进程对子进程的跟踪    
 PTRACE_CONT		结束子进程的挂起状态，让子进程继续执行   
 
