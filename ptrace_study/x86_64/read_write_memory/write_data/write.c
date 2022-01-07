@@ -69,6 +69,10 @@ int main(int argc, char **argv) {
 	putdata(target_pid, addr, src, len);
 
 	continue_process(target_pid);
+//      while(1) {
+//              printf("dst:%p\n", (void *) addr);
+//              sleep(3);
+//      }
 
 	return 0;
 }

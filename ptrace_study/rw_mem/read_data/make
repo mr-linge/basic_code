@@ -1,4 +1,0 @@
-gcc -no-pie read.c -o main
-
-./main `pidof ./target` 94265875448480
-
