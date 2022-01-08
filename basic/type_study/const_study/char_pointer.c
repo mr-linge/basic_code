@@ -6,7 +6,7 @@
    char* p="hello";等价于const char* p="hello"
    常量字符：说明hello这个字符串是无法改变的，则不能更改指针指向的内容，来改变字符串hello。
    *(p+2)='w';错误
-   指向的指针：是可以改变自身的值，输出p的时候就不是hello了而是别的字符串
+   常量指针：是可以改变自身的值，输出p的时候就不是hello了而是别的字符串
    p="newstring";正确
   
    char p[]
