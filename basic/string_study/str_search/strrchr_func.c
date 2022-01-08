@@ -12,17 +12,20 @@
    str -- C 字符串。
    c -- 要搜索的字符。以 int 形式传递，但是最终会转换回 char 形式。
    返回值
-   该函数返回 str 中最后一次出现字符 c的位置，后的所有字符。如果未找到该值，则函数返回一个空指针。
+   该函数返回 str 中最后一次出现字符 c的地址。如果未找到该值，则函数返回一个空指针。
  * */
 int main () {
-	int len;
 	const char str[] = "https://www.runoob.com";
+	printf("str:%s		addr:%p\n",str, str);
 	const char ch = '.';
-	char *ret;
 
-	ret = strrchr(str, ch);
+	char *ret = strrchr(str, ch);
+	if (ret == NULL) {
+		puts("no target string!");
+		return -1;
+	}
 
-	printf("|%c| 之后的字符串是 - |%s|\n", ch, ret);
+	printf("|%c| 之后的字符串是 - |%s|	addr:%p\n", ch, ret, ret);
 
 	return 0;
 }
