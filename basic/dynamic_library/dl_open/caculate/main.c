@@ -36,6 +36,7 @@ int main() {
 	printf("add: %d\n", (*cac_func)(2,7));
 
 	cac_func = (CAC_FUNC)dlsym(handle, "sub");
+	printf("cac_func: %p\n", cac_func);
 	printf("sub: %d\n", cac_func(9,2));
 
 	cac_func = (CAC_FUNC)dlsym(handle, "mul");
@@ -46,6 +47,7 @@ int main() {
 
 	//关闭动态链接库
 	dlclose(handle);
-	
+
+	while(1);	
 	return 0;
 }

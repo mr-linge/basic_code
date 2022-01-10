@@ -114,6 +114,20 @@ int attach_process(pid_t target_pid) {
     return 0;
 }
 
+typedef struct handle{
+    Elf64_Ehdr *ehdr;
+    Elf64_Phdr *phdr;
+    Elf64_Shdr *shdr;
+    uint8_t *mem;
+    pid_t pid;
+    uint8_t *shellcode;
+    char *exec_path;
+    uint64_t base;
+    uint64_t stack;
+    uint64_t entry;
+    struct user_regs_struct pt_reg;
+}handle_t;
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage:\n\t%s pid\n", argv[0]);

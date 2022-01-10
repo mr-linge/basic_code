@@ -17,15 +17,12 @@
  * */
 
 int main() {
-	long val;
-	char str[20];
-
-	strcpy(str, "98993489");
-	val = atol(str);
-	printf("字符串值 = %s, 长整型值 = %ld\n", str, val);
-
-	strcpy(str, "runoob.com");
-	val = atol(str);
+	char str[] = "98993489";
+	long val = atol(str);
+	if(val == 0) {
+                printf("%s is Illegal parameter\n",str);
+                exit(-1);
+        }
 	printf("字符串值 = %s, 长整型值 = %ld\n", str, val);
 
 	return(0);

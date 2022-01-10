@@ -262,12 +262,12 @@ trace:
 }
 
 Elf64_Addr lookup_symbol(handle_t *h, const char *symname) {
-	int i, j, NumOfSym;
+	unsigned long i, j, NumOfSym;
 	char *strtab;
 	Elf64_Sym *symtab;
 
 	for (i = 0; i < h->ehdr->e_shnum; i++) {
-		/* 找 ./symtab 节，该节保存了符号信息，每一个符号项为Elf64_Sym */
+		/* 找 .symtab 节，该节保存了符号信息，每一个符号项为Elf64_Sym */
 		if (h->shdr[i].sh_type == SHT_SYMTAB) {
 			/* 类型为SHT_SYMTAB的节，其sh_link为字符串表所在节表中的下标 */
 			/* 因此h->shdr[i].sh_link为字符串表下标 */
@@ -291,7 +291,7 @@ Elf64_Addr lookup_symbol(handle_t *h, const char *symname) {
 				//char *name = (char *) &strtab[symtab->st_name];
 				//printf("\nsymbol name : %s\n", name);
 				/* st_name为符号名在字符串表中的下标 */
-				if (!strncmp(&strtab[symtab->st_name], symname, strlen(symname)))  {
+				if (!strncmp(&strtab[symtab->st_name], symname, strlen(symname))) {
 					/* st_value 为符号的地址 */
 					return symtab->st_value;
 				}

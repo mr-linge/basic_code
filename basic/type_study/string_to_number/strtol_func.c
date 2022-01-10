@@ -17,14 +17,16 @@
    该函数返回转换后的长整数，如果没有执行有效的转换，则返回一个零值。
  * */
 int main() {
-	char str[30] = "2030300 This is test";
+	char str[] = "2030300 This is test";
 	char *ptr;
-	long ret;
+	long val = strtol(str, &ptr, 10);
+	if(val == 0) {
+		printf("%s is Illegal parameter\n",str);
+		exit(-1);
+	}
 
-	ret = strtol(str, &ptr, 10);
-	printf("数字（无符号长整数）是 %ld\n", ret);
-	printf("字符串部分是 |%s|", ptr);
+	printf("数字（长整数）是 %ld\n", val);
+	printf("字符串部分是 |%s|\n", ptr);
 
-	puts("");
 	return 0;
 }

@@ -1,7 +1,9 @@
 #define _GNU_SOURCE
 #include <link.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 // 查看所有加载的so
 static int callback(struct dl_phdr_info *info, size_t size, void *data) {
@@ -36,11 +38,23 @@ static int callback(struct dl_phdr_info *info, size_t size, void *data) {
     return 0;
 }
 
+//typedef void(*CAC_FUNC)(void);
+
 int main() {
+	//CAC_FUNC cac_func = NULL;
 	puts("call hello()");
 	hello();
+	void(*cac_func)(void) = hello;
+	//printf("cac_func addr: %p\n", cac_func);
 
-	dl_iterate_phdr(callback, NULL);
+	//	dl_iterate_phdr(callback, NULL);
+
+	while(1) {
+		printf("cac_func addr: %p\n", cac_func);
+		printf("pid : %d. wait a minutes ...\n", getpid());
+		sleep(3);
+	}
 
 	return 0;
 }
+

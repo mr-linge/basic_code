@@ -1,0 +1,5 @@
+
+gcc -no-pie so_base.c symbol_offset.c main.c -o main
+
+./main `pidof ./main` libtest.so hello
+

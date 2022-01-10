@@ -19,15 +19,15 @@
 
 int main()
 {
-	char str[30] = "2030300This is test";
+	char str[] = "2030300This is test";
 	char *ptr;
 
-	unsigned long ret = strtoul(str, &ptr, 10);
-	if (ret == 0) {
+	unsigned long val = strtoul(str, &ptr, 10);
+	if (val == 0) {
 		puts("strtoul error");
 		return -1;
 	}
-	printf("数字（无符号长整数）是 %lu\n", ret);
+	printf("数字（无符号长整数）是 %lu\n", val);
 	printf("字符串部分是 |%s|\n", ptr);
 
 	return(0);
