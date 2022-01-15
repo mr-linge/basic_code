@@ -1,3 +1,0 @@
-gcc main.c -o main2
-
-./main2 `pidof ./main` libtest.so

@@ -1,0 +1,3 @@
+aarch64-linux-gnu-gcc -no-pie write.c -o write
+
+./write `pidof ./target` 94619969200800  zzzzz

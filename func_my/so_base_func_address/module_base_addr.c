@@ -28,9 +28,14 @@ size_t getLibcbase(int pid,char * so_name) {
 	printf("The process %d's libcbase is: 0x%lx\n", pid, libcAddr);
 
 	// get lib path
-	char *path = strchr(buf, '/');
-	printf("%s path: %s\n", so_name, path);
-	
+	char *start_path = strchr(buf, '/');
+	char *end_path = strstr(buf, ".so");
+	unsigned long len = end_path + 3 - start_path;
+	strncpy(so_path, start_path, len);
+	so_path[len] = '\0';
+	//printf("path:%s len:%lu\n", so_path, strlen(so_path));
+
+
 	fclose(fd);
 
 	return libcAddr;

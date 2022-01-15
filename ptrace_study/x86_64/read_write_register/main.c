@@ -17,7 +17,6 @@ void continue_process(pid_t target_pid) {
 	}
 }
 
-
 //  附加到正在运行的进程
 int attach_process(pid_t target_pid) {
 	printf("+ Tracing process %d\n", target_pid);
@@ -34,19 +33,22 @@ int attach_process(pid_t target_pid) {
 // 获取寄存器
 int get_registers(pid_t target_pid, struct user_regs_struct *regs) {
 	printf("+ Getting Registers\n");
-	if ((ptrace(PTRACE_GETREGS, target_pid, NULL, regs)) < 0) {
+ 	long ret = ptrace(PTRACE_GETREGS, target_pid, NULL, regs);
+	printf("%s: ret = %ld\n",__FUNCTION__ ,ret);
+	if (ret < 0) {
 		perror("ptrace(GETREGS):");
 		exit(-1);
 	}
-
-	(*regs).rip += 2;
+//	(*regs).rip += 2;
 	return 0;
 }
 
 //  恢复寄存器
 void set_registers(pid_t target_pid, struct user_regs_struct *regs) {
 	printf("+ Setting instruction pointer to %p\n", (void *) regs->rip);
-	if ((ptrace(PTRACE_SETREGS, target_pid, NULL, regs)) < 0) {
+	long ret = ptrace(PTRACE_SETREGS, target_pid, NULL, regs);
+	printf("%s: ret = %ld\n",__FUNCTION__ ,ret);
+	if (ret < 0) {
 		perror("ptrace(GETREGS):");
 		exit(1);
 	}

@@ -30,6 +30,14 @@ void putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long l
 	}
 }
 
+//  结束对目标进程的跟踪
+void end_tracke_process(pid_t target_pid) {
+    if ((ptrace(PTRACE_DETACH, target_pid, NULL, NULL)) < 0) {
+        perror("ptrace(DETACH):");
+        exit(1);
+    }
+}
+
 // 目标进程继续运行
 void continue_process(pid_t target_pid) {
 	if ((ptrace(PTRACE_CONT, target_pid, NULL, NULL)) < 0) {
@@ -73,6 +81,8 @@ int main(int argc, char **argv) {
 //              printf("dst:%p\n", (void *) addr);
 //              sleep(3);
 //      }
+
+	end_tracke_process(target_pid);
 
 	return 0;
 }

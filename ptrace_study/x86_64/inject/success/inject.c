@@ -96,8 +96,8 @@ int get_registers(pid_t target_pid, struct user_regs_struct *regs) {
         perror("ptrace(GETREGS):");
         exit(-1);
     }
-
-    (*regs).rip += 2;
+//
+//    (*regs).rip += 2;
     return 0;
 }
 
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
     // get context
     getdata(target_pid, regs.rip, backup, len);
     // 对指令指针进行了修改，而这正是必须要在交出控制权之前在目标进程上设置寄存器的原因。实质上，指令指针会变为PTRACE_DEATCH减去2个字节的值。
-    regs.rip += 2;
+    //regs.rip += 2;
     putdata(target_pid, regs.rip, shellcode, len);
 
     continue_process(target_pid);
@@ -140,12 +140,11 @@ int main(int argc, char *argv[]) {
 //    if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTRAP) {
 //	    puts("continne the child process. put Enter");
 //	    getchar();
-//	    regs.rip += 2;
 //	    putdata(target_pid, regs.rip, backup, len);
 //
+//	    regs.rip -= 1;
 //	    set_registers(target_pid, &regs);
 //	    continue_process(target_pid);
-//	    end_tracke_process(target_pid);
 //    } else {
 //	    puts("child process error");
 //    }

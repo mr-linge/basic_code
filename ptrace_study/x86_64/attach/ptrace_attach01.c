@@ -6,11 +6,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-/*
- * 目标进程被 PTRACE_ATTACH 附加后, 子进程就已经暂停了
- 当执行 PTRACE_CONT 后 子进程会继续执行
- 除些之外 当前进程结束 或 PTRACE_DETACH(结束对目标进程的跟踪后)  子进程也会继续执行
- * */
 int main(int argc, char *argv[]) {
 	if (argc != 2) {
 		printf("Usage: %s <pid to be traced>\n",argv[0]);

@@ -9,7 +9,7 @@ int main() {
 
 	while(1) {
 		printf("str addr:%p, value:%s\n",str,str);	
-		sleep(5);
+		sleep(10);
 	}
 	return 0;
 }

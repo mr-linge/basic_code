@@ -33,7 +33,7 @@ void getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long l
 
 //  结束对目标进程的跟踪
 void end_tracke_process(pid_t target_pid) {
-    if ((ptrace(PTRACE_DETACH, target_pid, NULL, NULL)) < 0) {
+    if ((ptrace(PTRACE_DETACH, target_pid, NULL, NULL)) != -1) {
         perror("ptrace(DETACH):");
         exit(1);
     }

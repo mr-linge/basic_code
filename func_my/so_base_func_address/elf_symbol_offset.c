@@ -33,10 +33,12 @@ void lookup_symbol(handle_t *h) {
 			/* 类型为SHT_SYMTAB的节，其sh_link为字符串表所在节表中的下标 */
 			/* 因此h->shdr[i].sh_link为字符串表下标 */
 			strtab = (char *) (h->mem + h->shdr[h->shdr[i].sh_link].sh_offset);
+
 			/* 获取符号表的首地址 */
 			symtab = (Elf64_Sym *) &h->mem[h->shdr[i].sh_offset];
 
 			NumOfSym = h->shdr[i].sh_size / sizeof(Elf64_Sym);
+
 			for (j = 0; j < NumOfSym; j++) {
 				//                char *name = (char *) &strtab[symtab->st_name];
 				//                printf("\nsymbol name : %s\n", name);
@@ -52,10 +54,16 @@ void lookup_symbol(handle_t *h) {
 	}
 }
 
-handle_t h;
+int main(int argc, char *argv[]) {
+	if (argc != 3) {
+		printf("params is less than 3 ..");
+		return -1;
+	}
 
-void handle_elf() {
+	handle_t h;
 	struct stat st;
+
+	h.path = argv[1];
 	/* 打开指定文件 */
 	int fd;
 	if ((fd = open(h.path, O_RDONLY)) < 0) {
@@ -79,12 +87,10 @@ void handle_elf() {
 	h.ehdr = (Elf64_Ehdr *) h.mem;
 	h.phdr = (Elf64_Phdr *) (h.mem + h.ehdr->e_phoff);
 	h.shdr = (Elf64_Shdr *) (h.mem + h.ehdr->e_shoff);
-}
 
-size_t symbol_address(char *so_path, char *symbol_name) {
-	h.path = so_path;
-	h.symname = symbol_name;
-	handle_elf();
+	h.symname = argv[2];
 	lookup_symbol(&h);
-	return h.symaddr;
+	printf("func:%s, addr:0x%lx\n", h.symname, h.symaddr);
+
+	return 0;
 }

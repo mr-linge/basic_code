@@ -1,0 +1,4 @@
+aarch64-linux-gnu-gcc -no-pie read.c -o read
+
+./read `pidof ./target` 94619969200800
+
