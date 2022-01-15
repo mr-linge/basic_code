@@ -23,7 +23,7 @@ void get_message(char *path, Message **msg) {
 	(*msg)->message = (uint8_t *) calloc((*msg)->len, sizeof(uint8_t));
 
 	int fd = open(path, O_RDONLY, S_IRWXU | S_IRWXG | S_IRWXO);
-	int size = read(fd, (*msg)->message, (*msg)->len);
+	size_t size = read(fd, (*msg)->message, (*msg)->len);
 	if (size < 0) {
 		perror("open file fail!");
 		exit(1);
@@ -38,7 +38,7 @@ void write_message(char *path, Message *msg) {
 		perror("create directory fail!");
 		exit(-1);
 	}
-	int size = write(fd, msg->message, msg->len);
+	size_t size = write(fd, msg->message, msg->len);
 	if (size < 0) {
 		perror("open file fail!");
 		exit(1);
