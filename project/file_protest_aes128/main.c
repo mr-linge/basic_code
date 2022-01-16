@@ -10,8 +10,7 @@
 
 enum CryptoType {
 	encrypt, decrypt
-};
-enum CryptoType ctype;
+}ctype;
 
 // 根据路径获取目录里的内容
 void get_message(char *path, Message **msg) {
@@ -21,6 +20,7 @@ void get_message(char *path, Message **msg) {
 	*msg = (Message *) calloc(1, sizeof(Message));
 	(*msg)->len = buf.st_size;
 	(*msg)->message = (uint8_t *) calloc((*msg)->len, sizeof(uint8_t));
+	(*msg)->origin_ptr = (*msg)->message;
 
 	int fd = open(path, O_RDONLY, S_IRWXU | S_IRWXG | S_IRWXO);
 	size_t size = read(fd, (*msg)->message, (*msg)->len);
@@ -55,16 +55,17 @@ void encrypt_directory(char *path) {
 	Message *msg = NULL;
 	get_message(path, &msg);
 	if (msg->len < 1) {
-		printf("file content is null");
+		printf("file content is null\n");
 		return;
 	}
+	printf("encryp: directory size = 0x%lX\n", msg->len);
 	AES_CBC_encrypt(key, msg);
-	printf("encrypt_directory len = 0x%lX ciphertext:\n", msg->len);
+	//printf("encrypt_directory len = 0x%lX ciphertext:\n", msg->len);
 	/*    for (int i = 0; i < msg->len; ++i) {
 	      printf("0x%02X ", *(msg->message + i));
 	      }
 	      puts("");*/
-	char *new_path = (char *) calloc(256, 1);
+	char *new_path = (char *) calloc(512, 1);
 	strcat(new_path, path);
 	strcat(new_path, ".temp");
 	write_message(new_path, msg);
@@ -77,6 +78,8 @@ void encrypt_directory(char *path) {
 		}
 	}
 	free(new_path);
+	free(msg->origin_ptr);
+	free(msg);
 }
 
 // 生成解密目录
@@ -84,10 +87,10 @@ void decrypt_directory(char *path) {
 	Message *msg = NULL;
 	get_message(path, &msg);
 	if (msg->len < 1) {
-		printf("file content is null");
+		printf("file content is null\n");
 		return;
 	}
-	//    printf("decrypt_directory origin text len = 0x%lX\n", msg->len);
+	printf("decrypt: directory size = 0x%lX\n", msg->len);
 	AES_CBC_decrypt(key, msg);
 	//    printf("decrypt_directory len = 0x%lX plaintext:\n", msg->len);
 	//    for (int i = 0; i < msg->len; ++i) {
@@ -106,6 +109,8 @@ void decrypt_directory(char *path) {
 		}
 	}
 	free(new_path);
+	free(msg->origin_ptr);
+	free(msg);
 }
 
 void readFileList(char *basePath) {
@@ -119,6 +124,7 @@ void readFileList(char *basePath) {
 	}
 
 	while ((ptr = readdir(dir)) != NULL) {
+		// strcmp(ptr->d_name, ".git") == 0 || strcmp(ptr->d_name, ".gitattributes") == 0
 		if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {    ///current dir OR parrent dir
 			continue;
 		} else if (ptr->d_type == 8 || ptr->d_type == 10) {    ///file or link file
@@ -127,7 +133,7 @@ void readFileList(char *basePath) {
 			strcat(current_path, basePath);
 			strcat(current_path, "/");
 			strcat(current_path, ptr->d_name);
-			printf("crypto current_path:\n%s\n", current_path);
+			printf("crypto current_path:%s\n", current_path);
 			char *suffix = strrchr(ptr->d_name, '.');
 			if (ctype == encrypt) {
 				if (!(suffix != NULL && (strcmp(suffix, ".temp") == 0))) {
@@ -138,6 +144,7 @@ void readFileList(char *basePath) {
 					decrypt_directory(current_path);
 				}
 			}
+			free(current_path);
 			/*            char *suffix = strrchr(ptr->d_name, '.');
 				      if (ctype == encrypt && suffix != NULL && (strcmp(suffix, ".temp") != 0)) {
 				      encrypt_directory(current_path);
@@ -182,7 +189,7 @@ int main(int argc, char *argv[]) {
 	//    encrypt_func();
 	//    decrypt_func();
 
-	char *path = (char *) calloc(256, 1);
+	char *path = (char *) calloc(512, 1);
 	int c = 0;
 	while ((c = getopt(argc, argv, "edp:k:")) != -1) {
 		switch (c) {
@@ -213,6 +220,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	readFileList(path);
+	free(path);
 
 	return 0;
 }

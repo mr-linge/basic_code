@@ -28,7 +28,7 @@ void split_block(Message *msg) {
 		block_num++;
 	}
 	unsigned long new_len = block_num * 16;
-	uint8_t *new_p = (uint8_t *) calloc(new_len, 1);
+	uint8_t *new_p = (uint8_t *) malloc(new_len);
 	if (!new_p) {
 		printf("Not Enough Memory!\n");
 		exit(-1);
@@ -46,7 +46,9 @@ void split_block(Message *msg) {
 		memset((new_p + 8 + msg->len), '\0', filling_num - 1);
 		*(new_p + new_len - 1) = filling_num;
 	}
+	free(msg->origin_ptr);
 	msg->message = new_p;
+	msg->origin_ptr = msg->message;
 	msg->len = new_len;
 	/*    printf("split_block len =  0x%lx:\n", msg->len);
 	      for (int i = 0; i < msg->len; ++i) {
@@ -104,7 +106,7 @@ void AES_CBC_decrypt(uint8_t key[16], Message *msg) {
 	uint8_t state_matrix[4][4];
 
 	// 需要每次与明文异或的 数据
-	uint8_t *new_ptr = (uint8_t *) calloc(msg->len, 1);
+	uint8_t *new_ptr = (uint8_t *) malloc(msg->len);
 	uint8_t *obj_ptr = new_ptr;
 	memcpy(obj_ptr, iv, 16);
 	memcpy(obj_ptr + 16, msg->message, (msg->len - 16));

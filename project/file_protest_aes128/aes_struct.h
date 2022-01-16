@@ -4,8 +4,9 @@
 #define AES128_AES_STRUCT_H
 
 typedef struct {
-    uint8_t *message;
-    unsigned long len;
+	uint8_t *origin_ptr;
+	uint8_t *message;
+	unsigned long len;
 } Message;
 
 #endif //AES128_AES_STRUCT_H
