@@ -45,9 +45,10 @@ int main() {
 	cac_func = dlsym(handle, "div");
 	printf("div: %d\n", cac_func(8,2));
 
+//	while(1);
+
 	//关闭动态链接库
 	dlclose(handle);
 
-	while(1);	
 	return 0;
 }

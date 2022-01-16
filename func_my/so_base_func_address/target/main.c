@@ -1,42 +1,10 @@
-#define _GNU_SOURCE
-#include <link.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
-
-// 查看所有加载的so
-static int callback(struct dl_phdr_info *info, size_t size, void *data) {
-    char *type;
-    int p_type, j;
-
-    printf("Name: \"%s\" (%d segments)\n", info->dlpi_name, info->dlpi_phnum);
-
-    for (j = 0; j < info->dlpi_phnum; j++) {
-        p_type = info->dlpi_phdr[j].p_type;
-        type =  (p_type == PT_LOAD) ? "PT_LOAD" :
-                (p_type == PT_DYNAMIC) ? "PT_DYNAMIC" :
-                (p_type == PT_INTERP) ? "PT_INTERP" :
-                (p_type == PT_NOTE) ? "PT_NOTE" :
-                (p_type == PT_INTERP) ? "PT_INTERP" :
-                (p_type == PT_PHDR) ? "PT_PHDR" :
-                (p_type == PT_TLS) ? "PT_TLS" :
-                (p_type == PT_GNU_EH_FRAME) ? "PT_GNU_EH_FRAME" :
-                (p_type == PT_GNU_STACK) ? "PT_GNU_STACK" :
-                (p_type == PT_GNU_RELRO) ? "PT_GNU_RELRO" : NULL;
-
-        printf("    %2d: [%14p; memsz:%7lx] flags: 0x%x; ", j,
-                (void *) (info->dlpi_addr + info->dlpi_phdr[j].p_vaddr),
-                info->dlpi_phdr[j].p_memsz,
-                info->dlpi_phdr[j].p_flags);
-        if (type != NULL)
-            printf("%s\n", type);
-        else
-            printf("[other (0x%x)]\n", p_type);
-    }
-
-    return 0;
-}
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 //typedef void(*CAC_FUNC)(void);
 
@@ -47,13 +15,28 @@ int main() {
 	void(*cac_func)(void) = hello;
 	//printf("cac_func addr: %p\n", cac_func);
 
-	//	dl_iterate_phdr(callback, NULL);
-
-	while(1) {
-		printf("cac_func addr: %p\n", cac_func);
-		printf("pid : %d. wait a minutes ...\n", getpid());
-		sleep(3);
+	int fd;
+	void * start;
+	struct stat sb;
+	fd = open("/etc/profile", O_RDONLY); /* 打开/etc/passwd */
+	fstat(fd, &sb); /* 取得文件大小 */
+	start = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	if(start == MAP_FAILED) /* 判断是否映射成功 */
+	{
+		perror("mmap init fail");
+		exit(-1);
 	}
+
+	void(**my_mmap)(void *, size_t, int, int, int, off_t) = mmap;
+	size_t my_mmap2 = (size_t)dlsym(0, "mmap");
+        while(1) {
+                printf("cac_func        addr: %p\n", (void *)cac_func);
+                printf("mmap            addr: %p\n", (void *)mmap);
+                printf("my_mmap         addr: %p\n", (void *)my_mmap);
+                printf("my_mmap2        addr: %p\n", (void *)my_mmap2);
+                printf("pid : %d. wait a minutes ...\n", getpid());
+                sleep(10);
+        }
 
 	return 0;
 }

@@ -5,10 +5,7 @@ dl_iterate_phdr-遍历共享对象列表
 #define _GNU_SOURCE         /* See feature_test_macros(7) */
 #include <link.h>
 
-int dl_iterate_phdr(
-          int (*callback) (struct dl_phdr_info *info,
-                           size_t size, void *data),
-          void *data);
+int dl_iterate_phdr(int (*callback) (struct dl_phdr_info *info,size_t size, void *data),void *data);
 说明
 dl_iterate_phdr()函数允许应用程序在运行时进行查询，以了解其已加载了哪些共享库以及它们的加载顺序。
 

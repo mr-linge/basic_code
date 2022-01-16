@@ -4,7 +4,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
-size_t getLibcbase(int pid,char * so_name) {
+size_t getLibcbase(int pid, char *so_name) {
 	size_t libcAddr;
 	char *buf;
 	char *end;
@@ -26,16 +26,7 @@ size_t getLibcbase(int pid,char * so_name) {
 	end = strchr(buf, '-');
 	libcAddr = strtol(buf, &end, 16);
 	printf("The process %d's libcbase is: 0x%lx\n", pid, libcAddr);
-
-	// get lib path
-	char *start_path = strchr(buf, '/');
-	char *end_path = strstr(buf, ".so");
-	unsigned long len = end_path + 3 - start_path;
-	strncpy(so_path, start_path, len);
-	so_path[len] = '\0';
-	//printf("path:%s len:%lu\n", so_path, strlen(so_path));
-
-
+	
 	fclose(fd);
 
 	return libcAddr;
@@ -43,7 +34,7 @@ size_t getLibcbase(int pid,char * so_name) {
 
 
 int main(int argc, char *argv[]) {
-	if (argc < 3) {
+	if (argc != 3) {
 		return -1;
 	}
 	int pid = atoi(argv[1]);
