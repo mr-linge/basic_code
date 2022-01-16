@@ -28,12 +28,12 @@ int main() {
 	dlerror();
 
 	//获取一个函数
-	*(void **) (&cac_func) = dlsym(handle, "add");
+	int (*cac_func1)(int,int) = dlsym(handle, "add");
 	if ((error = dlerror()) != NULL)  {
 		fprintf(stderr, "%s\n", error);
 		exit(EXIT_FAILURE);
 	}
-	printf("add: %d\n", (*cac_func)(2,7));
+	printf("add: %d\n", cac_func1(2,7));
 
 	cac_func = (CAC_FUNC)dlsym(handle, "sub");
 	printf("cac_func: %p\n", cac_func);

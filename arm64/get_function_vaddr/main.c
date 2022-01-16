@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <dlfcn.h>
 
 // 计算模块在进程中的虚拟地址(即so加载到进程后的首地址)
 size_t get_module_base(int pid, char *moduleName)
@@ -32,16 +33,17 @@ size_t get_module_base(int pid, char *moduleName)
 	return moduleAddr;
 }
 
+typedef void *(*MY_MMAP)(void *start, size_t length, int prot, int flags, int fd, off_t offsize);
+
 // 计算 函数 在模块中的偏移
 size_t get_func_offset(int pid,char *funcName,char *moduleName)
 {
 	//get function offset from self process, the shared libc.so
-	size_t funcAddr   = (size_t)dlsym(0, funcName); // 获取当前进程中 名为funcName 的函数 所在的 虚拟地址 vaddr
-	funcAddr &= 0x0000ffffffffffff; //对地址格式进行一次转换，以便于后续的地址计算 (仅适用于ARM64,x86的计算方法不同)
+	MY_MMAP funcAddr = (MY_MMAP)dlsym(0, "mmap"); // 获取当前进程中 名为funcName 的函数 所在的 虚拟地址 vaddr
 	size_t moduleAddr = get_module_base(getpid(),moduleName);
-	size_t offset     = funcAddr - moduleAddr; // 当前函数地址 减去 函数所在模块(即加载的libc-2.31.so)在进程中的虚拟地址 即得到 函数在模块内的偏移(仅适用于ARM64,x86的计算方法不同)
+	size_t offset     = (size_t)funcAddr - moduleAddr; // 当前函数地址 减去 函数所在模块(即加载的libc-2.31.so)在进程中的虚拟地址 即得到 函数在模块内的偏移(仅适用于ARM64,x86的计算方法不同)
 	printf("function:%s in module:%s\n",funcName,moduleName);
-	printf("funcAddr: 		0x%lx\n",funcAddr);
+	printf("funcAddr: 		0x%lx\n",(size_t)funcAddr);
 	printf("moduleAddr: 		0x%lx\n",moduleAddr);
 	printf("offset: 		0x%lx\n",offset);
 
