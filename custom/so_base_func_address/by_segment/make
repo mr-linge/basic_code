@@ -1,4 +1,0 @@
-
-gcc -no-pie main.c -o main -ldl
-
-./main `pidof ./tracee` mmap

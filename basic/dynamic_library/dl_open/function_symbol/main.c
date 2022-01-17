@@ -47,8 +47,9 @@ int main() {
 
 //	while(1);
 
-	//关闭动态链接库
+	//关闭动态链接库,关闭后该动态库就会从 当前进程中 移除
 	dlclose(handle);
+	//while(1);
 
 	return 0;
 }
