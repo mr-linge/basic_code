@@ -32,7 +32,7 @@ int main() {
 	
 	printf("test_func origin addr:%p\n", &test_func);
 	CAC_FUNC test_func_dlsym = dlsym(0, "test_func");
-	printf("test_func dlsym  addr:0x%lx\n", test_func_dlsym);
+	printf("test_func dlsym  addr:0x%lx\n", (size_t)test_func_dlsym);
 	
 	return 0;
 }

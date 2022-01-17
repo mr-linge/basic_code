@@ -3,8 +3,9 @@
 int main ()
 {
 	/* 局部变量定义 */
-	char grade = 'B';
-
+	char grade = 0;
+	puts("intput a char:");
+	grade = getchar();
 	switch(grade) {
 		case 'A' :
 			printf("很棒！\n" );
@@ -21,6 +22,7 @@ int main ()
 			break;
 		default :
 			printf("无效的成绩\n" );
+			break;
 	}
 
 	printf("您的成绩是 %c\n", grade);
