@@ -13,6 +13,7 @@ int main() {
 	printf("short   is %lu byte\n", sizeof(short));
 	printf("int     is %lu byte\n", sizeof(int));
 	printf("long    is %lu byte\n", sizeof(long));
+	printf("long long is %lu byte\n", sizeof(long long));
 	printf("double  is %lu byte\n", sizeof(double));
 	unsigned long len = sizeof(size_t);
 	printf("size_t  is %lu byte\n", len);

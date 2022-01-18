@@ -9,7 +9,7 @@
 
 #define LONGSIZE  sizeof(long)
 
-void getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long len) {
+int getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long len) {
 	union {
 		long val;
 		uint8_t bytes[LONGSIZE];
@@ -29,22 +29,28 @@ void getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long l
 		data.val = ptrace(PTRACE_PEEKDATA, target_pid, addr + (i * LONGSIZE), NULL);
 		memcpy(laddr, data.bytes, remainder);
 	}
+
+	return 0;
 }
 
 //  结束对目标进程的跟踪
-void end_tracke_process(pid_t target_pid) {
+int end_tracke_process(pid_t target_pid) {
     if ((ptrace(PTRACE_DETACH, target_pid, NULL, NULL)) != -1) {
         perror("ptrace(DETACH):");
-        exit(1);
+        return -1;
     }
+
+    return 0;
 }
 
 // 目标进程继续运行
-void continue_process(pid_t target_pid) {
+int continue_process(pid_t target_pid) {
 	if ((ptrace(PTRACE_CONT, target_pid, NULL, NULL)) < 0) {
 		perror("ptrace(DETACH):");
-		exit(1);
+		return -1;
 	}
+
+	return 0;
 }
 
 //  附加到正在运行的进程
@@ -52,18 +58,17 @@ int attach_process(pid_t target_pid) {
 	printf("+ Tracing process %d\n", target_pid);
 	if ((ptrace(PTRACE_ATTACH, target_pid, NULL, NULL)) < 0) {
 		perror("ptrace(ATTACH):");
-		exit(-1);
+		return -1;
 	}
 	printf("+ Waiting for process...\n");
-	wait(NULL);
 
 	return 0;
 }
 
 int main(int argc, char **argv) {
-	if (argc < 3) {
+	if (argc != 3) {
 		fprintf(stderr, "Usage:\n\t%s pid\n", argv[0]);
-		exit(1);
+		return -1;
 	}
 
 	pid_t target_pid = atoi(argv[1]);
@@ -71,6 +76,7 @@ int main(int argc, char **argv) {
 	printf("addr : %lx\n", addr);
 
 	attach_process(target_pid);
+	wait(NULL);
 
 	unsigned long len = 32;
 	uint8_t *dst = (uint8_t *) calloc(len,1);

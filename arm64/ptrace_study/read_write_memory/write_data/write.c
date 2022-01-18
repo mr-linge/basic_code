@@ -7,7 +7,7 @@
 
 #define LONGSIZE  sizeof(long)
 
-void putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long len) {
+int putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long len) {
 	union {
 		long val;
 		uint8_t bytes[LONGSIZE];
@@ -28,22 +28,28 @@ void putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long l
 		memcpy(data.bytes, laddr, remainder);
 		ptrace(PTRACE_POKEDATA, target_pid, addr + (i * LONGSIZE), data.val);
 	}
+
+	return 0;
 }
 
 //  结束对目标进程的跟踪
-void end_tracke_process(pid_t target_pid) {
+int end_tracke_process(pid_t target_pid) {
     if ((ptrace(PTRACE_DETACH, target_pid, NULL, NULL)) != -1) {
         perror("ptrace(DETACH):");
-        exit(1);
+        return -1;
     }
+
+    return 0;
 }
 
 // 目标进程继续运行
-void continue_process(pid_t target_pid) {
+int continue_process(pid_t target_pid) {
 	if ((ptrace(PTRACE_CONT, target_pid, NULL, NULL)) > 0) {
 		perror("ptrace(DETACH):");
-		exit(1);
+		return -1;
 	}
+
+	return 0;
 }
 
 //  附加到正在运行的进程
@@ -54,7 +60,6 @@ int attach_process(pid_t target_pid) {
 		exit(-1);
 	}
 	printf("+ Waiting for process...\n");
-	wait(NULL);
 
 	return 0;
 }
@@ -73,6 +78,7 @@ int main(int argc, char **argv) {
 	printf("src:%s, size = %lu\n", src, len);
 	
 	attach_process(target_pid);
+	wait(NULL);
 	
 	putdata(target_pid, addr, src, len);
 

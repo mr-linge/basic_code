@@ -4,12 +4,12 @@
 
 // 自义 保存寄存器的 struct, 重命名这些寄存器内容便于理解
 struct pt_regs {
-	long long  uregs[18];
+        long long uregs[18];
 };
-#define ARM_cpsr uregs[16]
-#define ARM_pc   uregs[15]
-#define ARM_lr   uregs[14]
-#define ARM_sp   uregs[13]
+#define ARM_cpsr uregs[16]              // 存储状态寄存器的值
+#define ARM_pc   uregs[15]              // 存储当前的执行地址
+#define ARM_lr   uregs[14]              // 远程进程的函数调用结束后，程序会跳转到LR寄存器存储的地址     
+#define ARM_sp   uregs[13]              // 存储当前的栈顶地址
 #define ARM_ip   uregs[12]
 #define ARM_fp   uregs[11]
 #define ARM_r10  uregs[10]
@@ -22,8 +22,10 @@ struct pt_regs {
 #define ARM_r3   uregs[3]
 #define ARM_r2   uregs[2]
 #define ARM_r1   uregs[1]
-#define ARM_r0   uregs[0]
+#define ARM_r0   uregs[0]               // 存储R0寄存器的值，函数调用后的返回值会存储在R0寄存器中
 #define ARM_ORIG_r0 uregs[17]
+
+#define CPSR_T_MASK (1u << 5)
 
 
 int main(int argc, char *argv[])
