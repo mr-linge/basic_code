@@ -8,6 +8,16 @@ int trap(int pid,size_t addr) {
 	/* 读取被追踪进程中地址为h.symaddr处的数据 */
 	orig = ptrace(PTRACE_PEEKTEXT, pid, addr, NULL);
 
+	union{
+		long val;
+		uint8_t bytes[8];
+	}data;
+	data.val = orig;
+	printf("orig:%lx\n", (unsigned long)data.val);
+	for(int i=0;i < 8;i++){
+		printf("%02x ", data.bytes[i]);
+	}
+
 	/* int3指令码 0xcc */
 	long trap = (orig & ~0xff) | 0xcc;
 
