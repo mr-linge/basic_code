@@ -39,32 +39,19 @@ void sighandler(int);
  * **/
 int main() {
 	signal(SIGINT, sighandler);
-
-	const int len = 64;
-	uint8_t *mem_space = (uint8_t *)calloc(len,1);
-
-	//char c;
-	while(1) {
-		printf("****************** pid:%d *******************\n",getpid());
-		//printf("input commond:");
-		//c = getchar();
-		printf("mem_space addr:%p,value:\n",mem_space);
-		for(int i = 0; i< len; i++) {
-			printf("%02x ", *(mem_space + i));
-		}
-		puts("");
-
-		//printf("mmap            addr: %p\n", &mmap);
-		printf("&func0          addr: %p\n", &func0);
-		printf("&func1          addr: %p\n", &func1);
-		printf("&func2          addr: %p\n", &func2);
-		printf("&func10         addr: %p\n", &func10);
-		global_var++;
-		int ret = 0;
-		ret = func1(1,1);
-		printf("result = 0x%x\n", ret);
-		sleep(5);
-	}
+	
+	int p0 = 100;
+        int p1 = 200;
+        int p2 = 300;
+        int p3 = 400;
+        int p4 = 500;
+        int p5 = 600;
+        int p6 = 700;
+        int p7 = 800;
+        int p8 = 900;
+        int p9 = 901;
+        int ret = func10(p0,p1,p2,p3,p4,p5,p6,p7,p8,p8);
+	printf("ret = %d\n",ret);
 
 	return 0;
 }

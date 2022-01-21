@@ -1,2 +1,2 @@
-gcc -no-pie ptrace_util.c call01.c -o main
+gcc -no-pie ptrace_util.c call02.c -o main
 ./main `pidof ./tracee`
