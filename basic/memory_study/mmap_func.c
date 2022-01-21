@@ -59,7 +59,7 @@ int main() {
 	int fd;
 	void * start;
 	struct stat sb;
-	fd = open("/etc/passwd", O_RDONLY); /* 打开/etc/passwd */
+	fd = open("./loaded_file", O_RDONLY); /* 打开/etc/passwd */
 	fstat(fd, &sb); /* 取得文件大小 */
 	start = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 	if(start == MAP_FAILED) /* 判断是否映射成功 */

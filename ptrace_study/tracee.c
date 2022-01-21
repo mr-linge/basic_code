@@ -24,6 +24,15 @@ int func2(int p1, int p2) {
 	return p1 * p2 * global_var;
 }
 
+void read_mem(unsigned long vaddr,unsigned long len) {
+	printf("Hello, this is read_mem ...\n");
+	uint8_t * tmp_addr = (uint8_t *)vaddr;
+	for(unsigned long i = 0; i < len; i++) {
+		printf("%02x ",*(tmp_addr + i));
+	}
+	puts("");
+}
+
 int func10(int p1, int p2, int p3, int p4, int p5, int p6, int p7, int p8, int p9, int p10) {
 	printf("Hello, this is func10 ...\n");
 	printf("p1 = %d,p2 = %d,p3 = %d,p4 = %d,p5 = %d,p6 = %d,p7 = %d,p8 = %d,p9 = %d,p10 = %d\n",
@@ -53,11 +62,12 @@ int main() {
 			printf("%02x ", *(mem_space + i));
 		}
 		puts("");
-
-		//printf("mmap            addr: %p\n", &mmap);
+		//read_mem((unsigned long)mem_space,len);
+		printf("mmap            addr: %p\n", &mmap);
 		printf("&func0          addr: %p\n", &func0);
 		printf("&func1          addr: %p\n", &func1);
 		printf("&func2          addr: %p\n", &func2);
+		printf("&read_mem       addr: %p\n", &read_mem);
 		printf("&func10         addr: %p\n", &func10);
 		global_var++;
 		int ret = 0;

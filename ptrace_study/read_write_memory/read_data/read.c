@@ -77,6 +77,11 @@ int main(int argc, char **argv) {
 	getdata(target_pid, addr, dst, len);
 
 	printf("dst:%p\nvalue:%s\n", (void *) addr, dst);
+	for(int k = 0; k < len; k++) {
+		printf("%02x ",*(dst + k));
+	}
+	puts("");
+
 
 	continue_process(target_pid);
 	//	int i = 0;

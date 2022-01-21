@@ -1,3 +1,3 @@
 gcc -no-pie write.c -o main
 
-./main `pidof ./target` 94619969200800  zzzzz
+./main `pidof ./tracee` 13931168  zzzzzhhhhhhhhhhhh
