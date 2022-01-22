@@ -1,0 +1,3 @@
+gcc -no-pie vaddr_by_symbol.c main.c -o main -ldl
+./main `pidof ./tracee`
+

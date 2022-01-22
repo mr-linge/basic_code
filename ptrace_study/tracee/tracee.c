@@ -6,6 +6,12 @@
 #include <signal.h>
 #include <stdint.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+
+#include <dlfcn.h>
 
 int global_var = 0x1;
 
@@ -51,7 +57,7 @@ int main() {
 
 	const int len = 64;
 	uint8_t *mem_space = (uint8_t *)calloc(len,1);
-
+	//int fd = open("./loaded_file", O_RDONLY | O_WRONLY);
 	//char c;
 	while(1) {
 		printf("****************** pid:%d *******************\n",getpid());
@@ -62,13 +68,15 @@ int main() {
 			printf("%02x ", *(mem_space + i));
 		}
 		puts("");
+		//printf("fd = %d\n", fd);
 		//read_mem((unsigned long)mem_space,len);
 		printf("mmap            addr: %p\n", &mmap);
-		printf("&func0          addr: %p\n", &func0);
+		//printf("dlopen          addr: %p\n", &dlopen);
+		//printf("&func0          addr: %p\n", &func0);
 		printf("&func1          addr: %p\n", &func1);
 		printf("&func2          addr: %p\n", &func2);
 		printf("&read_mem       addr: %p\n", &read_mem);
-		printf("&func10         addr: %p\n", &func10);
+		//printf("&func10         addr: %p\n", &func10);
 		global_var++;
 		int ret = 0;
 		ret = func1(1,1);

@@ -203,6 +203,9 @@ int recovery_breakpoint(pid_t pid,struct user_regs_struct regs) {
 
 // 远程调用函数
 int call_function(int pid,size_t func_addr,long paramers[],const unsigned int num_param,struct user_regs_struct regs,long *result) {
+	struct user_regs_struct backup;
+	memcpy(&backup,&regs,sizeof(struct user_regs_struct));
+printf("%s %d\n", __FILE__, __LINE__);
 	// 1.先把参数保存起来
 	int tmp_num;
 	if (num_param <= 6) {
@@ -219,9 +222,11 @@ int call_function(int pid,size_t func_addr,long paramers[],const unsigned int nu
 			printf("*(param_stack + %d) = %ld \t",k,*(param_stack + k));
 		}
 		puts("");
+		// 第6个以后的参数保存到栈中
 		push_stack(pid, &(regs.rsp), param_stack, len);
 	}
 
+	// 前6个参数保存在寄存器里
 	switch(tmp_num) {
 		case 6:
 			regs.r9 = paramers[5];
@@ -241,7 +246,7 @@ int call_function(int pid,size_t func_addr,long paramers[],const unsigned int nu
 				printf("no paramer ...\n" );
 			}
 	}
-
+printf("%s %d\n", __FILE__, __LINE__);
 	//2.把当前指令的下一条指令入栈,函数往上一级返回的时候要用到
 	// rip = rip -1 是为了让函数重新撞击断点，断点指令0xcc 就1 Byte,当上次撞击断点时 pc 已经指下了断点的下一条指令
 	long rip[1] = {regs.rip - 1};
@@ -250,12 +255,9 @@ int call_function(int pid,size_t func_addr,long paramers[],const unsigned int nu
 	//3. 把pc指向目标函数首地址
 	regs.rip = func_addr;
 	set_registers(pid,&regs);
-
+printf("%s %d\n", __FILE__, __LINE__);
 	ptrace_cont(pid);
-
-	if(result == NULL) {
-		return 0;
-	}
+printf("%s %d\n", __FILE__, __LINE__);
 	/*
 	 * 为了获取 调用的目标函数的返回值(其实这个返回值存放在rax中)，只能让函数继续运行，直到运行结束 再次撞击原来的断点。
 	 这时才是正解的时机获取到 目标函数的返回值 rax
@@ -265,9 +267,16 @@ int call_function(int pid,size_t func_addr,long paramers[],const unsigned int nu
 		printf("%s:%d not hit breakpoint...\n",__FILE__,__LINE__);
 		return -1;
 	}
-	*result = call_ret_regs.rax;
-	//printf("call_function return value = %ld\n",*result);
-
+	printf("%s %d\n", __FILE__, __LINE__);
+	if(result != NULL) {
+		*result = call_ret_regs.rax;
+		//printf("call_function return value = %ld\n",*result);
+	}
+printf("%s %d\n", __FILE__, __LINE__);
+	recovery_breakpoint(pid, backup);
+	printf("%s %d\n", __FILE__, __LINE__);
+	ptrace_cont(pid);
+printf("%s %d\n", __FILE__, __LINE__);
 	return 0;
 }
 
