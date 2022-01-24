@@ -188,9 +188,9 @@ int set_breakpoint(pid_t pid,size_t vaddr) {
 }
 
 // 判断是否运行到断点处，如果运行到断点处就获取寄存器信息
-int wait_breakpoint() {
+int wait_breakpoint(pid_t pid) {
 	int status;
-	wait(&status);
+	waitpid(pid, &status, WUNTRACED);
 	//printf("status:%d\n", status);
 	if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTRAP) {
 		printf("+ Child process is stopped, by breakpoint ...\n");
@@ -201,13 +201,9 @@ int wait_breakpoint() {
 }
 
 // 恢复断点处的代码并使程序继续运行, 即还原寄存器信息和此位置原来的数据 然后调用 ptrace(PTRACE_CONT,...)
-int recovery_breakpoint(pid_t pid) {
+int recovery_breakpoint(pid_t pid,struct user_regs_struct regs) {
 	// 先运行到断点处
 //	wait_breakpoint();
-
-	// 获取断点处寄存器数据
-	struct user_regs_struct regs;
-	get_registers(pid,&regs);
 
 	// 运行到断点时，pc 指向断点后一条指令处. 断点指令 0xcc 只有 1 byte 所以 -1 后就是原来断点处地址
 	regs.rip -= 1;

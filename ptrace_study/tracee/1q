@@ -64,8 +64,8 @@ int main() {
 	memset(mem_space,'a',32);
 	int fd = open("./loaded_file", O_RDONLY | O_WRONLY);
 	//打开动态链接库
-//	void *handle = dlopen(path, RTLD_LAZY);
-//	printf("handle = %p\n",handle);
+	//void *handle = dlopen(path, RTLD_LAZY);
+
 	//char c;
 	while(1) {
 		printf("****************** pid:%d *******************\n",getpid());

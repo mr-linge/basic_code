@@ -19,6 +19,7 @@ int main() {
 
 	//打开动态链接库
 	handle = dlopen(LIB_CACULATE_PATH, RTLD_LAZY);
+	printf("handle = %p\n",handle);
 	if (!handle) {
 		fprintf(stderr, "%s\n", dlerror());
 		exit(EXIT_FAILURE);
