@@ -4,60 +4,67 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #define LONGSIZE  sizeof(long)
 
-void putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long len) {
-	union {
-		long val;
-		uint8_t bytes[LONGSIZE];
-	} data;
-	unsigned long i = 0;
-	unsigned long j = len / LONGSIZE;
-	uint8_t *laddr = src;
-	while (i < j) {
-		memcpy(data.bytes, laddr, LONGSIZE);
-		ptrace(PTRACE_POKEDATA, target_pid, addr + (i * LONGSIZE), data.val);
-		++i;
-		laddr += LONGSIZE;
-	}
+int putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long len) {
+        printf("+ Pokedata process %d\n", target_pid);
+        union {
+                long val;
+                uint8_t bytes[LONGSIZE];
+        } data;
+        unsigned long i = 0;
+        unsigned long j = len / LONGSIZE;
+        uint8_t *laddr = src;
+        while (i < j) {
+                memcpy(data.bytes, laddr, LONGSIZE);
+                ptrace(PTRACE_POKEDATA, target_pid, addr + (i * LONGSIZE), data.val);
+                ++i;
+                laddr += LONGSIZE;
+        }
 
-	unsigned long remainder = len % LONGSIZE;
-	if (remainder != 0) {
-		data.val = ptrace(PTRACE_PEEKDATA, target_pid, addr + (i * LONGSIZE), NULL);
-		memcpy(data.bytes, laddr, remainder);
-		ptrace(PTRACE_POKEDATA, target_pid, addr + (i * LONGSIZE), data.val);
-	}
-}
+        unsigned long remainder = len % LONGSIZE;
+        if (remainder != 0) {
+                data.val = ptrace(PTRACE_PEEKDATA, target_pid, addr + (i * LONGSIZE), NULL);
+                memcpy(data.bytes, laddr, remainder);
+                ptrace(PTRACE_POKEDATA, target_pid, addr + (i * LONGSIZE), data.val);
+        }
 
-//  结束对目标进程的跟踪
-void end_tracke_process(pid_t target_pid) {
-    if ((ptrace(PTRACE_DETACH, target_pid, NULL, NULL)) < 0) {
-        perror("ptrace(DETACH):");
-        exit(1);
-    }
-}
-
-// 目标进程继续运行
-void continue_process(pid_t target_pid) {
-	if ((ptrace(PTRACE_CONT, target_pid, NULL, NULL)) < 0) {
-		perror("ptrace(DETACH):");
-		exit(1);
-	}
+        return 0;
 }
 
 //  附加到正在运行的进程
-int attach_process(pid_t target_pid) {
-	printf("+ Tracing process %d\n", target_pid);
-	if ((ptrace(PTRACE_ATTACH, target_pid, NULL, NULL)) < 0) {
-		perror("ptrace(ATTACH):");
-		exit(-1);
-	}
-	printf("+ Waiting for process...\n");
-	wait(NULL);
-
-	return 0;
+int ptrace_attach(pid_t target_pid) {
+        printf("+ Attach process %d\n", target_pid);
+        if (ptrace(PTRACE_ATTACH, target_pid, NULL, NULL) < 0) {
+                perror("ptrace(ATTACH)");
+                return -1;
+        }
+        printf("+ Waiting for process...\n");
+        return 0;
 }
+
+// 让子进程继续运行
+int ptrace_cont(pid_t target_pid) {
+        printf("+ Continue process %d\n", target_pid);
+        if (ptrace(PTRACE_CONT, target_pid, NULL, NULL) < 0) {
+                perror("ptrace(PTRACE_CONT)");
+                return -1;
+        }
+        return 0;
+}
+
+//  结束对目标进程的跟踪
+int ptrace_detach(pid_t target_pid) {
+        printf("+ Detach process %d\n", target_pid);
+        if (ptrace(PTRACE_DETACH, target_pid, NULL, NULL) < 0) {
+                perror("ptrace(DETACH)");
+                return -1;
+        }
+        return 0;
+}
+
 
 int main(int argc, char **argv) {
 	if (argc < 4) {
@@ -65,25 +72,22 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
-	pid_t target_pid = atoi(argv[1]);
-	unsigned long addr = atol(argv[2]);
-	// printf("addr : %lx\n", addr);
+	pid_t pid = atoi(argv[1]);
+	char *addr_str = argv[2];
+	unsigned long addr = strtoul(addr_str, NULL, 16);
+	printf("addr : 0x%lx\n", addr);
 	char *src = argv[3];
 	unsigned long len = strlen(src);//sizeof(src);
 	printf("src:%s, size = %lu\n", src, len);
-	
-	attach_process(target_pid);
-	
-	putdata(target_pid, addr, src, len);
 
-	continue_process(target_pid);
-//      while(1) {
-//              printf("dst:%p\n", (void *) addr);
-//              sleep(3);
-//      }
+	ptrace_attach(pid);
+	int status;
+	wait(&status);
 
-	end_tracke_process(target_pid);
+	putdata(pid, addr, src, len);
+
+	ptrace_cont(pid);
+	ptrace_detach(pid);
 
 	return 0;
 }
-

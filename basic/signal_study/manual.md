@@ -1,4 +1,5 @@
 Signal 	Description
+
 SIGABRT	由调用abort函数产生，进程非正常退出
 SIGALRM	用alarm函数设置的timer超时或setitimer函数设置的interval timer超时
 SIGBUS	某种特定的硬件异常，通常由内存访问引起

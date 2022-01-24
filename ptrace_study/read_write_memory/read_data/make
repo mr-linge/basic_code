@@ -1,4 +1,3 @@
 gcc -no-pie read.c -o main
 
-./main `pidof ./tracee` 140421671321600
-
+./main `pidof ./tracee` a352a0

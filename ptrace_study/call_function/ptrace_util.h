@@ -44,12 +44,12 @@ uint8_t orig;
 // 在 vaddr 处 设置断点，并获取这处的原来数据、方便以后还原
 int set_breakpoint(pid_t pid,size_t vaddr);
 // 判断是否运行到断点处，如果运行到断点处就获取寄存器信息
-int is_hit_breakpoint(pid_t pid,struct user_regs_struct *regs);
-// 恢复断点处的代码, 即还原寄存器信息和此位置原来的数据
-int recovery_breakpoint(pid_t pid,struct user_regs_struct regs);
-// 远程调用函数
-int call_function(int pid,size_t func_addr,long paramers[],const unsigned int num_param,struct user_regs_struct regs,long *result);
+int wait_breakpoint();
+// 恢复断点处的代码并使程序继续运行, 即还原寄存器信息和此位置原来的数据 然后调用 ptrace(PTRACE_CONT,...)
+int recovery_breakpoint(pid_t pid);
 
+// 远程调用函数
+int call_function(pid_t pid,size_t func_addr,long paramers[],const unsigned int num_param);
 
 
 

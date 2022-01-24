@@ -7,14 +7,14 @@
    header file: #include <signal.h>
 
    int raise(int sig)
-Description:
-促使生成信号 sig.
-
-params:
-sig		信号
-
-return value:
-如果成功该函数返回零，否则返回非零。 
+   Description:
+   促使生成信号 sig.
+   
+   params:
+   sig		信号
+   
+   return value:
+   如果成功该函数返回零，否则返回非零。 
  * */
 
 void sighandler(int);

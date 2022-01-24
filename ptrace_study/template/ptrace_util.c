@@ -2,64 +2,66 @@
 
 //  附加到正在运行的进程
 int ptrace_attach(pid_t target_pid) {
-        printf("+ Tracing process %d\n", target_pid);
-        if (ptrace(PTRACE_ATTACH, target_pid, NULL, NULL) < 0) {
-                perror("ptrace(ATTACH)");
-                return -1;
-        }
-        printf("+ Waiting for process...\n");
-        return 0;
+	printf("+ Attach process %d\n", target_pid);
+	if (ptrace(PTRACE_ATTACH, target_pid, NULL, NULL) < 0) {
+		perror("ptrace(ATTACH)");
+		return -1;
+	}
+	printf("+ Waiting for process...\n");
+	return 0;
 }
 
 // 让子进程继续运行
 int ptrace_cont(pid_t target_pid) {
-        if (ptrace(PTRACE_CONT, target_pid, NULL, NULL) < 0) {
-                perror("ptrace(PTRACE_CONT)");
-                return -1;
-        }
+	printf("+ Continue process %d\n", target_pid);
+	if (ptrace(PTRACE_CONT, target_pid, NULL, NULL) < 0) {
+		perror("ptrace(PTRACE_CONT)");
+		return -1;
+	}
 	return 0;
 }
 
 //  结束对目标进程的跟踪
 int ptrace_detach(pid_t target_pid) {
-    if (ptrace(PTRACE_DETACH, target_pid, NULL, NULL) < 0) {
-        perror("ptrace(DETACH)");
-        return -1;
-    }
-    return 0;
+	printf("+ Detach process %d\n", target_pid);
+	if (ptrace(PTRACE_DETACH, target_pid, NULL, NULL) < 0) {
+		perror("ptrace(DETACH)");
+		return -1;
+	}
+	return 0;
 }
 
 
 // 获取寄存器
 int get_registers(pid_t target_pid, struct user_regs_struct *regs) {
-        printf("+ Getting Registers\n");
-        long ret = ptrace(PTRACE_GETREGS, target_pid, NULL, regs);
-        //printf("%s: ret = %ld\n",__FUNCTION__ ,ret);
-        if (ret < 0) {
-                perror("ptrace(GETREGS)");
-                return -1;
-        }
-        return 0;
+	printf("+ Getting registers pointer to %p\n", (void *) regs->rip);
+	long ret = ptrace(PTRACE_GETREGS, target_pid, NULL, regs);
+	//printf("%s: ret = %ld\n",__FUNCTION__ ,ret);
+	if (ret < 0) {
+		perror("ptrace(GETREGS)");
+		return -1;
+	}
+	return 0;
 }
 
 // 写入寄存器
 int set_registers(pid_t target_pid, struct user_regs_struct *regs) {
-        printf("+ Setting instruction pointer to %p\n", (void *) regs->rip);
-        long ret = ptrace(PTRACE_SETREGS, target_pid, NULL, regs);
-        //printf("%s: ret = %ld\n",__FUNCTION__ ,ret);
-        if (ret < 0) {
-                perror("ptrace(SETREGS)");
-               	return -1;
-        }
-        //printf("+ Run it!\n");
+	printf("+ Setting registers pointer to %p\n", (void *) regs->rip);
+	long ret = ptrace(PTRACE_SETREGS, target_pid, NULL, regs);
+	//printf("%s: ret = %ld\n",__FUNCTION__ ,ret);
+	if (ret < 0) {
+		perror("ptrace(SETREGS)");
+		return -1;
+	}
+	//printf("+ Run it!\n");
 	return 0;
 }
 
 // 打印寄存器信息
 int show_registers(struct user_regs_struct regs) {
-        printf("%%rip: %llx, %%rsp: %llx, %%rbp: %llx, %%rax: %llx\n%%rdi: %llx, %%rsi: %llx, %%rdx: %llx, %%rcx: %llx, %%r8: %llx, %%r9: %llx\n%%r10: %llx, %%r11: %llx, %%r12: %llx, %%r13: %llx, %%14: %llx, %%15: %llx\n",
-                        regs.rip,regs.rsp,regs.rbp,regs.rax,regs.rdi,regs.rsi,regs.rdx,regs.rcx,regs.r8,regs.r9,regs.r10,regs.r11,regs.r12,regs.r13,regs.r14,regs.r15);
-        return 0;
+	printf("%%rip: %llx, %%rsp: %llx, %%rbp: %llx, %%rax: %llx\n%%rdi: %llx, %%rsi: %llx, %%rdx: %llx, %%rcx: %llx, %%r8: %llx, %%r9: %llx\n%%r10: %llx, %%r11: %llx, %%r12: %llx, %%r13: %llx, %%14: %llx, %%15: %llx\n",
+			regs.rip,regs.rsp,regs.rbp,regs.rax,regs.rdi,regs.rsi,regs.rdx,regs.rcx,regs.r8,regs.r9,regs.r10,regs.r11,regs.r12,regs.r13,regs.r14,regs.r15);
+	return 0;
 }
 
 // 打印此时的寄存器信息
@@ -67,35 +69,37 @@ int show_current_registers(pid_t pid) {
 	struct user_regs_struct regs;
 	get_registers(pid, &regs);
 	show_registers(regs);
-        return 0;
+	return 0;
 }
 
 
 int getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long len) {
-        union {
-                long val;
-                uint8_t bytes[LONGSIZE];
-        } data;
-        unsigned long i = 0;
-        unsigned long j = len / LONGSIZE;
-        uint8_t *laddr = dst;
-        while (i < j) {
-                data.val = ptrace(PTRACE_PEEKTEXT, target_pid, addr + (i * LONGSIZE), NULL);
-                memcpy(laddr, data.bytes, LONGSIZE);
-                ++i;
-                laddr += LONGSIZE;
-        }
+	printf("+ Peekdata process %d\n", target_pid);
+	union {
+		long val;
+		uint8_t bytes[LONGSIZE];
+	} data;
+	unsigned long i = 0;
+	unsigned long j = len / LONGSIZE;
+	uint8_t *laddr = dst;
+	while (i < j) {
+		data.val = ptrace(PTRACE_PEEKDATA, target_pid, addr + (i * LONGSIZE), NULL);
+		memcpy(laddr, data.bytes, LONGSIZE);
+		++i;
+		laddr += LONGSIZE;
+	}
 
-        unsigned long remainder = len % LONGSIZE;
-        if (remainder != 0) { // save the remainder, which less than LONGSIZE
-                data.val = ptrace(PTRACE_PEEKTEXT, target_pid, addr + (i * LONGSIZE), NULL);
-                memcpy(laddr, data.bytes, remainder);
-        }
+	unsigned long remainder = len % LONGSIZE;
+	if (remainder != 0) { // save the remainder, which less than LONGSIZE
+		data.val = ptrace(PTRACE_PEEKDATA, target_pid, addr + (i * LONGSIZE), NULL);
+		memcpy(laddr, data.bytes, remainder);
+	}
 
 	return 0;
 }
 
 int putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long len) {
+	printf("+ Pokedata process %d\n", target_pid);
 	union {
 		long val;
 		uint8_t bytes[LONGSIZE];
@@ -105,14 +109,14 @@ int putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long le
 	uint8_t *laddr = src;
 	while (i < j) {
 		memcpy(data.bytes, laddr, LONGSIZE);
-		ptrace(PTRACE_POKETEXT, target_pid, addr + (i * LONGSIZE), data.val);
+		ptrace(PTRACE_POKEDATA, target_pid, addr + (i * LONGSIZE), data.val);
 		++i;
 		laddr += LONGSIZE;
 	}
 
 	unsigned long remainder = len % LONGSIZE;
 	if (remainder != 0) {
-		data.val = ptrace(PTRACE_PEEKTEXT, target_pid, addr + (i * LONGSIZE), NULL);
+		data.val = ptrace(PTRACE_PEEKDATA, target_pid, addr + (i * LONGSIZE), NULL);
 		memcpy(data.bytes, laddr, remainder);
 		ptrace(PTRACE_POKEDATA, target_pid, addr + (i * LONGSIZE), data.val);
 	}
@@ -136,7 +140,7 @@ int push_stack(int pid, unsigned long long *sp, long * paramers,int len) {
 	}
 
 	putdata(pid, *sp, data.bytes, statck_delta);
-	
+
 	return 0;
 }
 
@@ -161,7 +165,8 @@ int pop_stack(int pid, unsigned long long *sp, long *paramers, int len) {
 	return 0;
 }
 
-
+// 断点指令
+uint8_t trap = 0xcc;
 // 在 vaddr 处 设置断点，并获取这处的原来数据、方便以后还原
 int set_breakpoint(pid_t pid,size_t vaddr) {
 	printf("+ Set breakpoint at %lx\n", vaddr);
@@ -202,6 +207,9 @@ int recovery_breakpoint(pid_t pid,struct user_regs_struct regs) {
 
 // 远程调用函数
 int call_function(int pid,size_t func_addr,long paramers[],const unsigned int num_param,struct user_regs_struct regs,long *result) {
+	struct user_regs_struct backup;
+	memcpy(&backup,&regs,sizeof(struct user_regs_struct));
+printf("%s %d\n", __FILE__, __LINE__);
 	// 1.先把参数保存起来
 	int tmp_num;
 	if (num_param <= 6) {
@@ -218,9 +226,11 @@ int call_function(int pid,size_t func_addr,long paramers[],const unsigned int nu
 			printf("*(param_stack + %d) = %ld \t",k,*(param_stack + k));
 		}
 		puts("");
+		// 第6个以后的参数保存到栈中
 		push_stack(pid, &(regs.rsp), param_stack, len);
 	}
 
+	// 前6个参数保存在寄存器里
 	switch(tmp_num) {
 		case 6:
 			regs.r9 = paramers[5];
@@ -240,7 +250,7 @@ int call_function(int pid,size_t func_addr,long paramers[],const unsigned int nu
 				printf("no paramer ...\n" );
 			}
 	}
-
+printf("%s %d\n", __FILE__, __LINE__);
 	//2.把当前指令的下一条指令入栈,函数往上一级返回的时候要用到
 	// rip = rip -1 是为了让函数重新撞击断点，断点指令0xcc 就1 Byte,当上次撞击断点时 pc 已经指下了断点的下一条指令
 	long rip[1] = {regs.rip - 1};
@@ -249,20 +259,28 @@ int call_function(int pid,size_t func_addr,long paramers[],const unsigned int nu
 	//3. 把pc指向目标函数首地址
 	regs.rip = func_addr;
 	set_registers(pid,&regs);
-
+printf("%s %d\n", __FILE__, __LINE__);
+	ptrace_cont(pid);
+printf("%s %d\n", __FILE__, __LINE__);
 	/*
 	 * 为了获取 调用的目标函数的返回值(其实这个返回值存放在rax中)，只能让函数继续运行，直到运行结束 再次撞击原来的断点。
 	 这时才是正解的时机获取到 目标函数的返回值 rax
 	 * **/
-	ptrace_cont(pid);
 	struct user_regs_struct call_ret_regs;
 	if (is_hit_breakpoint(pid,&call_ret_regs) == -1) {
-		printf("not hit breakpoint...\n");
+		printf("%s:%d not hit breakpoint...\n",__FILE__,__LINE__);
 		return -1;
 	}
-	*result = call_ret_regs.rax;
-	//printf("call_function return value = %ld\n",*result);
-
+	printf("%s %d\n", __FILE__, __LINE__);
+	if(result != NULL) {
+		*result = call_ret_regs.rax;
+		//printf("call_function return value = %ld\n",*result);
+	}
+printf("%s %d\n", __FILE__, __LINE__);
+	recovery_breakpoint(pid, backup);
+	printf("%s %d\n", __FILE__, __LINE__);
+	ptrace_cont(pid);
+printf("%s %d\n", __FILE__, __LINE__);
 	return 0;
 }
 

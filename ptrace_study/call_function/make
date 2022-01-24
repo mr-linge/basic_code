@@ -1,2 +1,2 @@
-gcc -no-pie vaddr_by_symbol.c ptrace_util.c call02.c -o main -ldl
+gcc -no-pie vaddr_by_symbol.c ptrace_util.c call03.c -o main -ldl
 ./main `pidof ./tracee`

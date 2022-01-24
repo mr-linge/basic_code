@@ -2,17 +2,27 @@
 
 //  附加到正在运行的进程
 int ptrace_attach(pid_t target_pid) {
-	printf("+ Tracing process %d\n", target_pid);
+	printf("+ Attach process %d\n", target_pid);
 	if (ptrace(PTRACE_ATTACH, target_pid, NULL, NULL) < 0) {
 		perror("ptrace(ATTACH)");
 		return -1;
 	}
 	printf("+ Waiting for process...\n");
-	return 0;
+	
+	int status;
+	wait(&status);
+	//printf("status:%d\n", status);
+	if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGCONT) {
+		printf("+ Child process is stopped, by ptrace(PTRACE_ATTACH,...)\n");
+		return 0;
+	}
+
+	return -1;
 }
 
 // 让子进程继续运行
 int ptrace_cont(pid_t target_pid) {
+	printf("+ Continue process %d\n", target_pid);
 	if (ptrace(PTRACE_CONT, target_pid, NULL, NULL) < 0) {
 		perror("ptrace(PTRACE_CONT)");
 		return -1;
@@ -22,6 +32,7 @@ int ptrace_cont(pid_t target_pid) {
 
 //  结束对目标进程的跟踪
 int ptrace_detach(pid_t target_pid) {
+	printf("+ Detach process %d\n", target_pid);
 	if (ptrace(PTRACE_DETACH, target_pid, NULL, NULL) < 0) {
 		perror("ptrace(DETACH)");
 		return -1;
@@ -32,7 +43,7 @@ int ptrace_detach(pid_t target_pid) {
 
 // 获取寄存器
 int get_registers(pid_t target_pid, struct user_regs_struct *regs) {
-	printf("+ Getting Registers\n");
+	printf("+ Getting registers\n");
 	long ret = ptrace(PTRACE_GETREGS, target_pid, NULL, regs);
 	//printf("%s: ret = %ld\n",__FUNCTION__ ,ret);
 	if (ret < 0) {
@@ -44,7 +55,7 @@ int get_registers(pid_t target_pid, struct user_regs_struct *regs) {
 
 // 写入寄存器
 int set_registers(pid_t target_pid, struct user_regs_struct *regs) {
-	printf("+ Setting instruction pointer to %p\n", (void *) regs->rip);
+	printf("+ Setting registers\n");
 	long ret = ptrace(PTRACE_SETREGS, target_pid, NULL, regs);
 	//printf("%s: ret = %ld\n",__FUNCTION__ ,ret);
 	if (ret < 0) {
@@ -72,6 +83,7 @@ int show_current_registers(pid_t pid) {
 
 
 int getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long len) {
+	printf("+ Peektext process %d\n", target_pid);
 	union {
 		long val;
 		uint8_t bytes[LONGSIZE];
@@ -96,6 +108,7 @@ int getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long le
 }
 
 int putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long len) {
+	printf("+ Poketext process %d\n", target_pid);
 	union {
 		long val;
 		uint8_t bytes[LONGSIZE];
@@ -114,7 +127,7 @@ int putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long le
 	if (remainder != 0) {
 		data.val = ptrace(PTRACE_PEEKTEXT, target_pid, addr + (i * LONGSIZE), NULL);
 		memcpy(data.bytes, laddr, remainder);
-		ptrace(PTRACE_POKEDATA, target_pid, addr + (i * LONGSIZE), data.val);
+		ptrace(PTRACE_POKETEXT, target_pid, addr + (i * LONGSIZE), data.val);
 	}
 
 	return 0;
@@ -175,37 +188,45 @@ int set_breakpoint(pid_t pid,size_t vaddr) {
 }
 
 // 判断是否运行到断点处，如果运行到断点处就获取寄存器信息
-int is_hit_breakpoint(pid_t pid,struct user_regs_struct *regs) {
+int wait_breakpoint() {
 	int status;
 	wait(&status);
 	//printf("status:%d\n", status);
 	if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTRAP) {
-		if (regs != NULL) {
-			get_registers(pid, regs);
-		}
+		printf("+ Child process is stopped, by breakpoint ...\n");
 		return 0;
 	}
 
 	return -1;
 }
 
-// 恢复断点处的代码, 即还原寄存器信息和此位置原来的数据
-int recovery_breakpoint(pid_t pid,struct user_regs_struct regs) {
+// 恢复断点处的代码并使程序继续运行, 即还原寄存器信息和此位置原来的数据 然后调用 ptrace(PTRACE_CONT,...)
+int recovery_breakpoint(pid_t pid) {
+	// 先运行到断点处
+//	wait_breakpoint();
+
+	// 获取断点处寄存器数据
+	struct user_regs_struct regs;
+	get_registers(pid,&regs);
+
 	// 运行到断点时，pc 指向断点后一条指令处. 断点指令 0xcc 只有 1 byte 所以 -1 后就是原来断点处地址
 	regs.rip -= 1;
-
+	
+	// 恢复寄存器数据
 	set_registers(pid,&regs);
 
+	// 清除原来设置的断点，也就是把之前写入 0xcc 处的原始数据再写回去
 	putdata(pid, regs.rip, &orig, 1);
+
+	ptrace_cont(pid);
 
 	return 0;
 }
 
 // 远程调用函数
-int call_function(int pid,size_t func_addr,long paramers[],const unsigned int num_param,struct user_regs_struct regs,long *result) {
-	struct user_regs_struct backup;
-	memcpy(&backup,&regs,sizeof(struct user_regs_struct));
-printf("%s %d\n", __FILE__, __LINE__);
+int call_function(pid_t pid,size_t func_addr,long paramers[],const unsigned int num_param) {
+	struct user_regs_struct regs;
+	get_registers(pid, &regs);
 	// 1.先把参数保存起来
 	int tmp_num;
 	if (num_param <= 6) {
@@ -246,7 +267,6 @@ printf("%s %d\n", __FILE__, __LINE__);
 				printf("no paramer ...\n" );
 			}
 	}
-printf("%s %d\n", __FILE__, __LINE__);
 	//2.把当前指令的下一条指令入栈,函数往上一级返回的时候要用到
 	// rip = rip -1 是为了让函数重新撞击断点，断点指令0xcc 就1 Byte,当上次撞击断点时 pc 已经指下了断点的下一条指令
 	long rip[1] = {regs.rip - 1};
@@ -255,28 +275,22 @@ printf("%s %d\n", __FILE__, __LINE__);
 	//3. 把pc指向目标函数首地址
 	regs.rip = func_addr;
 	set_registers(pid,&regs);
-printf("%s %d\n", __FILE__, __LINE__);
 	ptrace_cont(pid);
-printf("%s %d\n", __FILE__, __LINE__);
 	/*
 	 * 为了获取 调用的目标函数的返回值(其实这个返回值存放在rax中)，只能让函数继续运行，直到运行结束 再次撞击原来的断点。
 	 这时才是正解的时机获取到 目标函数的返回值 rax
 	 * **/
-	struct user_regs_struct call_ret_regs;
-	if (is_hit_breakpoint(pid,&call_ret_regs) == -1) {
-		printf("%s:%d not hit breakpoint...\n",__FILE__,__LINE__);
-		return -1;
-	}
-	printf("%s %d\n", __FILE__, __LINE__);
-	if(result != NULL) {
-		*result = call_ret_regs.rax;
-		//printf("call_function return value = %ld\n",*result);
-	}
-printf("%s %d\n", __FILE__, __LINE__);
-	recovery_breakpoint(pid, backup);
-	printf("%s %d\n", __FILE__, __LINE__);
-	ptrace_cont(pid);
-printf("%s %d\n", __FILE__, __LINE__);
+	//if(result != NULL) {
+	//	if (wait_breakpoint() != -1) {
+	//		printf("%s:%d not hit breakpoint...\n",__FILE__,__LINE__);
+	//		return -1;
+	//	}
+	//	struct user_regs_struct call_ret_regs;
+	//	get_registers(pid, &call_ret_regs);
+	//	*result = call_ret_regs.rax;
+	//	//printf("call_function return value = %ld\n",*result);
+	//}
+
 	return 0;
 }
 

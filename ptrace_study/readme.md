@@ -89,29 +89,19 @@ ptrace(PTRACE_SYS, pid, 0, signal)
 **描述：**设置浮点寄存器值，pid表示被跟踪的子进程，data为用户数据地址。此功能将设置所有浮点协处理器387的所有寄存器的值。	
 
 
+注意:
+PTRACE_ATTACH    会让进程处于中止状态. 这个函数调用后必须用 wait 等待子进程的中止信号，收到子进程的信号后才能进行其他操作
+PTRACE_CONT      让子进程继续运行
+PTRACE_DETACH    结束对子进程的跟踪,结束跟踪后被跟踪进程将继续执行
+除了上面这三条命令外，其他所有命令使用前子进程必须处于中止状态。否则可能会出错，像子进程 stopped，或 读、写数据失效。
 
-// enum __ptrace_request  参数的命令, 会让子进程处于挂起状态   
-PTRACE_TRACEME    
-PTRACE_PEEKTEXT   
-PTRACE_PEEKDATA   
-PTRACE_PEEKUSER   
-PTRACE_POKETEXT   
-PTRACE_POKEDATA   
-PTRACE_POKEUSER   
-PTRACE_SYSCALL    
-PTRACE_SINGLESTEP   
-Intel386特有：
-PTRACE_GETREGS		
-PTRACE_GETFPREGS    	
-PTRACE_SETREGS    	
-PTRACE_SETFPREGS    	
-
-// enum __ptrace_request 参数的命令 会结束子进程的挂起状态   
-PTRACE_CONT			结束子进程的挂起状态，让子进程继续执行   
-PTRACE_DETACH   		结束父进程对子进程的跟踪    
-
-父进程结束 后子进程也会结束挂起状态    
-
-所以每次使用 ptrace 函数后，可以使用 ptrace(PTRACE_CONT,.....) 让子程序继续运行   
+获取子进程状态 使用 wait 函数
+int status;
+wait(&status);
+if(WIFSTOPPED(status)) 判断子程是否处于中止状态
+当子进程处于中止状态后
+WSTOPSIG(status) 获取子进程中止信号
+WSTOPSIG(status) == SIGCONT 则是 PTRACE_ATTACH 导致的子进程中止
+WSTOPSIG(status) == SIGTRAP 则是 由于子进程运行到调试断点后产生的 信号
 
 参考资料：https://man7.org/linux/man-pages/man2/ptrace.2.html

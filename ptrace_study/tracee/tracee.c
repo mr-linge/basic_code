@@ -53,10 +53,11 @@ void sighandler(int);
  * gcc -no-pie tracee.c -o tracee
  * **/
 int main() {
-	signal(SIGINT, sighandler);
+//	signal(SIGINT, sighandler);
 
 	const int len = 64;
-	uint8_t *mem_space = (uint8_t *)calloc(len,1);
+	uint8_t *mem_space = (uint8_t *)malloc(len);
+	memset(mem_space,'a',32);
 	//int fd = open("./loaded_file", O_RDONLY | O_WRONLY);
 	//char c;
 	while(1) {
@@ -70,7 +71,7 @@ int main() {
 		puts("");
 		//printf("fd = %d\n", fd);
 		//read_mem((unsigned long)mem_space,len);
-		printf("mmap            addr: %p\n", &mmap);
+		//printf("mmap            addr: %p\n", &mmap);
 		//printf("dlopen          addr: %p\n", &dlopen);
 		//printf("&func0          addr: %p\n", &func0);
 		printf("&func1          addr: %p\n", &func1);

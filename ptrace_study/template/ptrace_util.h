@@ -39,11 +39,8 @@ int push_stack(int pid, unsigned long long *sp, long * paramers,int len);
 int pop_stack(int pid, unsigned long long *sp, long *paramers, int len);
 
 
-// 断点指令
-uint8_t trap = 0xcc;
 // 断点处原始数据
 uint8_t orig;
-
 // 在 vaddr 处 设置断点，并获取这处的原来数据、方便以后还原
 int set_breakpoint(pid_t pid,size_t vaddr);
 // 判断是否运行到断点处，如果运行到断点处就获取寄存器信息
