@@ -1,4 +1,0 @@
-
-gcc code_inject.c -o code_inject
-
-./code_inject `pidof ./host` payload

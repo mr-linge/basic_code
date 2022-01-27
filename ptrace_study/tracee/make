@@ -1,2 +1,0 @@
-gcc -no-pie tracee.c -o tracee -ldl
-./tracee

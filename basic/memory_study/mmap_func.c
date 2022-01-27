@@ -1,10 +1,8 @@
 #include <stdio.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
-#include <errno.h>
 #include <stdlib.h>
 
 /*
@@ -70,6 +68,7 @@ int main() {
 	printf("start = %p, value = %s\n",start,(char *)start);
 	munmap(start, sb.st_size); /* 解除映射 */
 	close(fd);
+//	printf("start = %p, value = %s\n",start,(char *)start);
 
 	return 0;
 }

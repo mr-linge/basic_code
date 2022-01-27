@@ -1,4 +1,0 @@
-gcc -fpic -pie -nostdlib payload.c -o payload
-
-gcc code_inject.c -o code_inject
-./code_inject `pidof ./tracee`  payload

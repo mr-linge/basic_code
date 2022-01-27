@@ -4,6 +4,13 @@
 #include <errno.h>
 #include <string.h>
 
+/****************
+   #include <unistd.h>
+   #include <sys/mmap.h>
+   
+   int mprotect(const void *start, size_t len, int prot);
+ * *****************/
+
 // 将地址addr修整为页边界地址(页的上边界)
 #define PAGE_SHIFT          12
 #define PAGE_SIZE           (1UL << PAGE_SHIFT)

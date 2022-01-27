@@ -62,7 +62,7 @@ int main() {
 	const int len = 64;
 	uint8_t *mem_space = (uint8_t *)malloc(len);
 	memset(mem_space,'a',32);
-	int fd = open("./loaded_file", O_RDONLY | O_WRONLY);
+//	int fd = open("./loaded_file", O_RDONLY | O_WRONLY);
 	//打开动态链接库
 //	void *handle = dlopen(path, RTLD_LAZY);
 //	printf("handle = %p\n",handle);
@@ -76,9 +76,9 @@ int main() {
 			printf("%02x ", *(mem_space + i));
 		}
 		puts("");
-		printf("fd = %d\n", fd);
+//		printf("fd = %d\n", fd);
 		//read_mem((unsigned long)mem_space,len);
-		printf("open            addr: %p\n", &open);
+//		printf("open            addr: %p\n", &open);
 		printf("mmap            addr: %p\n", &mmap);
 		printf("dlopen          addr: %p\n", &dlopen);
 		//printf("&func0          addr: %p\n", &func0);
