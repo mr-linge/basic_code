@@ -81,6 +81,7 @@ int main() {
 //		printf("open            addr: %p\n", &open);
 		printf("mmap            addr: %p\n", &mmap);
 		printf("dlopen          addr: %p\n", &dlopen);
+		printf("printf          addr: %p\n", &printf);
 		//printf("&func0          addr: %p\n", &func0);
 		printf("&func1          addr: %p\n", &func1);
 		printf("&func2          addr: %p\n", &func2);

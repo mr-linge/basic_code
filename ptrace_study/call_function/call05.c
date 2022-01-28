@@ -5,7 +5,22 @@
 #include <dlfcn.h>
 
 #include "ptrace_util.h"
-//#include "vaddr_by_symbol.h"
+#include "vaddr_by_symbol.h"
+
+void init_symbol(pid_t pid,unsigned long module_addr) {
+	unsigned long func_addr = module_addr + 0x10f9;
+	
+	uint8_t num_param = 1;
+	long parameters[num_param];
+	unsigned long printf_vaddr = get_vaddr(pid,"printf","libc-");
+	printf("printf_vaddr:0x%lx\n", printf_vaddr);
+	parameters[0] = printf_vaddr;
+//	parameters[1] = 0x100;
+//	parameters[2] = 0x200;
+	long long return_value;
+	call_function(pid,func_addr,parameters,num_param,&return_value);
+	printf("%s %d return_value = 0x%llx\n",__FUNCTION__,__LINE__,return_value);
+}
 
 int main(int argc, char **argv)
 {
@@ -18,7 +33,7 @@ int main(int argc, char **argv)
 
 	ptrace_attach(pid);
 
-	size_t func1Addr = 0x401211;
+	size_t func1Addr = 0x401201;
 	set_breakpoint(pid, func1Addr);
 	ptrace_cont(pid);
 
@@ -30,13 +45,26 @@ int main(int argc, char **argv)
 	unsigned long module_addr = inject_library(pid,lib_path);
 	printf("module_addr:0x%lx\n",module_addr);
 
-	size_t func_addr = module_addr + 0x1108;
-	uint8_t num_param = 1;
-	long parameters[num_param];
-	parameters[0] = 1000;
-	long long return_value;
-	call_function(pid,func_addr,parameters,num_param,&return_value);
-	printf("%s %d return_value = 0x%llx\n",__FUNCTION__,__LINE__,return_value);
+
+	init_symbol(pid,module_addr);
+
+//	unsigned long vaddr = module_addr + 0x4028;
+//	union {
+//		long val;
+//		uint8_t bytes[8];
+//	}data;
+//	data.val = 0x7f8a412eee10;
+//	putdata(pid, vaddr, data.bytes, 6);
+
+//	size_t func_addr = module_addr + 0x116a;
+//	uint8_t num_param = 2;
+//	long parameters[num_param];
+//	parameters[0] = 0x200;
+//	parameters[1] = 0x100;
+////	parameters[2] = 0x200;
+//	long long return_value;
+//	call_function(pid,func_addr,parameters,num_param,&return_value);
+//	printf("%s %d return_value = 0x%llx\n",__FUNCTION__,__LINE__,return_value);
 
 
 	recovery_breakpoint(pid,backup_regs);
