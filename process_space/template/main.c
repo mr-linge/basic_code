@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
 	}
 	pid_t pid = atoi(argv[1]);
 
-	size_t func_addr = get_vaddr(pid,"mmap", "libc-");
+	size_t func_addr = get_vaddr(pid,"mmap", "libc-",NULL);
 	printf("addr : 0x%lx\n",func_addr);
 	return 0;
 }

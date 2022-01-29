@@ -12,7 +12,7 @@
 
 (1)打开动态链接库：dlopen，函数原型void *dlopen (const char *filename, int flag); dlopen用于打开指定名字(filename)的动态链接库，并返回操作句柄。
 
-(2)取函数执行地址：dlsym，函数原型为: void *dlsym(void *handle, char *symbol); dlsym根据动态链接库操作句柄(handle)与符号(symbol)，返回符号对应的函数的执行代码地址。
+(2)取函数执行地址：dlsym，函数原型为: void *dlsym(void *handle, char *symbol); dlsym根据动态链接库操作句柄(handle)与符号(symbol)，返回符号对应的函数的执行代码地址。当handle == NULL 时，获取进程已经加载的系统模块里的函数，在x86-64 上是 libc-2.31.so 这个模块里的函数.
 
 (3)关闭动态链接库：dlclose，函数原型为: int dlclose (void *handle); dlclose用于关闭指定句柄的动态链接库，只有当此动态链接库的使用计数为0时,才会真正被系统卸载。
 

@@ -11,8 +11,8 @@
 
 #include <sys/user.h>
 
-#include "vaddr_by_symbol.h"
 
+#include "vaddr_by_symbol.h"
 
 #define LONGSIZE  sizeof(long)
 

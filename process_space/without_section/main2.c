@@ -1,4 +1,10 @@
-#include "vaddr_by_symbol.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/mman.h>
+#include <dlfcn.h>
 
 // 计算模块在进程中的虚拟地址(即so加载到进程后的首地址)
 unsigned long get_module_base(int pid, char *moduleName)
@@ -43,7 +49,6 @@ unsigned long get_func_offset(char *funcName,char *moduleName,void *handle)
 	return offset;
 }
 
-// 把动态库加载到进程
 void * load_module(char *lib_path) {
 	void *handle;
 	//打开动态链接库
@@ -63,17 +68,21 @@ void * load_module(char *lib_path) {
 	return handle;
 }
 
-// 计算系统模块(libc-)中 symbol 在进程中的虚拟地址
-unsigned long get_vaddr(pid_t pid,char *funcName,char *moduleName) {
-        size_t base = get_module_base(pid,moduleName);
-        //printf("base:           0x%lx\n", base);
-
-        size_t offset = get_func_offset(funcName,moduleName,NULL);
-        //printf("offset:         0x%lx\n", offset);
-
-        size_t vaddr = base + offset; //  模块在目标进程中的基址 加上函数在模块内的偏移 就是函数在目标进程中的虚拟地址 
-        //printf("vaddr:          0x%lx\n", vaddr);
+int main(int argc, char *argv[]) {
+	printf("current pid : %d\n",getpid());
 	
-	return vaddr;
+	char * lib_path = "./libinject.so";
+	
+	void *handle = load_module(lib_path);
+
+	puts("*********************************");
+
+	get_func_offset("func2","libinject.so",handle);
+	get_func_offset("mmap","libc-",NULL);
+
+	
+	dlclose(handle);
+
+	return 0;
 }
 
