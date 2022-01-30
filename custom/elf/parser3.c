@@ -192,7 +192,7 @@ void descrite_Program_header() {
 				break;
 
 		}
-		printf("%s segment\n p_type: %016x, p_offset: %016lx, p_vaddr: %016lx, p_paddr: %016lx, p_filesz: %016lx, p_memsz: %016lx, p_flags: %016x, p_align: %016lx\n", segment_type, phdr[i].p_type, phdr[i].p_offset, phdr[i].p_vaddr, phdr[i].p_paddr, phdr[i].p_filesz, phdr[i].p_memsz, phdr[i].p_flags, phdr[i].p_align);
+		printf("%s segment\n p_type: %x, p_offset: %lx, p_vaddr: %lx, p_paddr: %lx, p_filesz: %lx, p_memsz: %lx, p_flags: %x, p_align: %lx\n", segment_type, phdr[i].p_type, phdr[i].p_offset, phdr[i].p_vaddr, phdr[i].p_paddr, phdr[i].p_filesz, phdr[i].p_memsz, phdr[i].p_flags, phdr[i].p_align);
 	}
 }
 
