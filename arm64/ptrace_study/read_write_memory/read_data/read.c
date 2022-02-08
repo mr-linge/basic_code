@@ -35,7 +35,7 @@ int getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long le
 
 //  结束对目标进程的跟踪
 int end_tracke_process(pid_t target_pid) {
-    if ((ptrace(PTRACE_DETACH, target_pid, NULL, NULL)) != -1) {
+    if (ptrace(PTRACE_DETACH, target_pid, NULL, NULL) < 0) {
         perror("ptrace(DETACH):");
         return -1;
     }
@@ -45,7 +45,7 @@ int end_tracke_process(pid_t target_pid) {
 
 // 目标进程继续运行
 int continue_process(pid_t target_pid) {
-	if ((ptrace(PTRACE_CONT, target_pid, NULL, NULL)) < 0) {
+	if (ptrace(PTRACE_CONT, target_pid, NULL, NULL) < 0) {
 		perror("ptrace(DETACH):");
 		return -1;
 	}
@@ -56,7 +56,7 @@ int continue_process(pid_t target_pid) {
 //  附加到正在运行的进程
 int attach_process(pid_t target_pid) {
 	printf("+ Tracing process %d\n", target_pid);
-	if ((ptrace(PTRACE_ATTACH, target_pid, NULL, NULL)) < 0) {
+	if (ptrace(PTRACE_ATTACH, target_pid, NULL, NULL) < 0) {
 		perror("ptrace(ATTACH):");
 		return -1;
 	}

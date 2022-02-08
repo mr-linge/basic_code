@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
 
 	pid_t target_pid = atoi(argv[1]);
 	struct user_regs_struct regs;
+	memset((void *)&regs,'\0',sizeof(struct user_regs_struct));
 
 	attach_process(target_pid);
 	get_registers(target_pid, &regs);

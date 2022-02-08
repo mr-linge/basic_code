@@ -17,7 +17,11 @@ int putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long le
 	uint8_t *laddr = src;
 	while (i < j) {
 		memcpy(data.bytes, laddr, LONGSIZE);
-		ptrace(PTRACE_POKEDATA, target_pid, addr + (i * LONGSIZE), data.val);
+		int ret = ptrace(PTRACE_POKEDATA, target_pid, addr + (i * LONGSIZE), data.val);
+		if (ret < 0) {
+			perror("ptrace(POKEDATA):");
+			return -1;
+		}
 		++i;
 		laddr += LONGSIZE;
 	}
@@ -26,7 +30,11 @@ int putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long le
 	if (remainder != 0) {
 		data.val = ptrace(PTRACE_PEEKDATA, target_pid, addr + (i * LONGSIZE), NULL);
 		memcpy(data.bytes, laddr, remainder);
-		ptrace(PTRACE_POKEDATA, target_pid, addr + (i * LONGSIZE), data.val);
+		int ret = ptrace(PTRACE_POKEDATA, target_pid, addr + (i * LONGSIZE), data.val);
+		if (ret < 0) {
+			perror("ptrace(POKEDATA):");
+			return -1;
+		}
 	}
 
 	return 0;
@@ -34,17 +42,17 @@ int putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long le
 
 //  结束对目标进程的跟踪
 int end_tracke_process(pid_t target_pid) {
-    if ((ptrace(PTRACE_DETACH, target_pid, NULL, NULL)) != -1) {
-        perror("ptrace(DETACH):");
-        return -1;
-    }
+	if (ptrace(PTRACE_DETACH, target_pid, NULL, NULL) < 0) {
+		perror("ptrace(DETACH):");
+		return -1;
+	}
 
-    return 0;
+	return 0;
 }
 
 // 目标进程继续运行
 int continue_process(pid_t target_pid) {
-	if ((ptrace(PTRACE_CONT, target_pid, NULL, NULL)) > 0) {
+	if (ptrace(PTRACE_CONT, target_pid, NULL, NULL) < 0) {
 		perror("ptrace(DETACH):");
 		return -1;
 	}
@@ -55,7 +63,7 @@ int continue_process(pid_t target_pid) {
 //  附加到正在运行的进程
 int attach_process(pid_t target_pid) {
 	printf("+ Tracing process %d\n", target_pid);
-	if ((ptrace(PTRACE_ATTACH, target_pid, NULL, NULL)) < 0) {
+	if (ptrace(PTRACE_ATTACH, target_pid, NULL, NULL) < 0) {
 		perror("ptrace(ATTACH):");
 		exit(-1);
 	}
@@ -76,17 +84,17 @@ int main(int argc, char **argv) {
 	char *src = argv[3];
 	unsigned long len = strlen(src);//sizeof(src);
 	printf("src:%s, size = %lu\n", src, len);
-	
+
 	attach_process(target_pid);
 	wait(NULL);
-	
+
 	putdata(target_pid, addr, src, len);
 
 	continue_process(target_pid);
-//      while(1) {
-//              printf("dst:%p\n", (void *) addr);
-//              sleep(3);
-//      }
+	//      while(1) {
+	//              printf("dst:%p\n", (void *) addr);
+	//              sleep(3);
+	//      }
 
 	end_tracke_process(target_pid);
 

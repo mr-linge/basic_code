@@ -1,3 +1,5 @@
+/* <signal.h> included.  */
+
 Signal 	Description
 
 SIGABRT	由调用abort函数产生，进程非正常退出

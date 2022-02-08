@@ -47,6 +47,6 @@ int end_tracke_process(pid_t target_pid);
 
 
 // 读取内存数据
-void getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long len);
+int getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long len);
 // 往内存中写入数据
-void putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long len);
+int putdata(pid_t target_pid, unsigned long addr, uint8_t *src, unsigned long len);
