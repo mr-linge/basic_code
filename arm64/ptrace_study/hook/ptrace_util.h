@@ -69,21 +69,12 @@ int push_stack(int pid, unsigned long long *sp, long * param,int len);
 int pop_stack(int pid, unsigned long long *sp, long *param, int len);
 
 
-// // 断点处原始数据
-// uint8_t orig;
-// // 在 vaddr 处 设置断点，并获取这处的原来数据、方便以后还原
-// int set_breakpoint(pid_t pid,size_t vaddr);
-// // 判断是否运行到断点处，如果运行到断点处就获取寄存器信息
-// int wait_breakpoint(pid_t pid);
-// // 恢复断点处的代码并使程序继续运行, 即还原寄存器信息和此位置原来的数据 然后调用 ptrace(PTRACE_CONT,...)
-// int recovery_breakpoint(pid_t pid,struct pt_regs regs);
-
-// // 远程调用函数
-// int call_function(pid_t pid,size_t func_addr,long param[], uint8_t num_param,long long *result);
-// // 调用 mmap 建立匿名映射空间
-// long long call_mmap(pid_t pid,unsigned long size);
-// // 调用 munmap 解除一个映射关系
-// int call_munmap(pid_t pid,long *parameters, uint8_t num_param);
-// // 往进程中注入动态库
-// unsigned long inject_library(pid_t pid, char * lib_path);
+// 远程调用函数
+int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_params, long long *result);
+// 调用 mmap 建立匿名映射空间
+long long call_mmap(pid_t pid,unsigned long size);
+// 调用 munmap 解除一个映射关系
+int call_munmap(pid_t pid,unsigned long start, unsigned long size);
+// 往进程中注入动态库
+unsigned long inject_library(pid_t pid, char * lib_path);
 

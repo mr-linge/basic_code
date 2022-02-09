@@ -2,20 +2,17 @@ base_dir = /usr/local/android/sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/linu
 cc = $(base_dir)aarch64-linux-android29-clang
 strip = $(base_dir)aarch64-linux-android-strip
 
-.so = libcaculate.so
 exec = tracee
+
+source = tracee.c
 
 all: $(exec)
 	# @$(strip) ./$(exec)
 	@adb push ./$(exec) /data/local/tmp/work
-	@adb shell "chmod +x /data/local/tmp/work/$(exec)"
+	@adb shell "chmod +x /data/local/tmp/work/$(exec)"	
+	
+$(exec): $(source)
+	@$(cc) $(source) -o $(exec)
 
-$(exec): tracee.c
-	@ $(cc) -fPIE tracee.c -o $(exec) -ldl
-
-so : caculate.c
-	@ $(cc) -fPIC -shared caculate.c -o $(.so)
-
-.PHONY:clean
 clean:
-	@-rm $(exec) $(.so)
+	@-rm $(exec)

@@ -10,7 +10,7 @@ struct pt_regs
 {
 	long long uregs[34];
 };
-#define ARM_r0   	uregs[0]            // 存储R0寄存器的值，函数调用后的返回值会存储在R0寄存器中.调用函数时保存第 1 个参数
+#define ARM_r0   	uregs[0]            		// 存储R0寄存器的值，函数调用后的返回值会存储在R0寄存器中.调用函数时保存第 1 个参数
 #define ARM_r1   	uregs[1]			// 调用函数时保存第 2 个参数
 #define ARM_r2   	uregs[2]			// 调用函数时保存第 3 个参数
 #define ARM_r3   	uregs[3]			// 调用函数时保存第 4 个参数

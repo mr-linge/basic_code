@@ -88,7 +88,7 @@ int main() {
 		printf("&read_mem       addr: %p\n", &read_mem);
 		printf(" path           addr: %p\n", path);
 		printf("&print          addr: %p\n", &print);
-		//printf("&func10         addr: %p\n", &func10);
+		printf("&func10         addr: %p\n", &func10);
 		global_var++;
 		int ret = 0;
 		ret = func1(1,1);

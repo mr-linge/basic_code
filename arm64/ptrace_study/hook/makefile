@@ -6,13 +6,19 @@ exec = main
 
 source = main.c ptrace_util.c vaddr_by_symbol.c
 
+.so = libinject.so
+
 all: $(exec)
 	# @$(strip) ./$(exec)
 	@adb push ./$(exec) /data/local/tmp/work
 	@adb shell "chmod +x /data/local/tmp/work/$(exec)"	
-	
+
 $(exec): $(source)
 	@$(cc) $(source) -o $(exec)
+
+so: inject.c
+	@$(cc) -fPIC -shared inject.c -o $(.so)
+	@adb push ./$(.so) /data/local/tmp/work
 
 clean:
 	@-rm $(exec)

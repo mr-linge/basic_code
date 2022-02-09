@@ -217,54 +217,48 @@ int pop_stack(int pid, unsigned long long *sp, long *param, int len)
 
 /*************************************************
  *  Description:    使用ptrace远程call函数
- *  Input:          pid表示远程进程的ID，ExecuteAddr为远程进程函数的地址
+ *  Input:          pid表示远程进程的ID，func_addr为远程进程函数的地址
  *                  parameters为函数参数的地址，regs为远程进程call函数前的寄存器环境
  *  Return:         返回0表示call函数成功，返回-1表示失败
  * **********************************************/
-int ptrace_call(pid_t pid, uint32_t ExecuteAddr, long *parameters, long num_params, struct pt_regs *regs)
+int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_params, long long *result)
 {
+	struct pt_regs regs;
+	get_registers(pid, &regs);
+
 	int i = 0;
-	// ARM处理器，函数传递参数，将前四个参数放到r0-r3，剩下的参数压入栈中
-	for (i = 0; i < num_params && i < 4; i++)
+	// ARM64处理器，函数传递参数，将前 8 个参数放到r0-r7，剩下的参数压入栈中
+	for (i = 0; i < num_params && i < 8; i++)
 	{
-		regs->uregs[i] = parameters[i];
+		regs.uregs[i] = parameters[i];
 	}
 	if (i < num_params)
 	{
-		regs->ARM_sp -= (num_params - i) * sizeof(long);
-		putdata(pid, (unsigned long)regs->ARM_sp, (uint8_t *)&parameters[i], (num_params - i) * sizeof(long));
-		// if (ptrace_writedata()  == -1)
-		// {
-		//     return -1;
-		// }
+		regs.ARM_sp -= (num_params - i) * sizeof(long);
+		putdata(pid, (unsigned long)regs.ARM_sp, (uint8_t *)&parameters[i], (num_params - i) * sizeof(long));
 	}
 
 	//修改程序计数器
-	regs->ARM_pc = ExecuteAddr;
+	regs.ARM_pc = func_addr;
 
 	//判断指令集
 	// 与BX跳转指令类似，判断跳转的地址位[0]是否为1，如果为1，则将CPST寄存器的标志T置位，解释为Thumb代码
-	if (regs->ARM_pc & 1)
+	if (regs.ARM_pc & 1)
 	{
 		/*Thumb*/
-		regs->ARM_pc &= (~1u);
-		regs->ARM_cpsr |= CPSR_T_MASK;
+		regs.ARM_pc &= (~1u);
+		regs.ARM_cpsr |= CPSR_T_MASK;
 	}
 	else
 	{
 		/* ARM*/
-		regs->ARM_cpsr &= ~CPSR_T_MASK;
+		regs.ARM_cpsr &= ~CPSR_T_MASK;
 	}
 
-	regs->ARM_lr = 0;
+	regs.ARM_lr = 0;
 
 	//设置好寄存器后，开始运行进程
-	set_registers(pid, regs);
-	// if (set_registers(pid, regs) != -1)
-	// {
-	//     printf("ptrace set regs or continue error, pid:%d", pid);
-	//     return -1;
-	// }
+	set_registers(pid, &regs);
 	ptrace_cont(pid);
 
 	//对于ptrace_continue运行的进程，他会在三种情况下进入暂停状态：1.下一次系统调用 2.子进程出现异常 3.子进程退出
@@ -273,189 +267,84 @@ int ptrace_call(pid_t pid, uint32_t ExecuteAddr, long *parameters, long num_para
 	int stat = 0;
 	waitpid(pid, &stat, WUNTRACED);
 	// 0xb7f表示子进程进入暂停状态
-	printf("status = 0x%x\n", stat);
+	//	printf("status = 0x%x\n", stat);
 	while (stat != 0xb7f)
 	{
 		ptrace_cont(pid);
 		waitpid(pid, &stat, WUNTRACED);
 	}
-	// 获取远程进程的寄存器值，方便获取返回值
-	// if (ptrace_getregs(pid, regs) == -1)
-	// {
-	//     LOGD("After call getregs error");
-	//     return -1;
-	// }
+	if (result != NULL)
+	{
+		// 获取远程进程的寄存器值，方便获取返回值
+		struct pt_regs backup_regs;
+		get_registers(pid, &backup_regs);
+		*result = backup_regs.ARM_r0;
+	}
+
 	return 0;
 }
 
-// // 断点指令
-// uint8_t trap = 0xcc;
-// // 在 vaddr 处 设置断点，并获取这处的原来数据、方便以后还原
-// int set_breakpoint(pid_t pid,size_t vaddr) {
-// 	printf("+ Set breakpoint at %lx\n", vaddr);
+// 调用 mmap 建立匿名映射空间
+long long call_mmap(pid_t pid, unsigned long size)
+{
+	size_t func_addr = get_vaddr(pid, "mmap", "/system/lib64/libc.so");
+	printf("mmap:          		0x%lx\n", func_addr);
 
-// 	getdata(pid, vaddr, &orig, 1);
+	uint8_t num_param = 6;
+	long parameters[num_param];
+	parameters[0] = 0;									// 设置为NULL表示让系统自动选择分配内存的地址
+	parameters[1] = size;								// 映射内存的大小
+	parameters[2] = PROT_READ | PROT_WRITE | PROT_EXEC; // 表示映射内存区域可读可写可执行
+	parameters[3] = MAP_PRIVATE | MAP_ANONYMOUS;		// 建立匿名映射
+	parameters[4] = 0;									// 若需要映射文件到内存中，则为文件的fd
+	parameters[5] = 0;									// 文件映射偏移量
 
-// 	putdata(pid, vaddr, &trap, 1);
+	long long return_value;
+	ptrace_call(pid, func_addr, parameters, num_param, &return_value);
+	printf("%s %d return_value = 0x%llx\n", __FUNCTION__, __LINE__, return_value);
 
-// 	return 0;
-// }
+	return return_value;
+}
 
-// // 判断是否运行到断点处，如果运行到断点处就获取寄存器信息
-// int wait_breakpoint(pid_t pid) {
-// 	int status;
-// 	waitpid(pid, &status, WUNTRACED);
-// 	//printf("status:%d\n", status);
-// 	if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTRAP) {
-// 		printf("+ Child process is stopped, by breakpoint ...\n");
-// 		return 0;
-// 	}
+// 调用 munmap 解除一个映射关系
+int call_munmap(pid_t pid, unsigned long start, unsigned long size)
+{
+	size_t func_addr = get_vaddr(pid, "munmap", "/system/lib64/libc.so");
+	printf("munmap:                   0x%lx\n", func_addr);
 
-// 	return -1;
-// }
+	long num_param = 2;
+	long parameters[num_param];
+	parameters[0] = start; // 需要解除映射的内存首地址
+	parameters[1] = size;  // 内存大小
+	ptrace_call(pid, func_addr, parameters, num_param, NULL);
 
-// // 恢复断点处的代码并使程序继续运行, 即还原寄存器信息和此位置原来的数据 然后调用 ptrace(PTRACE_CONT,...)
-// int recovery_breakpoint(pid_t pid,struct pt_regs regs) {
-// 	// 先运行到断点处
-// //	wait_breakpoint();
+	return 0;
+}
 
-// 	// 运行到断点时，pc 指向断点后一条指令处. 断点指令 0xcc 只有 1 byte 所以 -1 后就是原来断点处地址
-// 	regs.ARM_pc -= 1;
+// 往进程中注入动态库
+unsigned long inject_library(pid_t pid, char *lib_path)
+{
+	// 先获取动态库
+	int fd;
+	void *start;
+	struct stat sb;
+	fd = open(lib_path, O_RDONLY); /* 打开/etc/passwd */
+	fstat(fd, &sb);				   /* 取得文件大小 */
+	start = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (start == MAP_FAILED) /* 判断是否映射成功 */
+	{
+		perror("mmap init fail");
+		exit(-1);
+	}
 
-// 	// 恢复寄存器数据
-// 	set_registers(pid,&regs);
+	// 在子进程中分配一片空间，用来写入需要注入的动态库
+	unsigned long module_addr = call_mmap(pid, sb.st_size);
 
-// 	// 清除原来设置的断点，也就是把之前写入 0xcc 处的原始数据再写回去
-// 	putdata(pid, regs.ARM_pc, &orig, 1);
+	// 把动态库写入分配的空间中
+	putdata(pid, module_addr, start, sb.st_size);
 
-// 	ptrace_cont(pid);
+	munmap(start, sb.st_size); /* 解除映射 */
+	close(fd);
 
-// 	return 0;
-// }
-
-// // 远程调用函数
-// int call_function(pid_t pid,size_t func_addr,long param[], uint8_t num_param,long long *result) {
-// 	struct pt_regs regs;
-// 	get_registers(pid, &regs);
-// 	// 1.先把参数保存起来
-// 	int tmp_num;
-// 	if (num_param <= 6) {
-// 		tmp_num = num_param;
-// 	}else{
-// 		tmp_num = 6;
-// 		int len = num_param - 6;
-// 		long *param_stack = (long *)calloc(len,8);
-// 		int i,j = 0;
-// 		for(i = (num_param - 1); i >= 6; i--,j++) {
-// 			*(param_stack + j) = param[i];
-// 		}
-// 		for(int k = 0; k < len; k++) {
-// 			printf("*(param_stack + %d) = %ld \t",k,*(param_stack + k));
-// 		}
-// 		puts("");
-// 		// 第6个以后的参数保存到栈中
-// 		push_stack(pid, &(regs.rsp), param_stack, len);
-// 	}
-
-// 	// 前6个参数保存在寄存器里
-// 	switch(tmp_num) {
-// 		case 6:
-// 			regs.r9 = param[5];
-// 		case 5:
-// 			regs.r8 = param[4];
-// 		case 4:
-// 			regs.rcx = param[3];
-// 		case 3:
-// 			regs.rdx = param[2];
-// 		case 2:
-// 			regs.rsi = param[1];
-// 		case 1:
-// 			regs.rdi = param[0];
-// 			break;
-// 		case 0:
-// 			{
-// 				printf("no paramer ...\n" );
-// 			}
-// 	}
-// 	//2.把当前指令的下一条指令入栈,函数往上一级返回的时候要用到
-// 	// rip = rip -1 是为了让函数重新撞击断点，断点指令0xcc 就1 Byte,当上次撞击断点时 pc 已经指下了断点的下一条指令
-// 	long rip[1] = {regs.rip - 1};
-// 	push_stack(pid, &(regs.rsp),rip, 1);
-
-// 	//3. 把pc指向目标函数首地址
-// 	regs.rip = func_addr;
-// 	set_registers(pid,&regs);
-// 	ptrace_cont(pid);
-
-// 	/*
-// 	 * 为了获取 调用的目标函数的返回值(其实这个返回值存放在rax中)，只能让函数继续运行，直到运行结束 再次撞击原来的断点。
-// 	 这时才是正解的时机获取到 目标函数的返回值 rax
-// 	 * **/
-// 	wait_breakpoint(pid);
-// 	if(result != NULL) {
-// 		struct pt_regs call_ret_regs;
-// 		get_registers(pid, &call_ret_regs);
-// 		*result = call_ret_regs.rax;
-// 		//printf("call_function return value = %ld\n",*result);
-// 	}
-
-// 	return 0;
-// }
-
-// // 调用 mmap 建立匿名映射空间
-// long long call_mmap(pid_t pid,unsigned long size) {
-// 	size_t func_addr = get_vaddr(pid, "mmap", "libc-");
-// 	printf("mmap:          		0x%lx\n", func_addr);
-
-// 	uint8_t num_param = 6;
-// 	long parameters[num_param];
-// 	parameters[0] = 0;				// 设置为NULL表示让系统自动选择分配内存的地址
-// 	parameters[1] = size;				// 映射内存的大小
-// 	parameters[2] = PROT_READ | PROT_WRITE | PROT_EXEC; // 表示映射内存区域可读可写可执行
-// 	parameters[3] = MAP_PRIVATE | MAP_ANONYMOUS;	// 建立匿名映射
-// 	parameters[4] = 0;				// 若需要映射文件到内存中，则为文件的fd
-// 	parameters[5] = 0;				// 文件映射偏移量
-
-// 	long long return_value;
-// 	call_function(pid, func_addr, parameters, num_param,&return_value);
-// 	printf("%s %d return_value = 0x%llx\n",__FUNCTION__,__LINE__,return_value);
-
-// 	return return_value;
-// }
-
-// // 调用 munmap 解除一个映射关系
-// int call_munmap(pid_t pid,long *parameters, uint8_t num_param) {
-// 	size_t func_addr = get_vaddr(pid, "munmap", "libc-");
-// 	printf("munmap:                   0x%lx\n", func_addr);
-
-// 	call_function(pid, func_addr, parameters, num_param,NULL);
-
-// 	return 0;
-// }
-
-// // 往进程中注入动态库
-// unsigned long inject_library(pid_t pid, char * lib_path) {
-//         // 先获取动态库
-// 	int fd;
-//         void * start;
-//         struct stat sb;
-//         fd = open(lib_path, O_RDONLY); /* 打开/etc/passwd */
-//         fstat(fd, &sb); /* 取得文件大小 */
-//         start = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-//         if(start == MAP_FAILED) /* 判断是否映射成功 */
-//         {
-//                 perror("mmap init fail");
-//                 exit(-1);
-//         }
-
-// 	// 在子进程中分配一片空间，用来写入需要注入的动态库
-// 	unsigned long module_addr = call_mmap(pid,sb.st_size);
-
-// 	// 把动态库写入分配的空间中
-// 	putdata(pid, module_addr, start, sb.st_size);
-
-// 	munmap(start, sb.st_size); /* 解除映射 */
-// 	close(fd);
-
-// 	return module_addr;
-// }
+	return module_addr;
+}
