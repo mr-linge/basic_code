@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dlfcn.h>
+#include <unistd.h>
 
-/*
-  gcc -rdynamic main.c -o main -ldl
- * */
 
 //动态链接库路径
 #define LIB_CACULATE_PATH "./libcaculate.so"
@@ -13,6 +11,8 @@
 typedef int (*CAC_FUNC)(int, int);
 
 int main() {
+	printf("****************** pid:%d *******************\n", getpid());
+
 	void *handle;
 	char *error;
 	CAC_FUNC cac_func = NULL;
@@ -46,7 +46,7 @@ int main() {
 	cac_func = dlsym(handle, "div");
 	printf("div: %d\n", cac_func(8,2));
 
-//	while(1);
+	while(1);
 
 	//关闭动态链接库,关闭后该动态库就会从 当前进程中 移除
 	dlclose(handle);

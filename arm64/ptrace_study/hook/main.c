@@ -2,7 +2,6 @@
 #include "vaddr_by_symbol.h"
 #include <signal.h>
 
-
 unsigned long illegal_instruction_addr;
 struct pt_regs backup_regs;
 union
@@ -65,26 +64,29 @@ int recovery_illegal_instruction(pid_t pid)
 	return 0;
 }
 
-
-void call_inject_library_test(pid_t pid){
+void call_inject_library_test(pid_t pid)
+{
 	char *lib_path = "./libinject.so";
 	unsigned long module_addr = inject_library(pid, lib_path);
 	printf("module_addr = 0x%lx\n", module_addr);
 }
 
-void call_munmmap_test(pid_t pid){
+void call_munmmap_test(pid_t pid)
+{
 	unsigned long mmap_addr = 0x7a32125000;
 	unsigned long size = 0x5000;
 	call_munmap(pid, mmap_addr, size);
 }
 
-void call_mmap_test(pid_t pid){
+void call_mmap_test(pid_t pid)
+{
 	unsigned long size = 0x5000;
-    unsigned long mmap_addr = call_mmap(pid,size);
-	printf("mmap_addr = 0x%lx\n",mmap_addr);
+	unsigned long mmap_addr = call_mmap(pid, size);
+	printf("mmap_addr = 0x%lx\n", mmap_addr);
 }
 
-void call_test(pid_t pid) {
+void call_test(pid_t pid)
+{
 	unsigned long func_addr = 0x565b5b7a20;
 	long num_params = 10;
 	long param[num_params];
@@ -98,7 +100,7 @@ void call_test(pid_t pid) {
 	param[7] = 7;
 	param[8] = 8;
 	param[9] = 9;
-	//param[10] = 10;
+	// param[10] = 10;
 
 	long long result;
 	ptrace_call(pid, func_addr, param, num_params, &result);
@@ -126,11 +128,18 @@ int main(int argc, char **argv)
 	// 	return -1;
 	// }
 
-	unsigned long func_addr = 0x5a8;
-	long num_params = 10;
-	long param[num_params];
-	param[0] = 0;
-	param[1] = 1;
+	call_inject_library_test(pid);
+
+	// char *funcName = "mmap";
+	// int bind = STB_GLOBAL;
+	// int type = STT_FUNC;
+	// unsigned long mmap_addr = get_vaddr_in_system_moudle(pid, funcName, bind, type);
+	// printf("mmap_addr = 0x%lx\n", mmap_addr);
+
+	// char *symbol = "func10";
+	// char *module_path = "/data/local/tmp/work/tracee";
+	// unsigned long func10_addr = get_vaddr(pid, symbol, module_path, bind, type);
+	// printf("func10_addr = 0x%lx\n", func10_addr);
 
 	// recovery_illegal_instruction(pid);
 	set_registers(pid, &backup_regs);

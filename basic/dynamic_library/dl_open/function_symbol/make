@@ -1,5 +1,0 @@
-gcc -fPIC -shared caculate.c -o libcaculate.so
-
-gcc -rdynamic main.c -o main -ldl
-
-./main
