@@ -12,7 +12,7 @@ all: $(exec)
 	@adb shell "chmod +x /data/local/tmp/work/$(exec)"	
 	
 $(exec): $(source)
-	@$(cc) $(source) -o $(exec)
+	@ $(cc) $(source) -o $(exec)
 
 clean:
 	@-rm $(exec)

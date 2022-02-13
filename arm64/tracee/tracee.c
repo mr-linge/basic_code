@@ -13,7 +13,7 @@
 
 #include <dlfcn.h>
 
-int global_var = 0x1;
+long global_var = 0x1;
 
 int func0(){
 	printf("Hello, this is func0 ...\n");
@@ -64,15 +64,15 @@ void sighandler(int);
  * gcc -no-pie tracee.c -o tracee
  * **/
 int main() {
-//	signal(SIGINT, sighandler);
+	//	signal(SIGINT, sighandler);
 
 	const int len = 64;
 	uint8_t *mem_space = (uint8_t *)malloc(len);
 	memset(mem_space,'a',32);
-//	int fd = open("./loaded_file", O_RDONLY | O_WRONLY);
+	//	int fd = open("./loaded_file", O_RDONLY | O_WRONLY);
 	//打开动态链接库
-//	void *handle = dlopen(path, RTLD_LAZY);
-//	printf("handle = %p\n",handle);
+	//	void *handle = dlopen(path, RTLD_LAZY);
+	//	printf("handle = %p\n",handle);
 	//char c;
 	while(1) {
 		printf("****************** pid:%d *******************\n",getpid());
@@ -83,25 +83,26 @@ int main() {
 			printf("%02x ", *(mem_space + i));
 		}
 		puts("");
-//		printf("fd = %d\n", fd);
+		//		printf("fd = %d\n", fd);
 		//read_mem((unsigned long)mem_space,len);
-//		printf("open            addr: %p\n", &open);
-		printf("mmap            addr: %p\n", &mmap);
+		//		printf("open            addr: %p\n", &open);
+		//printf("mmap            addr: %p\n", &mmap);
 		//printf("dlopen          addr: %p\n", &dlopen);
-		//printf("printf          addr: %p\n", &printf);
+		printf("printf          addr: %p\n", &printf);
 		//printf("&func0          addr: %p\n", &func0);
+		printf("&global_var     addr: %p\n", &global_var);
 		printf("&func1          addr: %p\n", &func1);
 		printf("&func2          addr: %p\n", &func2);
 		//printf("&read_mem       addr: %p\n", &read_mem);
 		//printf(" path           addr: %p\n", path);
 		//printf("&print          addr: %p\n", &print);
-		//printf("&func10         addr: %p\n", &func10);
+		printf("&func10         addr: %p\n", &func10);
 		printf("&func20         addr: %p\n", &func20);
 		global_var++;
 		int ret = 0;
 		//ret = func1(1,1);
-		//ret = func10(1,2,3,4,5,6,7,8,9,10);
-		ret = func20(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);
+		ret = func10(1,2,3,4,5,6,7,8,9,10);
+		//ret = func20(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);
 		printf("result = 0x%x\n", ret);
 		sleep(5);
 	}
@@ -113,4 +114,3 @@ void sighandler(int signum) {
 	printf("signal %d, exit ...\n", signum);
 	exit(1);
 }
-

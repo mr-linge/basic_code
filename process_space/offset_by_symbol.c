@@ -148,6 +148,12 @@ void test_dynsym(handle_t h,char *symbol) {
 	printf("dynsym func:%s, addr:0x%lx\n", symbol, addr);
 }
 
+void test_dynsym_var(handle_t h,char *symbol) {
+	Elf64_Addr addr = lookup_symbol_dynsym(&h,symbol,STB_GLOBAL,STT_OBJECT);
+	printf("dynsym func:%s, addr:0x%lx\n", symbol, addr);
+}
+
+
 int main(int argc, char *argv[]) {
 	if (argc != 3) {
 		printf("params is less than 3 ..");
@@ -159,9 +165,12 @@ int main(int argc, char *argv[]) {
 
 	char *symbol = argv[2];
 
-	test_symtab(h,symbol);
-	printf("************************************************\n");
-	test_dynsym(h,symbol);
+//	test_symtab(h,symbol);
+//	printf("************************************************\n");
+//	test_dynsym(h,symbol);
+
+
+	test_dynsym_var(h,symbol);
 
 	return 0;
 }

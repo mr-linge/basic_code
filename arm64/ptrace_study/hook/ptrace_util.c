@@ -417,12 +417,12 @@ int replace_function(pid_t pid, char *target_func_name, char *module_path, char 
 		exit(-1);
 	}
 	show_registers(illegal_regs);
-	long long params[num_params];
-	int i;
-	for (i = 0; i < num_params && i < 8; i++)
-	{
-		params[i] = illegal_regs.uregs[i];
-	}
+	// long long params[num_params];
+	// int i;
+	// for (i = 0; i < num_params && i < 8; i++)
+	// {
+	// 	params[i] = illegal_regs.uregs[i];
+	// }
 	// if (i == 8)
 	// {
 	// 	long long current_sp = illegal_regs.ARM_sp;
@@ -447,21 +447,17 @@ int replace_function(pid_t pid, char *target_func_name, char *module_path, char 
 	// }
 
 	// 2. 把自己写的 动态库注入目标进程中
-	unsigned long module_addr = inject_library(pid, my_lib_path);
-	printf("module_addr = 0x%lx\n", module_addr);
+	unsigned long inject_module_vaddr = inject_library(pid, my_lib_path);
+	printf("inject_module_vaddr = 0x%lx\n", inject_module_vaddr);
 
-	// 3. 获取 注入的动态库中 func2函数在 目标进程中的地址
-	// int bind = STB_GLOBAL;
-	// int type = STT_FUNC;
-	unsigned long offset = offset_symbol(my_func_name, my_lib_path, bind, type);
-	printf("offset:         0x%lx\n", offset);
-	unsigned long func_addr = module_addr + offset; //  模块在目标进程中的基址 加上函数在模块内的偏移 就是函数在目标进程中的虚拟地址
+	// 3. 获取 注入的动态库中 函数在 目标进程中的地址
+	int bind2 = STB_GLOBAL;
+	int type2 = STT_FUNC;
+	unsigned long offset = offset_symbol(my_func_name, my_lib_path, bind2, type2);
+	printf("inject_module function  offset:         0x%lx\n", offset);
+	unsigned long func_addr = inject_module_vaddr + offset; //  模块在目标进程中的基址 加上函数在模块内的偏移 就是函数在目标进程中的虚拟地址
 
 	// 4. 根据 目标进程的虚拟地址 远程调用 func2函数
-	// long num_params = 2;
-	// long param[num_params];
-	// param[0] = 10;
-	// param[1] = 11;
 	long long result;
 	ptrace_call(pid, func_addr, parameters, num_params, &result);
 	printf("result = 0x%llx\n", result);
