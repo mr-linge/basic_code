@@ -70,7 +70,7 @@ Elf64_Addr lookup_symbol_symtab(handle_t *h, char *symbol, int bind, int type)
 				char *name = (char *)&strtab[symtab->st_name];
 				// printf("symtab->st_info : %d\n", symtab->st_info);
 				// printf("symbol name : %s\n", name);
-				int name_right = !strncmp(name, symbol, strlen(symbol));
+				int name_right = !strcmp(name, symbol);
 				int st_info = ELF64_ST_INFO(bind, type);
 				// printf("st_info : %d\n", st_info);
 				int st_info_right = (st_info == symtab->st_info);
@@ -116,7 +116,7 @@ Elf64_Addr lookup_symbol_dynsym(handle_t *h, char *symbol, int bind, int type)
 				char *name = (char *)&dynstr[symtab->st_name];
 				// printf("symtab->st_info : %d\n", symtab->st_info);
 				// printf("symbol name : %s\n", name);
-				int name_right = !strncmp(name, symbol, strlen(symbol));
+				int name_right = !strcmp(name, symbol);
 				int st_info = ELF64_ST_INFO(bind, type);
 				// printf("st_info : %d\n", st_info);
 				int st_info_right = (st_info == symtab->st_info);

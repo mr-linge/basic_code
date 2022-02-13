@@ -1,110 +1,148 @@
 #include "ptrace_util.h"
-#include "vaddr_by_symbol.h"
-#include <signal.h>
+// #include "vaddr_by_symbol.h"
 
-unsigned long illegal_instruction_addr;
-struct pt_regs backup_regs;
-union
-{
-	uint32_t orig;
-	uint8_t bytes[4];
-} OriginOpcode;
-
-// BX利用Rn寄存器中目的地址值的最后一位来判断跳转后的状态。当最后一位为0时，表示转移到ARM状态；当最后一位为1时，表示转移到Thumb状态。
-int set_illegal_instruction(pid_t pid, unsigned long addr)
-{
-	getdata(pid, addr, OriginOpcode.bytes, 4);
-	illegal_instruction_addr = addr;
-
-	if (addr & (0x1))
-	{
-		printf("%s %d\n", __FUNCTION__, __LINE__);
-		union
-		{
-			uint16_t uiThumbillegalValue;
-			uint8_t bytes[2];
-		} data;
-		// Thumb  instruction : 0xdeXX
-		data.uiThumbillegalValue = 0xde00;
-		putdata(pid, addr, data.bytes, 2);
-	}
-	else
-	{
-		printf("%s %d\n", __FUNCTION__, __LINE__);
-		union
-		{
-			uint32_t uiArmillegalValue;
-			uint8_t bytes[4];
-		} data;
-		// Arm illegal instruction: 0xe7fXXXfX
-		data.uiArmillegalValue = 0xe7f000f0;
-		putdata(pid, addr, data.bytes, 4);
-	}
-
-	ptrace_cont(pid);
-	int status;
-	waitpid(pid, &status, WUNTRACED);
-	// printf("status:%d\n", status);
-	if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGILL)
-	{
-		get_registers(pid, &backup_regs);
-		return 0;
-	}
-
-	return -1;
-}
-
-// 恢复异常指令
-int recovery_illegal_instruction(pid_t pid)
-{
-	putdata(pid, illegal_instruction_addr, OriginOpcode.bytes, 4);
-	set_registers(pid, &backup_regs);
-	ptrace_cont(pid);
-
-	return 0;
-}
-
+// 进程注入 test
 void call_inject_library_test(pid_t pid)
 {
+	ptrace_attach(pid);
+	struct pt_regs backup_regs;
+	get_registers(pid, &backup_regs);
+
 	char *lib_path = "./libinject.so";
 	unsigned long module_addr = inject_library(pid, lib_path);
 	printf("module_addr = 0x%lx\n", module_addr);
+
+	set_registers(pid, &backup_regs);
+	ptrace_cont(pid);
 }
 
-void call_munmmap_test(pid_t pid)
+// 调用系统函数 munmmap test
+void call_munmmap_test(pid_t pid, unsigned long mmap_addr, unsigned long size)
 {
-	unsigned long mmap_addr = 0x7a32125000;
-	unsigned long size = 0x5000;
+	ptrace_attach(pid);
+	struct pt_regs backup_regs;
+	get_registers(pid, &backup_regs);
+
 	call_munmap(pid, mmap_addr, size);
+
+	set_registers(pid, &backup_regs);
+	ptrace_cont(pid);
 }
 
+// 调用系统函数 mmap test
 void call_mmap_test(pid_t pid)
 {
+	ptrace_attach(pid);
+	struct pt_regs backup_regs;
+	get_registers(pid, &backup_regs);
+
 	unsigned long size = 0x5000;
 	unsigned long mmap_addr = call_mmap(pid, size);
 	printf("mmap_addr = 0x%lx\n", mmap_addr);
+
+	set_registers(pid, &backup_regs);
+	ptrace_cont(pid);
 }
 
-void call_test(pid_t pid)
+// 调用本地函数 test
+void call_fuction_test(pid_t pid)
 {
-	unsigned long func_addr = 0x565b5b7a20;
-	long num_params = 10;
+	ptrace_attach(pid);
+	struct pt_regs backup_regs;
+	get_registers(pid, &backup_regs);
+
+	// 本地函数地址，可用的我其他函数直接通过函数名找到对 应的地址，这里测试这个功能就只接写地址吧
+	unsigned long func_addr = 0x57a3e28a20;
+	int num_params = 10;
 	long param[num_params];
-	param[0] = 0;
-	param[1] = 1;
-	param[2] = 2;
-	param[3] = 3;
-	param[4] = 4;
-	param[5] = 5;
-	param[6] = 6;
-	param[7] = 7;
-	param[8] = 8;
-	param[9] = 9;
-	// param[10] = 10;
+	param[0] = 0x101;
+	param[1] = 0x102;
+	param[2] = 0x103;
+	param[3] = 0x104;
+	param[4] = 0x105;
+	param[5] = 0x106;
+	param[6] = 0x107;
+	param[7] = 0x108;
+	param[8] = 0x109;
+	param[9] = 0x110;
 
 	long long result;
 	ptrace_call(pid, func_addr, param, num_params, &result);
 	printf("result = 0x%llx\n", result);
+
+	set_registers(pid, &backup_regs);
+	ptrace_cont(pid);
+}
+
+// 调用注入到进程中的动态库里的函数 test
+void call_fuction_in_injectlib_test(pid_t pid)
+{
+	ptrace_attach(pid);
+	struct pt_regs backup_regs;
+	get_registers(pid, &backup_regs);
+
+	// 先把自己写的 动态库注入目标进程中
+	char *symbol = "func2";
+	char *lib_path = "./libinject.so";
+	unsigned long module_addr = inject_library(pid, lib_path);
+	printf("module_addr = 0x%lx\n", module_addr);
+	printf("%s %s %d \n", __FILE__, __FUNCTION__, __LINE__);
+
+	// 获取 注入的动态库中 func2函数在 目标进程中的地址
+	int bind = STB_GLOBAL;
+	int type = STT_FUNC;
+	unsigned long offset = offset_symbol(symbol, lib_path, bind, type);
+	printf("offset:         0x%lx\n", offset);
+	unsigned long func_addr = module_addr + offset; //  模块在目标进程中的基址 加上函数在模块内的偏移 就是函数在目标进程中的虚拟地址
+	printf("%s = 0x%lx\n", symbol, func_addr);
+
+	// 根据 目标进程的虚拟地址 远程调用 func2函数
+	long num_params = 2;
+	long param[num_params];
+	param[0] = 10;
+	param[1] = 11;
+	long long result;
+	ptrace_call(pid, func_addr, param, num_params, &result);
+	printf("result = 0x%llx\n", result);
+
+	set_registers(pid, &backup_regs);
+	ptrace_cont(pid);
+}
+
+// hook 也就把要执行的进程中的 函数替换成 自己注入到进程里的动态库中的函数
+void hook_test(pid_t pid)
+{
+	ptrace_attach(pid);
+
+	char *target_func_name = "func20";
+	char *module_path = "/data/local/tmp/work/tracee";
+
+	char *my_func_name = "hook_func20";
+	char *my_lib_path = "./libinject.so";
+	long num_params = 20;
+	long param[num_params];
+	param[0] = 0x100;
+	param[1] = 0x101;
+	param[2] = 0x102;
+	param[3] = 0x103;
+	param[4] = 0x104;
+	param[5] = 0x105;
+	param[6] = 0x106;
+	param[7] = 0x107;
+	param[8] = 0x108;
+	param[9] = 0x109;
+	param[10] = 0x110;
+	param[11] = 0x111;
+	param[12] = 0x112;
+	param[13] = 0x113;
+	param[14] = 0x114;
+	param[15] = 0x115;
+	param[16] = 0x116;
+	param[17] = 0x117;
+	param[18] = 0x118;
+	param[19] = 0x119;
+
+	replace_function(pid, target_func_name, module_path, my_func_name, my_lib_path, param, num_params);
 }
 
 int main(int argc, char **argv)
@@ -117,34 +155,15 @@ int main(int argc, char **argv)
 
 	pid_t pid = atoi(argv[1]);
 
-	ptrace_attach(pid);
+	// ptrace_attach(pid);
 
-	get_registers(pid, &backup_regs);
+	// struct pt_regs backup_regs;
+	// get_registers(pid, &backup_regs);
 
-	// unsigned long target_addr = 0x5fb0b688ec;// regs.ARM_pc;
-	// // set_illegal_instruction(pid, target_addr);
-	// if(set_illegal_instruction(pid, target_addr) == -1) {
-	// 	printf("set_illegal_instruction error\n");
-	// 	return -1;
-	// }
+	// call_fuction_test(pid);
+	// call_fuction_in_injectlib_test(pid);
+	hook_test(pid);
 
-	call_inject_library_test(pid);
-
-	// char *funcName = "mmap";
-	// int bind = STB_GLOBAL;
-	// int type = STT_FUNC;
-	// unsigned long mmap_addr = get_vaddr_in_system_moudle(pid, funcName, bind, type);
-	// printf("mmap_addr = 0x%lx\n", mmap_addr);
-
-	// char *symbol = "func10";
-	// char *module_path = "/data/local/tmp/work/tracee";
-	// unsigned long func10_addr = get_vaddr(pid, symbol, module_path, bind, type);
-	// printf("func10_addr = 0x%lx\n", func10_addr);
-
-	// recovery_illegal_instruction(pid);
-	set_registers(pid, &backup_regs);
-
-	ptrace_cont(pid);
 	ptrace_detach(pid);
 
 	return 0;

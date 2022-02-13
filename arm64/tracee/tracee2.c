@@ -32,8 +32,13 @@ int main() {
 	int p8 = 0x8;
 	int p9 = 0x9;
 	int p10 = 0x10;
-	
-	int ret = func10(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10);
-	
+
+	while(1) {
+		printf("****************** pid:%d *******************\n",getpid());
+		printf("&func10         addr: %p\n", &func10);
+		int ret = func10(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10);
+		printf("ret = %d\n", ret);
+		sleep(5);
+	}
 	return 0;
 }

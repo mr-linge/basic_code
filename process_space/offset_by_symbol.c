@@ -15,37 +15,41 @@ typedef struct handle {
 	uint8_t *mem;
 } handle_t;
 
-
 /**
  * 根据符号名在 .symtab 查找符号地址
  */
-Elf64_Addr lookup_symbol_symtab(handle_t *h,char *symbol,int bind,int type) {
+Elf64_Addr lookup_symbol_symtab(handle_t *h, char *symbol, int bind, int type)
+{
 	unsigned long i, j, NumOfSym;
 	char *strtab;
 	Elf64_Sym *symtab;
 
-	for (i = 0; i < h->ehdr->e_shnum; i++) {
+	for (i = 0; i < h->ehdr->e_shnum; i++)
+	{
 		/* 找 .symtab 节，该节保存了符号信息，每一个符号项为Elf64_Sym */
-		if (h->shdr[i].sh_type == SHT_SYMTAB) {
+		if (h->shdr[i].sh_type == SHT_SYMTAB)
+		{
 			/* 类型为SHT_SYMTAB的节，其sh_link为字符串表所在节表中的下标 */
 			/* 因此h->shdr[i].sh_link为字符串表下标 */
-			strtab = (char *) (h->mem + h->shdr[h->shdr[i].sh_link].sh_offset);
+			strtab = (char *)(h->mem + h->shdr[h->shdr[i].sh_link].sh_offset);
 
 			/* 获取符号表的首地址 */
-			symtab = (Elf64_Sym *) &h->mem[h->shdr[i].sh_offset];
+			symtab = (Elf64_Sym *)&h->mem[h->shdr[i].sh_offset];
 
 			NumOfSym = h->shdr[i].sh_size / sizeof(Elf64_Sym);
 
-			for (j = 0; j < NumOfSym; j++) {
+			for (j = 0; j < NumOfSym; j++)
+			{
 				/* st_name为符号名在字符串表中的下标 */
-				char *name = (char *) &strtab[symtab->st_name];
-				//printf("symtab->st_info : %d\n", symtab->st_info);
-				//printf("symbol name : %s\n", name);
-				int name_right = !strncmp(name, symbol, strlen(symbol));
-				int st_info = ELF64_ST_INFO(bind,type);
-				//printf("st_info : %d\n", st_info);
+				char *name = (char *)&strtab[symtab->st_name];
+				// printf("symtab->st_info : %d\n", symtab->st_info);
+				// printf("symbol name : %s\n", name);
+				int name_right = !strcmp(name, symbol);
+				int st_info = ELF64_ST_INFO(bind, type);
+				// printf("st_info : %d\n", st_info);
 				int st_info_right = (st_info == symtab->st_info);
-				if (name_right && st_info_right) {
+				if (name_right && st_info_right)
+				{
 					/* st_value 为符号的地址 */
 					return symtab->st_value;
 				}
@@ -60,33 +64,38 @@ Elf64_Addr lookup_symbol_symtab(handle_t *h,char *symbol,int bind,int type) {
 /**
  * 根据符号名在 .dynsym 查找符号地址
  */
-Elf64_Addr lookup_symbol_dynsym(handle_t *h,char *symbol,int bind,int type) {
+Elf64_Addr lookup_symbol_dynsym(handle_t *h, char *symbol, int bind, int type)
+{
 	unsigned long i, j, NumOfSym;
 	char *dynstr;
 	Elf64_Sym *symtab;
 
-	for (i = 0; i < h->ehdr->e_shnum; i++) {
+	for (i = 0; i < h->ehdr->e_shnum; i++)
+	{
 		/* 找 .symtab 节，该节保存了符号信息，每一个符号项为Elf64_Sym */
-		if (h->shdr[i].sh_type == SHT_DYNSYM) {
+		if (h->shdr[i].sh_type == SHT_DYNSYM)
+		{
 			/* 类型为SHT_SYMTAB的节，其sh_link为字符串表所在节表中的下标 */
 			/* 因此h->shdr[i].sh_link为字符串表下标 */
-			dynstr = (char *) (h->mem + h->shdr[h->shdr[i].sh_link].sh_offset);
+			dynstr = (char *)(h->mem + h->shdr[h->shdr[i].sh_link].sh_offset);
 
 			/* 获取符号表的首地址 */
-			symtab = (Elf64_Sym *) &h->mem[h->shdr[i].sh_offset];
+			symtab = (Elf64_Sym *)&h->mem[h->shdr[i].sh_offset];
 
 			NumOfSym = h->shdr[i].sh_size / sizeof(Elf64_Sym);
 
-			for (j = 0; j < NumOfSym; j++) {
+			for (j = 0; j < NumOfSym; j++)
+			{
 				/* st_name为符号名在字符串表中的下标 */
-				char *name = (char *) &dynstr[symtab->st_name];
+				char *name = (char *)&dynstr[symtab->st_name];
 				//printf("symtab->st_info : %d\n", symtab->st_info);
 				//printf("symbol name : %s\n", name);
-				int name_right = !strncmp(name, symbol, strlen(symbol));
-				int st_info = ELF64_ST_INFO(bind,type);
-				//printf("st_info : %d\n", st_info);
+				int name_right = !strcmp(name, symbol);
+				int st_info = ELF64_ST_INFO(bind, type);
+				// printf("st_info : %d\n", st_info);
 				int st_info_right = (st_info == symtab->st_info);
-				if (name_right && st_info_right) {
+				if (name_right && st_info_right)
+				{
 					/* st_value 为符号的地址 */
 					return symtab->st_value;
 				}
