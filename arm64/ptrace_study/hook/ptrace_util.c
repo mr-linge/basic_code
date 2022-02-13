@@ -221,11 +221,8 @@ int pop_stack(int pid, unsigned long long *sp, long *param, int len)
  *                  parameters为函数参数的地址，regs为远程进程call函数前的寄存器环境
  *  Return:         返回0表示call函数成功，返回-1表示失败
  * **********************************************/
-int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_params, long long *result)
+int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_params, long long *result, struct pt_regs regs)
 {
-	struct pt_regs regs;
-	get_registers(pid, &regs);
-
 	int i = 0;
 	// aarch64处理器，函数传递参数，将前 8 个参数放到r0-r7，剩下的参数压入栈中
 	for (i = 0; i < num_params && i < 8; i++)
@@ -286,7 +283,7 @@ int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_p
 }
 
 // 调用 mmap 建立匿名映射空间
-long long call_mmap(pid_t pid, unsigned long size)
+long long call_mmap(pid_t pid, unsigned long size, struct pt_regs regs)
 {
 	char *module_path = "/system/lib64/libc.so"; // android 系统模块路径
 	int bind = STB_GLOBAL;
@@ -304,14 +301,14 @@ long long call_mmap(pid_t pid, unsigned long size)
 	parameters[5] = 0;									// 文件映射偏移量
 
 	long long return_value;
-	ptrace_call(pid, func_addr, parameters, num_param, &return_value);
+	ptrace_call(pid, func_addr, parameters, num_param, &return_value, regs);
 	printf("%s %s %d return_value = 0x%llx\n", __FILE__, __FUNCTION__, __LINE__, return_value);
 
 	return return_value;
 }
 
 // 调用 munmap 解除一个映射关系
-int call_munmap(pid_t pid, unsigned long start, unsigned long size)
+int call_munmap(pid_t pid, unsigned long start, unsigned long size, struct pt_regs regs)
 {
 	char *module_path = "/system/lib64/libc.so"; // android 系统模块路径
 	int bind = STB_GLOBAL;
@@ -325,13 +322,13 @@ int call_munmap(pid_t pid, unsigned long start, unsigned long size)
 	parameters[0] = start; // 需要解除映射的内存首地址
 	parameters[1] = size;  // 内存大小
 	long long return_value;
-	ptrace_call(pid, func_addr, parameters, num_param, &return_value);
+	ptrace_call(pid, func_addr, parameters, num_param, &return_value, regs);
 
 	return (int)return_value;
 }
 
 // 往进程中注入动态库
-unsigned long inject_library(pid_t pid, char *lib_path)
+unsigned long inject_library(pid_t pid, char *lib_path, struct pt_regs regs)
 {
 	// 先获取动态库
 	int fd;
@@ -346,7 +343,7 @@ unsigned long inject_library(pid_t pid, char *lib_path)
 		exit(-1);
 	}
 	// 在子进程中分配一片空间，用来写入需要注入的动态库
-	unsigned long module_addr = call_mmap(pid, sb.st_size);
+	unsigned long module_addr = call_mmap(pid, sb.st_size, regs);
 	// 把动态库写入分配的空间中
 	putdata(pid, module_addr, start, sb.st_size);
 	munmap(start, sb.st_size); /* 解除映射(当前进程中的这片空间，不是注入目标进程中的那个) */
@@ -388,7 +385,6 @@ int recovery_illegal_instruction(pid_t pid, unsigned long addr, struct pt_regs b
 {
 	putdata(pid, addr, OriginOpcode.bytes, 4);
 	set_registers(pid, &backup_regs);
-	ptrace_cont(pid);
 
 	return 0;
 }
@@ -416,38 +412,38 @@ int replace_function(pid_t pid, char *target_func_name, char *module_path, char 
 		printf("instruction code write error\n");
 		exit(-1);
 	}
-	show_registers(illegal_regs);
-	// long long params[num_params];
-	// int i;
-	// for (i = 0; i < num_params && i < 8; i++)
-	// {
-	// 	params[i] = illegal_regs.uregs[i];
-	// }
-	// if (i == 8)
-	// {
-	// 	long long current_sp = illegal_regs.ARM_sp;
-	// 	printf("current_sp = 0x%llx\n", current_sp);
-	// 	//current_sp += (2 * sizeof(long));
-	// 	union
-	// 	{
-	// 		long long val[2];
-	// 		uint8_t bytes[2 * 8];
-	// 	} data;
+	// show_registers(illegal_regs);
+	// 打印被hook函数的所有参数,有时根据情况会对这些参数进行处理
+	long long params[num_params];
+	int i;
+	for (i = 0; i < num_params && i < 8; i++)
+	{
+		params[i] = illegal_regs.uregs[i];
+	}
+	if (i == 8)
+	{
+		long long current_sp = illegal_regs.ARM_sp;
+		// printf("current_sp = 0x%llx\n", current_sp);
+		union
+		{
+			long long val[0x100];
+			uint8_t bytes[0x100 * sizeof(long)];
+		} data;
 
-	// 	getdata(pid, current_sp, data.bytes, 2 * sizeof(long));
-	// 	for (int j = 0; j < 2; j++)
-	// 	{
-	// 		params[i + 1 + j] = data.val[2 - j];
-	// 	}
-	// }
-	// printf("function <%s> parameters:\n", target_func_name);
-	// for (int k = 0; k < num_params; k++)
-	// {
-	// 	printf("param[%d] = 0x%llx\n", k, params[k]);
-	// }
+		getdata(pid, current_sp, data.bytes, ((num_params - 8) * sizeof(long)));
+		for (int j = 0; j < (num_params - 8); j++)
+		{
+			params[i + j] = data.val[j];
+		}
+	}
+	printf("function <%s> parameters:\n", target_func_name);
+	for (int k = 0; k < num_params; k++)
+	{
+		printf("param[%d] = 0x%llx\n", k, params[k]);
+	}
 
 	// 2. 把自己写的 动态库注入目标进程中
-	unsigned long inject_module_vaddr = inject_library(pid, my_lib_path);
+	unsigned long inject_module_vaddr = inject_library(pid, my_lib_path, illegal_regs);
 	printf("inject_module_vaddr = 0x%lx\n", inject_module_vaddr);
 
 	// 3. 获取 注入的动态库中 函数在 目标进程中的地址
@@ -458,8 +454,11 @@ int replace_function(pid_t pid, char *target_func_name, char *module_path, char 
 	unsigned long func_addr = inject_module_vaddr + offset; //  模块在目标进程中的基址 加上函数在模块内的偏移 就是函数在目标进程中的虚拟地址
 
 	// 4. 根据 目标进程的虚拟地址 远程调用 func2函数
+	struct pt_regs new_regs;
+	memcpy(&new_regs, &illegal_regs, sizeof(struct pt_regs));
+	new_regs.ARM_sp += ((num_params - 8) * sizeof(long));
 	long long result;
-	ptrace_call(pid, func_addr, parameters, num_params, &result);
+	ptrace_call(pid, func_addr, parameters, num_params, &result, new_regs);
 	printf("result = 0x%llx\n", result);
 
 	// 5. 调用成功后，根据需要改后程序执行逻辑，我这里就直接让函数返回 不再让被hook函数执行了.

@@ -1,5 +1,4 @@
 #include "ptrace_util.h"
-// #include "vaddr_by_symbol.h"
 
 // 进程注入 test
 unsigned long call_inject_library_test(pid_t pid)
@@ -9,7 +8,7 @@ unsigned long call_inject_library_test(pid_t pid)
 	get_registers(pid, &backup_regs);
 
 	char *lib_path = "./libinject.so";
-	unsigned long module_addr = inject_library(pid, lib_path);
+	unsigned long module_addr = inject_library(pid, lib_path, backup_regs);
 	printf("module_addr = 0x%lx\n", module_addr);
 
 	set_registers(pid, &backup_regs);
@@ -26,7 +25,7 @@ void call_munmmap_test(pid_t pid, unsigned long mmap_addr, unsigned long size)
 	struct pt_regs backup_regs;
 	get_registers(pid, &backup_regs);
 
-	call_munmap(pid, mmap_addr, size);
+	call_munmap(pid, mmap_addr, size, backup_regs);
 
 	set_registers(pid, &backup_regs);
 	ptrace_cont(pid);
@@ -40,7 +39,7 @@ void call_mmap_test(pid_t pid)
 	get_registers(pid, &backup_regs);
 
 	unsigned long size = 0x5000;
-	unsigned long mmap_addr = call_mmap(pid, size);
+	unsigned long mmap_addr = call_mmap(pid, size, backup_regs);
 	printf("mmap_addr = 0x%lx\n", mmap_addr);
 
 	set_registers(pid, &backup_regs);
@@ -80,7 +79,7 @@ void call_fuction_test(pid_t pid)
 	param[19] = 0x119;
 
 	long long result;
-	ptrace_call(pid, func_addr, param, num_params, &result);
+	ptrace_call(pid, func_addr, param, num_params, &result, backup_regs);
 	printf("result = 0x%llx\n", result);
 
 	set_registers(pid, &backup_regs);
@@ -91,17 +90,13 @@ void call_fuction_test(pid_t pid)
 void call_fuction_in_injectlib_test(pid_t pid)
 {
 	// ptrace_attach(pid);
-	// struct pt_regs backup_regs;
-	// get_registers(pid, &backup_regs);
+	struct pt_regs backup_regs;
+	get_registers(pid, &backup_regs);
 
 	// 先把自己写的 动态库注入目标进程中
 	char *lib_path = "./libinject.so";
-	unsigned long inject_module_vaddr = inject_library(pid, lib_path);
+	unsigned long inject_module_vaddr = inject_library(pid, lib_path, backup_regs);
 	printf("inject_module_vaddr = 0x%lx\n", inject_module_vaddr);
-	// char *lib_path = "./libinject.so";
-	// unsigned long module_addr = inject_library(pid, lib_path);
-	// printf("module_addr = 0x%lx\n", module_addr);
-	// printf("%s %s %d \n", __FILE__, __FUNCTION__, __LINE__);
 
 	// 获取 注入的动态库中 func2函数在 目标进程中的地址
 	char *symbol = "hook_func20";
@@ -109,7 +104,7 @@ void call_fuction_in_injectlib_test(pid_t pid)
 	int type = STT_FUNC;
 	unsigned long offset = offset_symbol(symbol, lib_path, bind, type);
 	printf("inject module offset:         0x%lx\n", offset);
-	unsigned long func_addr = inject_module_vaddr + offset; //  模块在目标进程中的基址 加上函数在模块内的偏移 就是函数在目标进程中的虚拟地址
+	unsigned long func_addr = inject_module_vaddr + offset;
 	printf("%s = 0x%lx\n", symbol, func_addr);
 
 	// 根据 目标进程的虚拟地址 远程调用 func2函数
@@ -136,7 +131,7 @@ void call_fuction_in_injectlib_test(pid_t pid)
 	param[18] = 0x118;
 	param[19] = 0x119;
 	long long result;
-	ptrace_call(pid, func_addr, param, num_params, &result);
+	ptrace_call(pid, func_addr, param, num_params, &result, backup_regs);
 	printf("result = 0x%llx\n", result);
 
 	// set_registers(pid, &backup_regs);
@@ -148,12 +143,12 @@ void hook_test(pid_t pid)
 {
 	ptrace_attach(pid);
 
-	char *target_func_name = "func10";
+	char *target_func_name = "func20";
 	char *module_path = "/data/local/tmp/work/tracee";
 
-	char *my_func_name = "hook_func10"; // hook_func2
+	char *my_func_name = "hook_func20";
 	char *my_lib_path = "./libinject.so";
-	long num_params = 10;
+	long num_params = 20;
 	long param[num_params];
 	param[0] = 0x100;
 	param[1] = 0x101;
@@ -165,24 +160,28 @@ void hook_test(pid_t pid)
 	param[7] = 0x107;
 	param[8] = 0x108;
 	param[9] = 0x109;
-	// param[10] = 0x110;
-	// param[11] = 0x111;
-	// param[12] = 0x112;
-	// param[13] = 0x113;
-	// param[14] = 0x114;
-	// param[15] = 0x115;
-	// param[16] = 0x116;
-	// param[17] = 0x117;
-	// param[18] = 0x118;
-	// param[19] = 0x119;
+	param[10] = 0x110;
+	param[11] = 0x111;
+	param[12] = 0x112;
+	param[13] = 0x113;
+	param[14] = 0x114;
+	param[15] = 0x115;
+	param[16] = 0x116;
+	param[17] = 0x117;
+	param[18] = 0x118;
+	param[19] = 0x119;
 
 	replace_function(pid, target_func_name, module_path, my_func_name, my_lib_path, param, num_params);
+
+	ptrace_cont(pid);
 }
 
 // 根据变量名 寻找到变量地址并修改变量的值
 void modify_var(pid_t pid)
 {
-	ptrace_attach(pid);
+	// ptrace_attach(pid);
+	// struct pt_regs backup_regs;
+	// get_registers(pid, &backup_regs);
 
 	char *symbol = "global_var";
 	char *module_path = "/data/local/tmp/work/tracee";
@@ -203,8 +202,13 @@ void modify_var(pid_t pid)
 	ptrace_cont(pid);
 }
 
+// (注：没实现成功，写入失败)
 void modify_var_in_injectmodule(pid_t pid)
 {
+	// ptrace_attach(pid);
+	struct pt_regs backup_regs;
+	get_registers(pid, &backup_regs);
+
 	// printf 在目标进程中的地址
 	char *symbol_printf = "printf";
 	char *system_module = "/system/lib64/libc.so"; // android 系统模块路径
@@ -214,7 +218,7 @@ void modify_var_in_injectmodule(pid_t pid)
 	printf("system printf_vaddr = 0x%lx\n", printf_vaddr);
 
 	char *lib_path = "./libinject.so";
-	unsigned long inject_module_vaddr = inject_library(pid, lib_path);
+	unsigned long inject_module_vaddr = inject_library(pid, lib_path, backup_regs);
 	printf("inject_module_vaddr = 0x%lx\n", inject_module_vaddr);
 
 	char *symbol = "test_var";
@@ -245,20 +249,20 @@ void modify_var_in_injectmodule(pid_t pid)
 	long param[num_params];
 	param[0] = printf_vaddr;
 	long long result;
-	ptrace_call(pid, init_symbol_vaddr, param, num_params, &result);
+	ptrace_call(pid, init_symbol_vaddr, param, num_params, &result, backup_regs);
 	printf("%s %d result = 0x%llx\n", __FUNCTION__, __LINE__, result);
 }
 
-// 注入动态库并初始化 以后会 调用的一些函数地址
+// 注入动态库并初始化 以后会 调用的一些函数地址 (可以在注入的动态库里调用目标进程里的一些函数，比如:printf)
 unsigned long init_symbol_injectmodule(pid_t pid)
 {
 	// unsigned long inject_module_addr = call_inject_library_test(pid);
 	// ptrace_attach(pid);
-	// struct pt_regs backup_regs;
-	// get_registers(pid, &backup_regs);
+	struct pt_regs backup_regs;
+	get_registers(pid, &backup_regs);
 
 	char *lib_path = "./libinject.so";
-	unsigned long inject_module_vaddr = inject_library(pid, lib_path);
+	unsigned long inject_module_vaddr = inject_library(pid, lib_path, backup_regs);
 	printf("inject_module_vaddr = 0x%lx\n", inject_module_vaddr);
 
 	// printf 在目标进程中的地址
@@ -299,7 +303,7 @@ unsigned long init_symbol_injectmodule(pid_t pid)
 	long param[num_params];
 	param[0] = printf_vaddr;
 	long long result;
-	ptrace_call(pid, init_symbol_vaddr, param, num_params, &result);
+	ptrace_call(pid, init_symbol_vaddr, param, num_params, &result, backup_regs);
 	printf("%s %d result = 0x%llx\n", __FUNCTION__, __LINE__, result);
 
 	// set_registers(pid, &backup_regs);
@@ -309,12 +313,12 @@ unsigned long init_symbol_injectmodule(pid_t pid)
 	return inject_module_vaddr;
 }
 
-// 调用注入到进程中的动态库里的函数 test
+// (注：没实现)
 void fuction_in_injectlib_call_target_pid(pid_t pid)
 {
 	// ptrace_attach(pid);
-	// struct pt_regs backup_regs;
-	// get_registers(pid, &backup_regs);
+	struct pt_regs backup_regs;
+	get_registers(pid, &backup_regs);
 
 	// 先把自己写的 动态库注入目标进程中
 	char *lib_path = "./libinject.so";
@@ -358,7 +362,7 @@ void fuction_in_injectlib_call_target_pid(pid_t pid)
 	param[18] = 0x118;
 	param[19] = 0x119;
 	long long result;
-	ptrace_call(pid, func_addr, param, num_params, &result);
+	ptrace_call(pid, func_addr, param, num_params, &result, backup_regs);
 	printf("%s %d result = 0x%llx\n", __FUNCTION__, __LINE__, result);
 
 	// set_registers(pid, &backup_regs);
