@@ -23,6 +23,10 @@ struct pt_regs
 #define ARM_r1 uregs[1]	 // 调用函数时保存第 2 个参数
 #define ARM_r2 uregs[2]	 // 调用函数时保存第 3 个参数
 #define ARM_r3 uregs[3]	 // 调用函数时保存第 4 个参数
+#define ARM_r1 uregs[4]	 // 调用函数时保存第 5 个参数
+#define ARM_r1 uregs[5]	 // 调用函数时保存第 6 个参数
+#define ARM_r2 uregs[6]	 // 调用函数时保存第 7 个参数
+#define ARM_r3 uregs[7]	 // 调用函数时保存第 8 个参数
 #define ARM_fp uregs[29] // X29 is the frame pointer register (FP). 用来定位有效的栈帧记录。帧指针寄存器，存放当前过程调用栈帧的起始地址，可使用FP别名引用
 #define ARM_lr uregs[30] // 链接寄存器，用于保存过程调用的返回地址，可使用LR别名引用
 /*
