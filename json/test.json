@@ -1,0 +1,17 @@
+{
+	"path" : "/usr/share",
+	"number" : 666,
+	"state" : true,
+	"state2" : false,
+	"state3" : null,
+	"url":
+	[
+		"jobs8.cn",
+		"baidu.com"
+	],
+	"sec":
+	{
+		"name":"DIo",
+		"age":8
+	}
+}
