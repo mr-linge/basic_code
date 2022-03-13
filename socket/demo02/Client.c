@@ -7,6 +7,8 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <fcntl.h> // for open
+#include <unistd.h> // for close
 
 int port = 8000;
 char *addr = "127.0.0.1";

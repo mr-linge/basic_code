@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <sys/socket.h> // socket
 #include <sys/types.h>  // 基本数据类型
 #include <unistd.h>     // read write

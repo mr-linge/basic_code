@@ -50,8 +50,8 @@ int make_post_info(char * http_info) {
 
 int main(int argc, char *argv[]) {
 	char HTTP_INFO[0x1000]; 
-	//int http_info_len = make_get_info(HTTP_INFO);
-	int http_info_len = make_post_info(HTTP_INFO);
+	int http_info_len = make_get_info(HTTP_INFO);
+	//int http_info_len = make_post_info(HTTP_INFO);
 	printf("%s\n", HTTP_INFO);
 
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0); 
