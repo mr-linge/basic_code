@@ -17,10 +17,10 @@ void main() {
 	char s[] = "ab-cd : ef;gh :i-jkl;mnop;qrs-tu: vwx-y;z";
 	char *delim = "-: ";
 	char *p;
-	printf("%s ", strtok(s, delim));
+	printf("%s\n", strtok(s, delim));
 	puts("\n-------- while before -------");
-	while((p = strtok(NULL, delim))) {
-		printf("%s ", p);
+	while(p = strtok(NULL, delim)) {
+		printf("%s\n", p);
 	}
 	puts("");
 }

@@ -9,17 +9,20 @@
    str 是一个指向 char 数据类型的指针。
    format 是用来显示输出类型和占位符。
    arg1, arg2 是要转换为字符串的整数。
+
+   返回值:
+   返回拼接后的字符长度
  * */
 int main(void) {
 	int number;
-	char text[20]; 
+	char text[0x1024]; 
 
 	printf("Enter a number: ");
 	scanf("%d", &number);
 
-	sprintf(text, "%d", number);   
-
-	printf("\nYou have entered: %s", text);
+	int ret = sprintf(text, "This string is %d,over.", number);   
+	printf("ret = %d\n",ret);
+	printf("\nYou have entered: %s\n", text);
 
 	return 0;
 }

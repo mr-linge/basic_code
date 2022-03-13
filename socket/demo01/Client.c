@@ -7,7 +7,7 @@
 #include <netinet/ip.h>
 
 #define PORT 23                 //目标地址端口号
-#define ADDR "127.0.0.1" //目标地址IP
+#define ADDR "127.0.0.1" 	//目标地址IP
 
 int main()
 {
