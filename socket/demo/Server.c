@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 /************************************************************************************************************************
 1、int socket(int family,int type,int protocol)
 family:
@@ -77,7 +78,7 @@ int main(int argc, char *argv[])
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(port);
 	server_addr.sin_addr.s_addr = INADDR_ANY;
-	bzero(&(server_addr.sin_zero), 8);
+	bzero(&(server_addr.sin_zero), sizeof(server_addr.sin_zero));
 	struct_len = sizeof(struct sockaddr_in);
 
 	fd = socket(AF_INET, SOCK_STREAM, 0);

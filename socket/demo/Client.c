@@ -26,7 +26,7 @@ int main(int argc,char *argv[])
 	their_addr.sin_family = AF_INET;
 	their_addr.sin_port = htons(port);
 	their_addr.sin_addr.s_addr = inet_addr(addr);
-	bzero(&(their_addr.sin_zero), 8);
+	bzero(&(their_addr.sin_zero), sizeof(their_addr.sin_zero));
 
 	if(connect(sockfd,(struct sockaddr*)&their_addr,sizeof(struct sockaddr)) == -1) {
 		printf("connect fail!\n");
@@ -48,7 +48,7 @@ int main(int argc,char *argv[])
 		numbytes = recv(sockfd,buf,BUFSIZ,0);  
 		buf[numbytes]='\0'; 
 		printf("received:%s\n",buf);
-		memset(buf,'\0',BUFSIZ);
+		memset(buf,0,BUFSIZ);
 	}
 	close(sockfd);
 	
