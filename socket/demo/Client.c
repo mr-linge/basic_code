@@ -13,8 +13,7 @@
 int port = 8000;
 char *addr = "127.0.0.1";
 
-int main(int argc,char *argv[])
-{
+int main(int argc,char *argv[]) {
 	int sockfd,numbytes;
 	char buf[BUFSIZ];
 	struct sockaddr_in their_addr;
@@ -36,8 +35,7 @@ int main(int argc,char *argv[])
 	numbytes = recv(sockfd, buf, BUFSIZ,0);//接收服务器端信息  
 	buf[numbytes]='\0';  
 	printf("server response:%s\n",buf);
-	while(1)
-	{
+	while(1) {
 		printf("input your message:");
 		fgets(buf, BUFSIZ, stdin);
 		// printf("buf = %s\n",buf);
