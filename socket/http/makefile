@@ -1,11 +1,11 @@
+cc = gcc
 
-
-server: Server.c
-	@gcc Server.c -o server
+server: server.c
+	@$(cc) server.c -o server
 	@./server
 
-client: Client.c
-	@gcc Client.c -o client
+client: client.c
+	@$(cc) client.c -o client
 	@./client
 
 clean:
