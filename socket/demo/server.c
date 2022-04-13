@@ -10,7 +10,7 @@
 #include <unistd.h>
 
 /************************************************************************************************************************
-1、int socket(int family,int type,int protocol)
+  1、int socket(int family,int type,int protocol)
 family:
 指定使用的协议簇:AF_INET（IPv4） AF_INET6（IPv6） AF_LOCAL（UNIX协议） AF_ROUTE（路由套接字） AF_KEY（秘钥套接字）
 type:
@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
 		printf("Listening fail\n");
 		return -1;
 	}
+
 	printf("Ready for Accept,Waitting...\n");
 	new_fd = accept(fd, (struct sockaddr *)&client_addr, &struct_len);
 	printf("Get the Client.\n");
@@ -105,6 +106,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	close(new_fd);
+
 	close(fd);
 	return 0;
 }
