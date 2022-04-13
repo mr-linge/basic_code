@@ -37,17 +37,19 @@ void ShowCerts(SSL * ssl)
 
 SSL_CTX * ssl_init() {
 	SSL_CTX *ctx;
-
-	/* SSL 库初始化，参看 ssl-server.c 代码 */
+	/* SSL 库初始化 */
 	SSL_library_init();
+	/* 载入所有 SSL 算法 */
 	OpenSSL_add_all_algorithms();
+	/* 载入所有 SSL 错误消息 */
 	SSL_load_error_strings();
+	/* 以 SSL V2 和 V3 标准兼容方式产生一个 SSL_CTX ，即 SSL Content Text */
 	ctx = SSL_CTX_new(SSLv23_client_method());
 	if (ctx == NULL) {
 		ERR_print_errors_fp(stdout);
 		exit(1);
 	}
-
+	
 	return ctx;
 }
 

@@ -14,6 +14,32 @@
 int port = 8000;
 int listen_port = 5;	//最大监听数
 
+
+void ShowCerts(SSL * ssl)
+{
+	X509 *cert;
+	char *line;
+
+	// SSL_get_verify_result()是重点，SSL_CTX_set_verify()只是配置启不启用并没有执行认证，调用该函数才会真证进行证书认证
+	// 如果验证不通过，那么程序抛出异常中止连接
+	if(SSL_get_verify_result(ssl) == X509_V_OK){
+		printf("证书验证通过\n");
+	}
+
+	cert = SSL_get_peer_certificate(ssl);
+	if (cert != NULL) {
+		printf("数字证书信息:\n");
+		line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
+		printf("证书: %s\n", line);
+		free(line);
+		line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
+		printf("颁发者: %s\n", line);
+		free(line);
+		X509_free(cert);
+	} else
+		printf("无证书信息！\n");
+}
+
 SSL_CTX * ssl_init() {
 	SSL_CTX *ctx;
 	/* SSL 库初始化 */ 
@@ -29,13 +55,24 @@ SSL_CTX * ssl_init() {
 		ERR_print_errors_fp(stdout);
 		exit(1);
 	}
-	/* 载入用户的数字证书， 此证书用来发送给客户端。 证书里包含有公钥 */
-	if (SSL_CTX_use_certificate_file(ctx, "./cacert.pem", SSL_FILETYPE_PEM) <= 0) {
+	SSL_CTX_set_default_passwd_cb_userdata(ctx,"1qaz2wsx");
+	
+	// 双向验证
+	// SSL_VERIFY_PEER---要求对证书进行认证，没有证书也会放行
+	// SSL_VERIFY_FAIL_IF_NO_PEER_CERT---要求客户端需要提供证书，但验证发现单独使用没有证书也会放行
+	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
+	// 设置信任根证书
+	if (SSL_CTX_load_verify_locations(ctx, "../certificate/ca.crt",NULL)<=0){
 		ERR_print_errors_fp(stdout);
 		exit(1);
 	}
-	/* 载入用户私钥 */
-	if (SSL_CTX_use_PrivateKey_file(ctx, "./privkey.pem", SSL_FILETYPE_PEM) <= 0) {
+	/* 载入服务器数字证书， 此证书用来发送给客户端,client 会验证这份证书。 证书里包含有公钥 */
+	if (SSL_CTX_use_certificate_file(ctx, "../certificate/server.crt", SSL_FILETYPE_PEM) <= 0) { // ./cert/server.cer
+		ERR_print_errors_fp(stdout);
+		exit(1);
+	}
+	/* 载入证书私钥 */
+	if (SSL_CTX_use_PrivateKey_file(ctx, "../certificate/server_rsa_private.pem.unsecure", SSL_FILETYPE_PEM) <= 0) { // ./cert/server.key
 		ERR_print_errors_fp(stdout);
 		exit(1);
 	}
@@ -44,6 +81,7 @@ SSL_CTX * ssl_init() {
 		ERR_print_errors_fp(stdout);
 		exit(1);
 	}
+	
 	return ctx;
 }
 
@@ -81,6 +119,11 @@ int main(int argc, char *argv[]) {
 		close(new_fd);
 		return -1;
 	}
+	else {
+		printf("Connected with %s encryption\n", SSL_get_cipher(ssl));
+		ShowCerts(ssl);
+	}
+
 	char *msg = "Welcome to my server!";
 	// send message to client
 	if(SSL_write(ssl,msg,strlen(msg)) < 0) {
