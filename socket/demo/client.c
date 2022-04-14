@@ -34,7 +34,7 @@ int main(int argc,char *argv[]) {
 	printf("Get the Server~Cheers!\n");
 	numbytes = recv(sockfd, buf, BUFSIZ,0);//接收服务器端信息  
 	buf[numbytes]='\0';  
-	printf("server response:%s\n",buf);
+	printf("received:%s\n",buf);
 	while(1) {
 		printf("input your message:");
 		fgets(buf, BUFSIZ, stdin);
