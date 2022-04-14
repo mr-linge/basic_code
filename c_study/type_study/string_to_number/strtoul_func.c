@@ -19,7 +19,7 @@
 
 int main()
 {
-	char str[] = "2030300This is test";
+	char str[] = "  2030300This is test";
 	char *ptr;
 
 	unsigned long val = strtoul(str, &ptr, 10);
