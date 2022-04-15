@@ -9,6 +9,9 @@
 #include <fcntl.h> // open close
 #include <sys/shm.h>
 
+#include "cJSON.h"
+
+
 #define PORT 8888
 #define BACKLOG 20 // 最大并发数量
 
@@ -16,7 +19,8 @@ void response(int sock_client,char *content);
 void parse_request(char *buff, int len, int sock_client);
 
 int main() {
-	int count = 0; // 计数
+	// 计数
+	int count = 0; 
 	// 定义 socket
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	// 定义 sockaddr_in
@@ -72,7 +76,7 @@ void parse_request(char *buff, int len, int sock_client) {
 
 	unsigned long val = strtoul(p, NULL, 10);
 	if (val == 0) {
-		puts("strtoul error");
+		puts("no content text!");
 		return;
 	}
 	//printf("val = %lu\n", val);
@@ -81,8 +85,27 @@ void parse_request(char *buff, int len, int sock_client) {
 	memcpy(content,buff + (len - val),val);
 	//printf("len:%lu content:%s\n",strlen(content) ,content);	
 
-	char *msg = "{\"code\":200,\"msg\":\"success\",\"data\":\"you will be success!\"}";
-	response(sock_client, msg);
+	cJSON * rev_data = cJSON_Parse(content);
+	if (rev_data == NULL)return;
+	cJSON * key = cJSON_GetObjectItem(rev_data, "key");
+	if(key->valueint != 123456) {
+		char * tmp = "Your key is wrong!";
+		response(sock_client, tmp);
+		return;
+	}
+	cJSON * item = cJSON_GetObjectItem(rev_data, "name");
+
+
+	//1. 创建cJSON对象
+	cJSON * json = cJSON_CreateObject();
+	cJSON_AddNumberToObject(json, "code", 200);
+	cJSON_AddStringToObject(json, "msg", "success");
+	char tmp[0x100];
+	sprintf(tmp,"%s%s",item->valuestring,", Believe you will be what you want to be");
+	cJSON_AddStringToObject(json, "data",tmp);
+
+	char *json_str = cJSON_PrintUnformatted(json);
+	response(sock_client, json_str);
 }
 
 void response(int sock_client,char *content) {

@@ -8,6 +8,9 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
+#include "cJSON.h"
+
+
 char * ip = "127.0.0.1";
 #define PORT 8888
 
@@ -17,7 +20,13 @@ char * token = "0eefffb6-32af-4fed-833c-866af540akdn";
 char * host = "jobs8.cn";
 
 char * make_post_info() {
-	char * content = "{\"key\":\"123456\",\"name\":\"Dio\",\"address\":\"BJ\"}";
+        cJSON * json = cJSON_CreateObject();
+        cJSON_AddNumberToObject(json, "key", 1234567);
+        cJSON_AddStringToObject(json, "Name", "Li Zhendong");
+        cJSON_AddStringToObject(json, "address", "Hubei");
+
+        char * content = cJSON_PrintUnformatted(json);
+
 
 	char *info = (char *)malloc(0x4000);
 	memset(info,0,0x4000);
