@@ -19,7 +19,7 @@
 
 int main()
 {
-	char str[] = "  2030300This is test";
+	char str[] = "2030300This is test";
 	char *ptr;
 
 	unsigned long val = strtoul(str, &ptr, 10);
@@ -30,5 +30,5 @@ int main()
 	printf("数字（无符号长整数）是 %lu\n", val);
 	printf("字符串部分是 |%s|\n", ptr);
 
-	return(0);
+	return 0;
 }
