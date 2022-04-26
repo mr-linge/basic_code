@@ -37,8 +37,19 @@ Calls to subroutines, where it is necessary for the return address to be stored 
 #define ARM_pc uregs[32]   // 存储当前的执行地址
 #define ARM_cpsr uregs[33] // 存储状态寄存器的值
 
-#define CPSR_T_MASK (1u << 5)
+// #define CPSR_T_MASK (1u << 5)
 #define LONGSIZE sizeof(long)
+
+// 保存一条 aarch64 指令的数据结构
+union OneInstruction
+{
+	uint32_t instruction;
+	uint8_t bytes[4];
+};
+// 全局共享变量, 一条 aarch64 指令
+union OneInstruction oneInstruction;
+// aarch64 illegal instruction: 0xe7fXXXfX
+const static uint32_t illegal_instruction = 0xe7f000f0; // aarch64 的异常指令 0xe7f000f0
 
 // 附加到正在运行的进程
 int ptrace_attach(pid_t pid);

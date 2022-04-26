@@ -14,7 +14,6 @@
 
 #include "vaddr_by_symbol.h"
 
-
 // ARM64 寄存器结构体
 struct pt_regs
 {
@@ -76,5 +75,5 @@ int call_munmap(pid_t pid, unsigned long start, unsigned long size, struct pt_re
 // 往进程中注入动态库
 unsigned long inject_library(pid_t pid, char *lib_path, struct pt_regs regs);
 
-// hook 也就是把目标进程中的函数规制成自己的函数
+// replace function 是把目标进程中的函数替换成自己的函数
 int replace_function(pid_t pid, char *target_func_name, char *module_path, char *my_func_name, char *my_lib_path, long *parameters, long num_params);

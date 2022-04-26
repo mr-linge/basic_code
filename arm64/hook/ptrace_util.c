@@ -238,7 +238,7 @@ int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_p
 	//修改程序计数器
 	regs.ARM_pc = func_addr;
 
-	//判断指令集
+		//判断指令集
 	// 与BX跳转指令类似，判断跳转的地址位[0]是否为1，如果为1，则将CPST寄存器的标志T置位，解释为Thumb代码
 	if (regs.ARM_pc & 1)
 	{
@@ -252,6 +252,10 @@ int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_p
 		regs.ARM_cpsr &= ~CPSR_T_MASK;
 	}
 
+	// // aarch32 原来用来判断 是否为 thumb 指信集，如果不是就走这行代码。但现在是aarch64,估计这行代码不用加了 
+	// regs.ARM_cpsr &= ~CPSR_T_MASK;
+
+	// 让程序执行完后，返回到 0 地址处，此时会触发异来。触发异常后 子进程会暂停，此时可以借机获取返回值
 	regs.ARM_lr = 0;
 
 	//设置好寄存器后，开始运行进程
@@ -267,6 +271,7 @@ int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_p
 	//	printf("status = 0x%x\n", stat);
 	while (stat != 0xb7f)
 	{
+				sleep(5);
 		printf("%s %s %d stat = 0x%x\n", __FILE__, __FUNCTION__, __LINE__, stat);
 		ptrace_cont(pid);
 		waitpid(pid, &stat, WUNTRACED);
@@ -360,6 +365,7 @@ union
 // aarch64 往目标地址写入异常指令
 int set_illegal_instruction(pid_t pid, unsigned long addr, struct pt_regs *backup_regs)
 {
+	// memset(OriginOpcode.bytes,0,sizeof(OriginOpcode.orig));
 	getdata(pid, addr, OriginOpcode.bytes, 4);
 	union
 	{
@@ -370,15 +376,8 @@ int set_illegal_instruction(pid_t pid, unsigned long addr, struct pt_regs *backu
 	data.uiArmillegalValue = 0xe7f000f0;
 	putdata(pid, addr, data.bytes, 4);
 	ptrace_cont(pid);
-	int status;
-	waitpid(pid, &status, WUNTRACED);
-	printf("status:%d\n", status);
-	if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGILL)
-	{
-		get_registers(pid, backup_regs);
-		return 0;
-	}
-	return -1;
+	
+	return 0;
 }
 // 恢复异常指令
 int recovery_illegal_instruction(pid_t pid, unsigned long addr, struct pt_regs backup_regs)
@@ -388,7 +387,7 @@ int recovery_illegal_instruction(pid_t pid, unsigned long addr, struct pt_regs b
 
 	return 0;
 }
-// hook 也就是把目标进程中的函数替换成自己的函数
+// replace function 是把目标进程中的函数替换成自己的函数
 int replace_function(pid_t pid, char *target_func_name, char *module_path, char *my_func_name, char *my_lib_path, long *parameters, long num_params)
 {
 	// 1. 根据名字获取目标进程中 函数的地址

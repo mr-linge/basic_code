@@ -235,23 +235,10 @@ int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_p
 		putdata(pid, (unsigned long)regs.ARM_sp, (uint8_t *)&parameters[i], (num_params - i) * sizeof(long));
 	}
 
-	//修改程序计数器
+	// 修改程序计数器
 	regs.ARM_pc = func_addr;
 
-	//判断指令集
-	// 与BX跳转指令类似，判断跳转的地址位[0]是否为1，如果为1，则将CPST寄存器的标志T置位，解释为Thumb代码
-	if (regs.ARM_pc & 1)
-	{
-		/*Thumb*/
-		regs.ARM_pc &= (~1u);
-		regs.ARM_cpsr |= CPSR_T_MASK;
-	}
-	else
-	{
-		/* ARM*/
-		regs.ARM_cpsr &= ~CPSR_T_MASK;
-	}
-
+	// 让程序执行完后，返回到 0 地址处，此时会触发异来。触发异常后 子进程会暂停，此时可以借机获取返回值
 	regs.ARM_lr = 0;
 
 	//设置好寄存器后，开始运行进程
@@ -267,7 +254,8 @@ int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_p
 	//	printf("status = 0x%x\n", stat);
 	while (stat != 0xb7f)
 	{
-		printf("%s %s %d stat = 0x%x\n", __FILE__, __FUNCTION__, __LINE__, stat);
+		sleep(5);
+		printf("<%s %s %d> wait status = 0x%x\n", __FILE__, __FUNCTION__, __LINE__, stat);
 		ptrace_cont(pid);
 		waitpid(pid, &stat, WUNTRACED);
 	}
@@ -352,23 +340,13 @@ unsigned long inject_library(pid_t pid, char *lib_path, struct pt_regs regs)
 	return module_addr;
 }
 
-union
-{
-	uint32_t orig;
-	uint8_t bytes[4];
-} OriginOpcode;
-// aarch64 往目标地址写入异常指令
 int set_illegal_instruction(pid_t pid, unsigned long addr, struct pt_regs *backup_regs)
 {
-	getdata(pid, addr, OriginOpcode.bytes, 4);
-	union
-	{
-		uint32_t uiArmillegalValue;
-		uint8_t bytes[4];
-	} data;
+	getdata(pid, addr, oneInstruction.bytes, 4);
+	union OneInstruction IllInstruction;
 	// aarch64 illegal instruction: 0xe7fXXXfX
-	data.uiArmillegalValue = 0xe7f000f0;
-	putdata(pid, addr, data.bytes, 4);
+	IllInstruction.instruction = illegal_instruction; // 0xe7f000f0;
+	putdata(pid, addr, IllInstruction.bytes, 4);
 	ptrace_cont(pid);
 	int status;
 	waitpid(pid, &status, WUNTRACED);
@@ -383,7 +361,7 @@ int set_illegal_instruction(pid_t pid, unsigned long addr, struct pt_regs *backu
 // 恢复异常指令
 int recovery_illegal_instruction(pid_t pid, unsigned long addr, struct pt_regs backup_regs)
 {
-	putdata(pid, addr, OriginOpcode.bytes, 4);
+	putdata(pid, addr, oneInstruction.bytes, 4);
 	set_registers(pid, &backup_regs);
 
 	return 0;
