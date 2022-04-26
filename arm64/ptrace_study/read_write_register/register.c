@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <string.h>
 
+// ARM32 寄存器结构体
 struct pt_regs
 {
 	long long uregs[34];
