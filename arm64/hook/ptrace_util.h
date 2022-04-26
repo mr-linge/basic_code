@@ -23,10 +23,10 @@ struct pt_regs
 #define ARM_r1 uregs[1]	 // 调用函数时保存第 2 个参数
 #define ARM_r2 uregs[2]	 // 调用函数时保存第 3 个参数
 #define ARM_r3 uregs[3]	 // 调用函数时保存第 4 个参数
-#define ARM_r1 uregs[4]	 // 调用函数时保存第 5 个参数
-#define ARM_r1 uregs[5]	 // 调用函数时保存第 6 个参数
-#define ARM_r2 uregs[6]	 // 调用函数时保存第 7 个参数
-#define ARM_r3 uregs[7]	 // 调用函数时保存第 8 个参数
+#define ARM_r4 uregs[4]	 // 调用函数时保存第 5 个参数
+#define ARM_r5 uregs[5]	 // 调用函数时保存第 6 个参数
+#define ARM_r6 uregs[6]	 // 调用函数时保存第 7 个参数
+#define ARM_r7 uregs[7]	 // 调用函数时保存第 8 个参数
 #define ARM_fp uregs[29] // X29 is the frame pointer register (FP). 用来定位有效的栈帧记录。帧指针寄存器，存放当前过程调用栈帧的起始地址，可使用FP别名引用
 #define ARM_lr uregs[30] // 链接寄存器，用于保存过程调用的返回地址，可使用LR别名引用
 /*
@@ -75,5 +75,5 @@ int call_munmap(pid_t pid, unsigned long start, unsigned long size, struct pt_re
 // 往进程中注入动态库
 unsigned long inject_library(pid_t pid, char *lib_path, struct pt_regs regs);
 
-// hook 也就是把目标进程中的函数规制成自己的函数
+// hook 也就是把目标进程中的函数替换成自己的函数
 int replace_function(pid_t pid, char *target_func_name, char *module_path, char *my_func_name, char *my_lib_path, long *parameters, long num_params);

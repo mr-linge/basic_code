@@ -33,28 +33,32 @@ int getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long le
 	return 0;
 }
 
-//  结束对目标进程的跟踪
-int end_tracke_process(pid_t target_pid) {
-    if (ptrace(PTRACE_DETACH, target_pid, NULL, NULL) < 0) {
-        perror("ptrace(DETACH):");
-        return -1;
-    }
-
-    return 0;
-}
-
-// 目标进程继续运行
-int continue_process(pid_t target_pid) {
-	if (ptrace(PTRACE_CONT, target_pid, NULL, NULL) < 0) {
-		perror("ptrace(DETACH):");
+// 让子进程继续运行
+int ptrace_cont(pid_t pid)
+{
+	printf("+ Continue process %d\n", pid);
+	if (ptrace(PTRACE_CONT, pid, NULL, NULL) < 0)
+	{
+		perror("ptrace(PTRACE_CONT)");
 		return -1;
 	}
+	return 0;
+}
 
+//  结束对目标进程的跟踪
+int ptrace_detach(pid_t pid)
+{
+	printf("+ Detach process %d\n", pid);
+	if (ptrace(PTRACE_DETACH, pid, NULL, NULL) < 0)
+	{
+		perror("ptrace(DETACH)");
+		return -1;
+	}
 	return 0;
 }
 
 //  附加到正在运行的进程
-int attach_process(pid_t target_pid) {
+int ptrace_attach(pid_t target_pid) {
 	printf("+ Tracing process %d\n", target_pid);
 	if (ptrace(PTRACE_ATTACH, target_pid, NULL, NULL) < 0) {
 		perror("ptrace(ATTACH):");
@@ -71,20 +75,20 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 
-	pid_t target_pid = atoi(argv[1]);
+	pid_t pid = atoi(argv[1]);
 	unsigned long addr = atol(argv[2]);
 	printf("addr : %lx\n", addr);
 
-	attach_process(target_pid);
+	ptrace_attach(pid);
 	wait(NULL);
 
 	unsigned long len = 32;
 	uint8_t *dst = (uint8_t *) calloc(len,1);
-	getdata(target_pid, addr, dst, len);
+	getdata(pid, addr, dst, len);
 
 	printf("dst:%p\nvalue:%s\n", (void *) addr, dst);
 
-	continue_process(target_pid);
+	ptrace_cont(pid);
 	//	int i = 0;
 	//	while(1) {
 	//		i++;
@@ -96,7 +100,7 @@ int main(int argc, char **argv) {
 	//		}
 	//	}
 
-	end_tracke_process(target_pid);
+	ptrace_detach(pid);
 
 	return 0;
 }

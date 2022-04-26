@@ -15,6 +15,7 @@ unsigned long get_module_base(int pid, char *module)
 	}
 	// search the libc-.....
 	buf = (char *)malloc(0x100);
+	// 查找过程要给个跳出条件，不然的话查找不到 程序会一直卡在查找这里
 	unsigned long loop_num = 0x10000000;
 	do
 	{
@@ -163,7 +164,7 @@ unsigned long offset_symbol(char *symbol,char *path,int bind,int type)
 	Elf64_Addr offset = 0;
 	handle_t h = init_elf_file(path);
 	offset = lookup_symbol_symtab(&h, symbol,bind,type);
-	if (offset == 0)
+	if (offset == 0) // 如果 section 信息被去掉则 symtab 不存在，就到 dynsym 表里去查找
 	{
 		offset = lookup_symbol_dynsym(&h, symbol,bind,type);
 	}

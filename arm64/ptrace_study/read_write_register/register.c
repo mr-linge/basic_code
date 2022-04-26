@@ -6,24 +6,28 @@
 #include <sys/wait.h>
 #include <string.h>
 
-// ARM32 寄存器结构体
+// ARM64 寄存器结构体
 struct pt_regs
 {
 	long long uregs[34];
 };
-#define ARM_r0   	uregs[0]            		// 存储R0寄存器的值，函数调用后的返回值会存储在R0寄存器中.调用函数时保存第 1 个参数
-#define ARM_r1   	uregs[1]			// 调用函数时保存第 2 个参数
-#define ARM_r2   	uregs[2]			// 调用函数时保存第 3 个参数
-#define ARM_r3   	uregs[3]			// 调用函数时保存第 4 个参数
-#define ARM_fp 		uregs[29]			// X29 is the frame pointer register (FP). 用来定位有效的栈帧记录。
-#define ARM_lr 		uregs[30]			// 远程进程的函数调用结束后，程序会跳转到LR寄存器存储的地址
+#define ARM_r0 uregs[0]	 // 存储R0寄存器的值，函数调用后的返回值会存储在R0寄存器中.调用函数时保存第 1 个参数
+#define ARM_r1 uregs[1]	 // 调用函数时保存第 2 个参数
+#define ARM_r2 uregs[2]	 // 调用函数时保存第 3 个参数
+#define ARM_r3 uregs[3]	 // 调用函数时保存第 4 个参数
+#define ARM_r4 uregs[4]	 // 调用函数时保存第 5 个参数
+#define ARM_r5 uregs[5]	 // 调用函数时保存第 6 个参数
+#define ARM_r6 uregs[6]	 // 调用函数时保存第 7 个参数
+#define ARM_r7 uregs[7]	 // 调用函数时保存第 8 个参数
+#define ARM_fp uregs[29] // X29 is the frame pointer register (FP). 用来定位有效的栈帧记录。帧指针寄存器，存放当前过程调用栈帧的起始地址，可使用FP别名引用
+#define ARM_lr uregs[30] // 链接寄存器，用于保存过程调用的返回地址，可使用LR别名引用
 /*
-X30 is the link register (LR). The branch-and-link instructions that store a return address in the link register (BL and BLR), setting the register X30 to PC+4.  
+X30 is the link register (LR). The branch-and-link instructions that store a return address in the link register (BL and BLR), setting the register X30 to PC+4.
 Calls to subroutines, where it is necessary for the return address to be stored in the link register(X30).
 */
-#define ARM_sp 		uregs[31]			// 存储当前的栈顶地址
-#define ARM_pc 		uregs[32]			// 存储当前的执行地址
-#define ARM_cpsr 	uregs[33] 			// 存储状态寄存器的值
+#define ARM_sp uregs[31]   // 栈指针寄存器，指向当前堆栈的栈顶
+#define ARM_pc uregs[32]   // 存储当前的执行地址
+#define ARM_cpsr uregs[33] // 存储状态寄存器的值
 
 
 int main(int argc, char *argv[])
@@ -42,7 +46,7 @@ int main(int argc, char *argv[])
 	wait(NULL);
 
 	struct pt_regs regs;
-	memset((void *)&regs,'\0',sizeof(struct pt_regs));
+	memset((void *)&regs,0,sizeof(struct pt_regs));
 
 
 	int regset = NT_PRSTATUS; //如果addr是NT_PRSTATUS，则读取通用寄存器。如果addr是NT_foo，则读取浮点或向量寄存器（如果有的话)

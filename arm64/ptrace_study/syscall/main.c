@@ -1,35 +1,35 @@
+#include <stdio.h>
 #include <sys/ptrace.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <stdio.h>
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <sys/syscall.h>
 
-// 自义 保存寄存器的 struct, 重命名这些寄存器内容便于理解
-struct pt_regs {
-	long long uregs[18];
+// ARM64 寄存器结构体
+struct pt_regs
+{
+	long long uregs[34];
 };
-#define ARM_cpsr uregs[16]
-#define ARM_pc   uregs[15]
-#define ARM_lr   uregs[14]
-#define ARM_sp   uregs[13]
-#define ARM_ip   uregs[12]
-#define ARM_fp   uregs[11]
-#define ARM_r10  uregs[10]
-#define ARM_r9   uregs[9]
-#define ARM_r8   uregs[8]
-#define ARM_r7   uregs[7]
-#define ARM_r6   uregs[6]
-#define ARM_r5   uregs[5]
-#define ARM_r4   uregs[4]
-#define ARM_r3   uregs[3]
-#define ARM_r2   uregs[2]
-#define ARM_r1   uregs[1]
-#define ARM_r0   uregs[0]
-#define ARM_ORIG_r0 uregs[17]
+#define ARM_r0 uregs[0]	 // 存储R0寄存器的值，函数调用后的返回值会存储在R0寄存器中.调用函数时保存第 1 个参数
+#define ARM_r1 uregs[1]	 // 调用函数时保存第 2 个参数
+#define ARM_r2 uregs[2]	 // 调用函数时保存第 3 个参数
+#define ARM_r3 uregs[3]	 // 调用函数时保存第 4 个参数
+#define ARM_r4 uregs[4]	 // 调用函数时保存第 5 个参数
+#define ARM_r5 uregs[5]	 // 调用函数时保存第 6 个参数
+#define ARM_r6 uregs[6]	 // 调用函数时保存第 7 个参数
+#define ARM_r7 uregs[7]	 // 调用函数时保存第 8 个参数
+#define ARM_fp uregs[29] // X29 is the frame pointer register (FP). 用来定位有效的栈帧记录。帧指针寄存器，存放当前过程调用栈帧的起始地址，可使用FP别名引用
+#define ARM_lr uregs[30] // 链接寄存器，用于保存过程调用的返回地址，可使用LR别名引用
+/*
+X30 is the link register (LR). The branch-and-link instructions that store a return address in the link register (BL and BLR), setting the register X30 to PC+4.
+Calls to subroutines, where it is necessary for the return address to be stored in the link register(X30).
+*/
+#define ARM_sp uregs[31]   // 栈指针寄存器，指向当前堆栈的栈顶
+#define ARM_pc uregs[32]   // 存储当前的执行地址
+#define ARM_cpsr uregs[33] // 存储状态寄存器的值
 
 #define CPSR_T_MASK (1u << 5)
 

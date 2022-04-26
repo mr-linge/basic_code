@@ -1,4 +1,4 @@
-base_dir = /usr/local/android/sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/linux-x86_64/bin/
+base_dir = /home/dio/Development/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/linux-x86_64/bin/
 cc = $(base_dir)aarch64-linux-android29-clang
 strip = $(base_dir)aarch64-linux-android-strip
 
@@ -9,7 +9,7 @@ source = main.c ptrace_util.c vaddr_by_symbol.c
 .so = libinject.so
 
 all: $(exec)
-	# @$(strip) ./$(exec)
+	@$(strip) ./$(exec)
 	@adb push ./$(exec) /data/local/tmp/work
 	@adb shell "chmod +x /data/local/tmp/work/$(exec)"	
 

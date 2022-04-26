@@ -388,7 +388,7 @@ int recovery_illegal_instruction(pid_t pid, unsigned long addr, struct pt_regs b
 
 	return 0;
 }
-// hook 也就是把目标进程中的函数规制成自己的函数
+// hook 也就是把目标进程中的函数替换成自己的函数
 int replace_function(pid_t pid, char *target_func_name, char *module_path, char *my_func_name, char *my_lib_path, long *parameters, long num_params)
 {
 	// 1. 根据名字获取目标进程中 函数的地址
@@ -461,7 +461,7 @@ int replace_function(pid_t pid, char *target_func_name, char *module_path, char 
 	ptrace_call(pid, func_addr, parameters, num_params, &result, new_regs);
 	printf("result = 0x%llx\n", result);
 
-	// 5. 调用成功后，根据需要改后程序执行逻辑，我这里就直接让函数返回 不再让被hook函数执行了.
+	// 5. 调用成功后，根据需要改变程序执行逻辑，我这里就直接让函数返回 不再让被hook函数执行了.
 	struct pt_regs mycode_run_regs;
 	// mycode_run_regs 是自己的函数执行完后寄存器的一些信息
 	get_registers(pid, &mycode_run_regs);
