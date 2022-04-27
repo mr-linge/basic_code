@@ -19,16 +19,18 @@ struct pt_regs entry_regs; // 进入函数时保存的寄存器, 用来获取函
 struct pt_regs leave_regs; // 函数调用结束保存的寄存器，用来获取返回值
 long long lr = 0;		   // 函数调用结束后，应该返回的地址
 
-// struct Hook_point_info
-// {
-// 	unsigned long entry_addr;			  // 待hook 函数在进程中的虚拟地址
-// 	union OneInstruction entry_point_code; // 函数开始处的原来数据(保存后便于以后还原)
-// 	struct pt_regs entry_regs;			  // 程序执行到函数开始处的寄存器信息
+struct Hook_point_info
+{
+	char func_name[0x100];					// 被hook函数名
+	
+	unsigned long entry_addr;			  // 待hook 函数在进程中的虚拟地址
+	union OneInstruction entry_point_code; // 函数开始处的原来数据(保存后便于以后还原)
+	struct pt_regs entry_regs;			  // 程序执行到函数开始处的寄存器信息
 
-// 	unsigned long back_addr;			 // 函数执行完，需要返回的地址.这里下断点为了取返回值
-// 	union OneInstruction back_point_code; // 函数执行完返回处的原来数据(保存后便于以后还原)
-// 	struct pt_regs back_regs;			 // 程序执行到函数返回地址处的寄存器信息
-// };
+	unsigned long back_addr;			 // 函数执行完，需要返回的地址.这里下断点为了取返回值
+	union OneInstruction back_point_code; // 函数执行完返回处的原来数据(保存后便于以后还原)
+	struct pt_regs back_regs;			 // 程序执行到函数返回地址处的寄存器信息
+};
 
 // 下断点并保存此位置原来数据 (aarch64 往目标地址写入异常指令)
 int set_breakpoint(pid_t pid, unsigned long addr)
@@ -51,6 +53,8 @@ int remove_breakpoint(pid_t pid, unsigned long addr)
 	// 删除断点，即恢复程序上下文信息
 	putdata(pid, addr, oneInstruction.bytes, 4);
 	set_registers(pid, &entry_regs);
+
+	return 0;
 }
 
 // 等待程序运行到 指定地址的断点处,然后保存断点处寄存器信息
@@ -61,7 +65,7 @@ long long wait_breakpoint(pid_t pid, unsigned long addr)
 	// printf("status:%d\n", status);
 	if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGILL)
 	{
-					// save context 保存断点处寄存器信息
+		// save context 保存断点处寄存器信息
 		get_registers(pid, &entry_regs);
 		if (entry_regs.ARM_pc == addr)
 		{
