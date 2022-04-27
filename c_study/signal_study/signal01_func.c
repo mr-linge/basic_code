@@ -29,7 +29,7 @@ param2:  func		 一个指向函数的指针。它可以是一个由程序定义�
   该函数返回信号处理程序之前的值，当发生错误时返回 SIG_ERR。
  **/
 
-void sighandler(int);
+void sighandler(int signum);
 
 int main() {
    signal(SIGINT, sighandler);

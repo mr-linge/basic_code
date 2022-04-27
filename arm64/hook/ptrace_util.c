@@ -238,23 +238,6 @@ int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_p
 	//修改程序计数器
 	regs.ARM_pc = func_addr;
 
-		//判断指令集
-	// 与BX跳转指令类似，判断跳转的地址位[0]是否为1，如果为1，则将CPST寄存器的标志T置位，解释为Thumb代码
-	if (regs.ARM_pc & 1)
-	{
-		/*Thumb*/
-		regs.ARM_pc &= (~1u);
-		regs.ARM_cpsr |= CPSR_T_MASK;
-	}
-	else
-	{
-		/* ARM*/
-		regs.ARM_cpsr &= ~CPSR_T_MASK;
-	}
-
-	// // aarch32 原来用来判断 是否为 thumb 指信集，如果不是就走这行代码。但现在是aarch64,估计这行代码不用加了 
-	// regs.ARM_cpsr &= ~CPSR_T_MASK;
-
 	// 让程序执行完后，返回到 0 地址处，此时会触发异来。触发异常后 子进程会暂停，此时可以借机获取返回值
 	regs.ARM_lr = 0;
 

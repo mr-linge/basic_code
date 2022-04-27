@@ -398,7 +398,7 @@ int replace_function(pid_t pid, char *target_func_name, char *module_path, char 
 	{
 		params[i] = illegal_regs.uregs[i];
 	}
-	if (i == 8)
+	if (i < num_params)
 	{
 		long long current_sp = illegal_regs.ARM_sp;
 		// printf("current_sp = 0x%llx\n", current_sp);
