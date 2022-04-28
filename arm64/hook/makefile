@@ -4,7 +4,15 @@ strip = $(base_dir)aarch64-linux-android-strip
 
 exec = main
 
-source = main.c ptrace_util.c vaddr_by_symbol.c
+source = main2.c ptrace_util.c vaddr_by_symbol.c
+
+source3 = main3.c hook_util.c ptrace_util.c vaddr_by_symbol.c 
+
+
+main3: $(source3)
+	@$(cc) $(source3) -o $(exec)
+	@adb push ./$(exec) /data/local/tmp/work
+	@adb shell "chmod +x /data/local/tmp/work/$(exec)"
 
 all: $(exec)
 	@$(strip) ./$(exec)

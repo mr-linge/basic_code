@@ -274,67 +274,6 @@ loop:
 	ptrace_detach(pid);
 }
 
-// void hook(pid_t pid, uint64_t func_addr, long long *old_params, long long *new_params, int num_params)
-// {
-// 	int ret;
-// 	ptrace_attach(pid);
-
-// loop:
-// 	// 在函数起始点设置断点
-// 	set_breakpoint(pid, func_addr);
-// 	// 运行程序
-// 	ptrace_cont(pid);
-// 	// 等待并判断 程序运行到函数开始位置的断点处
-// 	ret = wait_breakpoint(pid, func_addr);
-// 	if (ret != 0)
-// 	{
-// 		puts("wait breakpoint error");
-// 		exit(-1);
-// 	}
-
-// 	// 获取函数传进来的参数
-// 	if (old_params != NULL)
-// 	{
-// 		get_func_params(pid, old_params, num_params);
-// 	}
-
-// 	// 重新设置函数参数
-// 	if (new_params != NULL)
-// 	{
-// 		set_func_params(pid, new_params, num_params);
-// 	}
-
-// 	// 如果需要 获取函数返回值
-// 	lr = entry_regs.ARM_lr;
-// 	entry_regs.ARM_lr = 0;
-
-// 	// 获取到传进函数的参数后 称除断点，让程序按原来的轨迹运行
-// 	remove_breakpoint(pid, func_addr);
-// 	// 运行程序
-// 	ptrace_cont(pid);
-
-// 	// 等待并判断 程序运行到函数返回位置的断点处
-// 	ret = wait_func_return(pid);
-// 	if (ret != 0)
-// 	{
-// 		puts("wait funciton return error");
-// 		exit(-1);
-// 	}
-
-// 	long long func_return_value = leave_regs.ARM_r0;
-// 	printf("func_return_value : 0x%llx\n", func_return_value);
-
-// 	leave_regs.ARM_pc = lr;
-// 	set_registers(pid, &leave_regs);
-
-// 	if (signal_command == 0)
-// 	{
-// 		goto loop;
-// 	}
-
-// 	// 运行程序
-// 	ptrace_cont(pid);
-// }
 
 void sighandler(int signum);
 

@@ -7,7 +7,7 @@ exec = tracee
 source = tracee.c
 
 all: $(exec)
-	# @$(strip) ./$(exec)
+	@ # $(strip) ./$(exec)
 	@adb push ./$(exec) /data/local/tmp/work
 	@adb shell "chmod +x /data/local/tmp/work/$(exec)"	
 	

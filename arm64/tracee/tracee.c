@@ -59,6 +59,13 @@ int func20(int p1, int p2, int p3, int p4, int p5, int p6, int p7, int p8, int p
 	return p1 + p20;
 }
 
+int func21(int p1, int p2, int p3, int p4, int p5, int p6, int p7, int p8, int p9, int p10, int p11, int p12, int p13, int p14, int p15, int p16, int p17, int p18, int p19, int p20)
+{
+	printf("<%s> p1 = %x,p2 = %x,p3 = %x,p4 = %x,p5 = %x,p6 = %x,p7 = %x,p8 = %x,p9 = %x,p10 = %x,p11 = %x,p12 = %x,p13 = %x,p14 = %x,p15 = %x,p16 = %x,p17 = %x,p18 = %x,p19 = %x,p20 = %x\n",
+		   __FUNCTION__, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20);
+	return p1 * p20;
+}
+
 void virtual_stack_100(uint8_t *stack_bottom, int len)
 {
 	printf("virtual stack: 0x%p\n", stack_bottom);
@@ -81,6 +88,7 @@ int main()
 	printf("&func2           addr: %p\n", &func2);
 	printf("&func10          addr: %p\n", &func10);
 	printf("&func20          addr: %p\n", &func20);
+	printf("&func21          addr: %p\n", &func21);
 	puts("输入控制指令\n1:调用func1\n2:调用func2\n......\n999:退出程序.");
 
 	int len = 64;
@@ -140,8 +148,14 @@ int main()
 		}
 		case 20:
 		{
-			int result = func20(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+			int result = func20(0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x20);
 			printf("<%s> func20 return value : 0x%x\n", __FUNCTION__, result);
+			break;
+		}
+		case 21:
+		{
+			int result = func21(0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x100, 0x111, 0x122, 0x133, 0x144, 0x155, 0x166, 0x177, 0x188, 0x199, 0x200);
+			printf("<%s> func21 return value : 0x%x\n", __FUNCTION__, result);
 			break;
 		}
 		case 100:

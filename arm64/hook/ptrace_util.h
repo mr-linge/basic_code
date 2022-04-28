@@ -12,7 +12,6 @@
 #include <sys/uio.h> // struct iovec
 #include <elf.h>	 // NT_PRSTATUS
 
-#include "vaddr_by_symbol.h"
 
 // ARM64 寄存器结构体
 struct pt_regs
@@ -65,15 +64,3 @@ int putdata(pid_t pid, unsigned long addr, uint8_t *src, unsigned long len);
 int push_stack(int pid, unsigned long long *sp, long *param, int len);
 // 以地址 sp 为基址，往这块内堆中 pop  数据，可以操纵远程进程 stack
 int pop_stack(int pid, unsigned long long *sp, long *param, int len);
-
-// 远程调用函数
-int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_params, long long *result, struct pt_regs regs);
-// 调用 mmap 建立匿名映射空间
-long long call_mmap(pid_t pid, unsigned long size, struct pt_regs regs);
-// 调用 munmap 解除一个映射关系
-int call_munmap(pid_t pid, unsigned long start, unsigned long size, struct pt_regs regs);
-// 往进程中注入动态库
-unsigned long inject_library(pid_t pid, char *lib_path, struct pt_regs regs);
-
-// replace function 是把目标进程中的函数替换成自己的函数
-int replace_function(pid_t pid, char *target_func_name, char *module_path, char *my_func_name, char *my_lib_path, long *parameters, long num_params);
