@@ -33,6 +33,18 @@ int func2(int p1, int p2)
 	return p1 * p2;
 }
 
+char *func3(char *str)
+{
+	printf("<%s %d> origin param string: %s\n", __FUNCTION__, __LINE__, str);
+	char *ret = "You will be success!";
+	printf("<%s %d> param vaddr: %p, ret :%p\n", __FUNCTION__, __LINE__, str, ret);
+	char tmp[0x100];
+	memset(tmp,0,0x100);
+	memcpy(tmp,str,strlen(str));
+	printf("<%s %d> tmp string: %s, vaddr:%p\n", __FUNCTION__, __LINE__, tmp, &(tmp[0]));
+	return ret;
+}
+
 void read_mem(unsigned long vaddr, unsigned long len)
 {
 	printf("Hello, this is read_mem ...\n");
@@ -86,6 +98,7 @@ int main()
 {
 	printf("&func1           addr: %p\n", &func1);
 	printf("&func2           addr: %p\n", &func2);
+	printf("&func3           addr: %p\n", &func3);
 	printf("&func10          addr: %p\n", &func10);
 	printf("&func20          addr: %p\n", &func20);
 	printf("&func21          addr: %p\n", &func21);
@@ -144,6 +157,12 @@ int main()
 		{
 			int result = func1(10);
 			printf("<%s> func1 return value : 0x%x\n", __FUNCTION__, result);
+			break;
+		}
+		case 3:
+		{
+			char *ret = func3("Good luck are for you!");
+			printf("<%s %d>return value: %s\n", __FUNCTION__, __LINE__, ret);
 			break;
 		}
 		case 20:

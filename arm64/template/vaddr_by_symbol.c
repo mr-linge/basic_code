@@ -28,7 +28,7 @@ unsigned long get_module_base(int pid, char *module)
 		return 0;
 	}
 	moduleAddr = strtol(buf, NULL, 16);
-	printf("The process %d's module(%s) base is: 0x%lx\n", pid, module, moduleAddr);
+	// printf("The process %d's module(%s) base is: 0x%lx\n", pid, module, moduleAddr);
 	fclose(fd);
 
 	return moduleAddr;
@@ -197,13 +197,13 @@ unsigned long get_vaddr_in_system_moudle(pid_t pid,char *symbol,int bind,int typ
 // 计算指定模块中 symbol 在进程中的虚拟地址
 unsigned long get_vaddr(pid_t pid,char *symbol,char *module_path,int bind,int type) {
 	unsigned long base = get_module_base(pid,module_path);
-	printf("base:           0x%lx\n", base);
+	// printf("base:           0x%lx\n", base);
 
 	unsigned long offset = offset_symbol(symbol,module_path,bind,type);
-	printf("offset:         0x%lx\n", offset);
+	// printf("offset:         0x%lx\n", offset);
 
 	unsigned long vaddr = base + offset; //  模块在目标进程中的基址 加上函数在模块内的偏移 就是函数在目标进程中的虚拟地址 
-	printf("vaddr:          0x%lx\n", vaddr);
+	// printf("vaddr:          0x%lx\n", vaddr);
 
 	return vaddr;
 }

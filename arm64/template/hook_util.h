@@ -8,8 +8,6 @@ union OneInstruction
 	uint32_t instruction;
 	uint8_t bytes[4];
 };
-// 全局共享变量, 一条 aarch64 指令
-union OneInstruction oneInstruction;
 // aarch64 illegal instruction: 0xe7fXXXfX
 const static uint32_t illegal_instruction = 0xe7f000f0; // aarch64 的异常指令 0xe7f000f0
 

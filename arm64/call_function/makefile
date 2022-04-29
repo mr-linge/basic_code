@@ -4,7 +4,7 @@ strip = $(base_dir)aarch64-linux-android-strip
 
 exec = main
 
-source = main.c ptrace_util.c vaddr_by_symbol.c
+source = main.c call_func.c ptrace_util.c vaddr_by_symbol.c
 
 .so = libinject.so
 

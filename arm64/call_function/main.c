@@ -1,4 +1,6 @@
-#include "ptrace_util.h"
+//#include "ptrace_util.h"
+#include "call_func.h"
+// #include "vaddr_by_symbol.h"
 
 // 进程注入 test
 unsigned long call_inject_library_test(pid_t pid)

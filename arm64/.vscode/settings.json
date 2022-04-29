@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "hook_util.h": "c",
-        "ptrace_util.h": "c"
-    }
-}
