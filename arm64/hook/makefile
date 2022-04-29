@@ -4,9 +4,11 @@ strip = $(base_dir)aarch64-linux-android-strip
 
 exec = main
 
-source = main2.c ptrace_util.c vaddr_by_symbol.c
-
 source3 = main3.c hook_util.c ptrace_util.c vaddr_by_symbol.c 
+
+ssl_source = hook_util.c ptrace_util.c vaddr_by_symbol.c android_ssl.c
+
+android_source = hook_util.c ptrace_util.c vaddr_by_symbol.c android_so.c
 
 
 main3: $(source3)
@@ -14,14 +16,17 @@ main3: $(source3)
 	@adb push ./$(exec) /data/local/tmp/work
 	@adb shell "chmod +x /data/local/tmp/work/$(exec)"
 
-all: $(exec)
+ssl: $(ssl_source)
+	@$(cc) $(ssl_source) -o $(exec)
 	@$(strip) ./$(exec)
 	@adb push ./$(exec) /data/local/tmp/work
 	@adb shell "chmod +x /data/local/tmp/work/$(exec)"
 
-$(exec): $(source)
-	@-rm $(exec)
-	@$(cc) $(source) -o $(exec)
+android:$(android_source)
+	@$(cc) $(android_source) -o $(exec)
+	@$(strip) ./$(exec)
+	@adb push ./$(exec) /data/local/tmp/work
+	@adb shell "chmod +x /data/local/tmp/work/$(exec)"
 
 clean:
 	@-rm $(exec)

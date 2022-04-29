@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 	}
 
 	pid_t pid = atoi(argv[1]);
-	unsigned long addr = atol(argv[2]);
+	unsigned long addr = strtoul(argv[2], NULL, 16);
 	printf("addr : %lx\n", addr);
 
 	ptrace_attach(pid);

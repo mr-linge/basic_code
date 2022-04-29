@@ -26,9 +26,11 @@ int onEnter(char *func_name, unsigned long func_vaddr, long long *argv)
     if (strcmp(func_name, "func3") == 0)
     {
         printf("return value : 0x%llx\n", argv[0]);
-        uint8_t str[0x100];
-        getdata(pid, argv[0], str, 20);
-        printf("argv[0]:%s\n", (char *)argv[0]);
+        unsigned long len = 32;
+        uint8_t *dst = (uint8_t *) calloc(len,1);
+        // uint8_t str[0x100];
+        getdata(pid, argv[0], dst, len);
+        printf("argv[0]:%s\n", dst);
         // argv[1] = 0xaaaaaaaa;
     }
 
@@ -53,9 +55,12 @@ int onLeave(char *func_name, unsigned long func_vaddr, long long *argv)
     if (strcmp(func_name, "func3") == 0)
     {
         printf("return value : 0x%llx\n", *argv);
-        uint8_t str[0x100];
-        getdata(pid, *argv, str, 20);
-        printf("*argv:%s\n", (char *)*argv);
+        unsigned long len = 0x100;
+        //uint8_t str[0x100];
+        uint8_t * dst = (uint8_t *)malloc(len);
+        memset(dst,0,len);
+        getdata(pid, *argv, dst, 20);
+        printf("*argv:%s\n", dst);
         // *argv = 0xaaaaaaaa;
     }
 
