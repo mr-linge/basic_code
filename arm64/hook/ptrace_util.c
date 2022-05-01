@@ -30,7 +30,7 @@ int ptrace_cont(pid_t pid)
 	if (ptrace(PTRACE_CONT, pid, NULL, NULL) < 0)
 	{
 		perror("ptrace(PTRACE_CONT)");
-		return -1;
+		exit(-1);
 	}
 	return 0;
 }

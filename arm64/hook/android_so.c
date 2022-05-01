@@ -30,6 +30,7 @@ int onEnter(char *func_name, unsigned long func_vaddr, long long *argv)
 int onLeave(char *func_name, unsigned long func_vaddr, long long *argv)
 {
     printf("onLeave -------> func_name: %s, func_vaddr: %lx <-------\n", func_name, func_vaddr);
+    
     if (strcmp(func_name, func_name_hook) == 0)
     {
         printf("return value : 0x%llx\n", *argv);
@@ -67,8 +68,7 @@ int main(int argc, char **argv)
 
     struct Hooked_func ssl_read;
     memset(&ssl_read, 0, sizeof(struct Hooked_func));
-    char *ssl_read_name = "Java_com_my_fridademo_MainActivity_hookSO2";
-    memcpy(ssl_read.func_name, ssl_read_name, strlen(ssl_read_name));
+    memcpy(ssl_read.func_name, func_name_hook, strlen(func_name_hook));
     char *ssl_read_module_path = "/data/app/com.my.fridademo-lK-FxQur3aTpxfxQwPbQlA==/lib/arm64/libnative-lib.so";
     memcpy(ssl_read.module_path, ssl_read_module_path, strlen(ssl_read_module_path));
     ssl_read.func_vaddr = 0; // 0x5a5726ba00;
