@@ -1,5 +1,4 @@
 #include "sequlist.h"
-#include <stdio.h>
 
 /*
  * init table
