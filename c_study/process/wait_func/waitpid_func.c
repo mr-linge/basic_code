@@ -10,7 +10,7 @@ function:
 pid_t waitpid(pid_t pid, int *status, int options);
 
 Description:
-waitpid()会暂时停止目前进程的执行, 直到有信号来到或子进程结束. 如果在调用wait()时子进程已经结束, 则wait()会立即返回子进程结束状态值. 子进程的结束状态值会由参数status 返回, 而子进程的进程识别码也会一快返回. 如果不在意结束状态值, 则参数status 可以设成NULL. 参数pid为欲等待的子进程识别码.
+waitpid()会暂时停止目前进程的执行, 直到有信号来到或子进程结束. 如果在调用waitpid()时子进程已经结束, 则waitpid()会立即返回子进程结束状态值. 子进程的结束状态值会由参数status 返回, 而子进程的进程识别码也会一起返回. 如果不在意结束状态值, 则参数status 可以设成NULL. 参数pid为欲等待的子进程识别码.
 
 params:
 pid_t pid
@@ -40,9 +40,9 @@ error no：
 注意:
 wait() 和waitpid() 的区别
 wait等待第一个终止的子进程，而waitpid可以通过pid参数指定等待哪一个子进程。当pid=-1、option=0时，waitpid函数等同于wait，可以把wait看作waitpid实现的特例。
-waitpid函数提供了wait函数没有提供的三个功能：
+waitpid函数提供了wait函数没有提供的三个功能:
 1、waitpid等待一个特定的进程，而wait则返回任一终止子进程的状态 。
-2、waitpid提供了一个 wait的非阻塞版本，有时希望取得一个子进程的状态， 但不想进程阻塞。
+2、waitpid提供了一个 wait的非阻塞版本,有时希望取得一个子进程的状态,但不想进程阻塞。
 3、waitpid支持作业控制。
  * */
 int main(void)
