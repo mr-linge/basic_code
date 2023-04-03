@@ -10,13 +10,16 @@
 #include <unistd.h>
 
 int port = 8000;
-int listen_port = 5;	//最大监听数
+int listen_port = 5; // 最大监听数
 
-int main(int argc, char *argv[]) {
-	int fd, new_fd, struct_len, numbytes, i;
+int main(int argc, char *argv[])
+{
+	int sockfd, client_fd, i;
+	unsigned int struct_len, numbytes;
 	struct sockaddr_in server_addr;
 	struct sockaddr_in client_addr;
 	char buff[BUFSIZ];
+	bzero(buff, BUFSIZ);
 
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(port);
@@ -24,32 +27,50 @@ int main(int argc, char *argv[]) {
 	bzero(&(server_addr.sin_zero), sizeof(server_addr.sin_zero));
 	struct_len = sizeof(struct sockaddr_in);
 
-	fd = socket(AF_INET, SOCK_STREAM, 0);
-	while(bind(fd, (struct sockaddr *)&server_addr, struct_len) == -1);
-	if(listen(fd, listen_port) == -1){
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockfd == -1)
+	{
+		printf("socket create fail!\n");
+		return -1;
+	}
+	int ret;
+	do
+	{
+		ret = bind(sockfd, (struct sockaddr *)&server_addr, struct_len);
+	} while (ret != -1);
+
+	if (listen(sockfd, listen_port) == -1)
+	{ // 监听 port
 		printf("Listening fail\n");
 		return -1;
 	}
 
 	printf("Ready for Accept,Waitting...\n");
-	new_fd = accept(fd, (struct sockaddr *)&client_addr, &struct_len);
-	printf("Get the Client.\n");
-	char *msg = "Welcome to my server!";
-	if(send(new_fd,msg,strlen(msg),0) < 0) {
-		perror("write");
-		return 1;
-	}
-	while((numbytes = recv(new_fd, buff, BUFSIZ, 0)) > 0)
+	client_fd = accept(sockfd, (struct sockaddr *)&client_addr, &struct_len);
+	printf("Client was accepting\n");
+
+	while (1)
 	{
-		buff[numbytes] = '\0';
-		printf("%s\n",buff);
-		if(send(new_fd,buff,numbytes,0) < 0) {
-			perror("write");
-			return 1;
+		// recv 返回接收的数据长度
+		numbytes = recv(client_fd, buff, BUFSIZ, 0);
+		if (numbytes > 0)
+		{
+			buff[numbytes] = '\0'; // 把接收到的二进制数据当作字符串来处理
+			strcat(buff, " | your message was received!");
+			if (send(client_fd, buff, strlen(buff) - 1, 0) < 0)
+			{
+				perror("write");
+				return -1;
+			}
+			bzero(buff, BUFSIZ);
+		}
+		else
+		{
+			printf("Received message was null!\n");
+			close(client_fd);
+			close(sockfd);
+			break;
 		}
 	}
-	close(new_fd);
-
-	close(fd);
 	return 0;
 }

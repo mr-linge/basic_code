@@ -1,4 +1,4 @@
-  1、int socket(int family,int type,int protocol)
+1、int socket(int family,int type,int protocol)
 family:
 指定使用的协议簇:AF_INET（IPv4） AF_INET6（IPv6） AF_LOCAL（UNIX协议） AF_ROUTE（路由套接字） AF_KEY（秘钥套接字）
 type:
@@ -51,4 +51,3 @@ buf:
 存放接收数据的缓冲区
 len:
 数据的长度，把flags设置为0
-

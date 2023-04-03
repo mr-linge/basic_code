@@ -33,7 +33,7 @@ X30 is the link register (LR). The branch-and-link instructions that store a ret
 Calls to subroutines, where it is necessary for the return address to be stored in the link register(X30).
 */
 #define ARM_sp uregs[31]   // 栈指针寄存器，指向当前堆栈的栈顶
-#define ARM_pc uregs[32]   // 存储当前的执行地址
+#define ARM_pc uregs[32]   // 存储当前正在执行的指令地址
 #define ARM_cpsr uregs[33] // 存储状态寄存器的值
 
 #define CPSR_T_MASK (1u << 5)
