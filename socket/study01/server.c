@@ -1,20 +1,20 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
 int port = 8000;
 int listen_port = 5; // 最大监听数
 
 int main(int argc, char *argv[])
 {
-	int sockfd, client_fd, i;
+	int sockfd, client_fd;
 	unsigned int struct_len;
 	unsigned long numbytes;
 	struct sockaddr_in server_addr;
@@ -26,9 +26,9 @@ int main(int argc, char *argv[])
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(port);
 	server_addr.sin_addr.s_addr = INADDR_ANY;
-	bzero(&(server_addr.sin_zero), sizeof(server_addr.sin_zero));
-
 loop:
+	bzero(&(server_addr.sin_zero), sizeof(server_addr.sin_zero));
+	
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1)
 	{
