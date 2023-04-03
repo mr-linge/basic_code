@@ -16,7 +16,7 @@ char *addr = "127.0.0.1";
 int main(int argc, char *argv[])
 {
 	int sockfd;
-	unsigned int numbytes;
+	unsigned long numbytes;
 	char buff[BUFSIZ];
 	bzero(buff, BUFSIZ);
 	struct sockaddr_in server_addr;
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			printf("Received message was null!\n");
+			printf("Server accepting close!\n");
 			close(sockfd);
 			break;
 		}

@@ -15,7 +15,8 @@ int listen_port = 5; // 最大监听数
 int main(int argc, char *argv[])
 {
 	int sockfd, client_fd, i;
-	unsigned int struct_len, numbytes;
+	unsigned int struct_len;
+	unsigned long numbytes;
 	struct sockaddr_in server_addr;
 	struct sockaddr_in client_addr;
 	char buff[BUFSIZ];
@@ -27,6 +28,7 @@ int main(int argc, char *argv[])
 	server_addr.sin_addr.s_addr = INADDR_ANY;
 	bzero(&(server_addr.sin_zero), sizeof(server_addr.sin_zero));
 
+loop:
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1)
 	{
@@ -56,6 +58,7 @@ int main(int argc, char *argv[])
 		if (numbytes > 0)
 		{
 			buff[numbytes] = '\0'; // 把接收到的二进制数据当作字符串来处理
+			printf("message from client:%s\n", buff);
 			strcat(buff, " | your message was received!");
 			if (send(client_fd, buff, strlen(buff) - 1, 0) < 0)
 			{
@@ -66,11 +69,13 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			printf("Received message was null!\n");
+			printf("Client accepting close!\n");
 			close(client_fd);
 			close(sockfd);
 			break;
 		}
 	}
+
+	goto loop;
 	return 0;
 }
