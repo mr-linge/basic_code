@@ -20,12 +20,12 @@ int main(int argc, char *argv[])
 	struct sockaddr_in client_addr;
 	char buff[BUFSIZ];
 	bzero(buff, BUFSIZ);
+	struct_len = sizeof(struct sockaddr_in);
 
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(port);
 	server_addr.sin_addr.s_addr = INADDR_ANY;
 	bzero(&(server_addr.sin_zero), sizeof(server_addr.sin_zero));
-	struct_len = sizeof(struct sockaddr_in);
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1)
