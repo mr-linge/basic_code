@@ -1,10 +1,21 @@
 Pointer
 
+
+指针与地址
+type * p = (type *) malloc(n * sizeof(type)); 
+p + i 的步长为 sizeof(type)
+unsigned long step1 =  (p + 1);
+unsigned long step2 =  (p + 2);
+unsigned long step =  step2 - step1;
+step 与 sizeof(type) 相等
+直接 char * new_p =  (char *)p; (new_p + 1)的步长就为 1了
+
+
 pointer and array
 array 就是通过 pointer 实现的，数组名是一个地址（首元素地址），即是一个指针常量。（不是指针变量）
 指针也可以通过下标管理数据
 type * p = (type *) malloc(n * sizeof(type)); 
-*(p + (i * sizeof(Type))) == p[i]
+*(p + i) 等价 p[i]
 区别:
 数组存储在 Stack 栈上
 指针存储在 Heap  堆上 
