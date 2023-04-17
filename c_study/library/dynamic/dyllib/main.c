@@ -37,8 +37,8 @@ static int callback(struct dl_phdr_info *info, size_t size, void *data) {
 }
 
 int main() {
-	puts("call hello()");
-	hello();
+    int ret = mul(10,10);
+    printf("dynamic lib--->mul:%d\n", ret);
 
 	dl_iterate_phdr(callback, NULL);
 
