@@ -1,10 +1,8 @@
 #include <stdio.h>
-#include <math.h>
+#include "add.h"
 
-int main(int argc, char *argv[])
+int main()
 {
-    int b = 2;
-    double a = exp(b);
-    printf("%lf\n", a);
+    printf("1 + 2 = %d\n", add(1, 2));
     return 0;
 }
