@@ -10,7 +10,7 @@ object:
 # 动态库文件名命名规范和静态库文件名命名规范类似，也是在动态库名增加前缀lib，但其文件扩展名为.so
 # -fPIC:产生位置无关代码
 # -shared:生成共享库
-dylib:
+dylib: object
 	${cc} -shared -fPIC -o libmymath.so add.o sub.o
 
 

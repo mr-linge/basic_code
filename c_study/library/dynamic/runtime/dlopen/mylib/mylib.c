@@ -23,7 +23,7 @@ static Test config = {
     .i = 0,
     .echo_fun = __printf,
 };
- 
+
 //加载动态库的自动初始化函数
 void _init(void) {
     printf("init\n");
