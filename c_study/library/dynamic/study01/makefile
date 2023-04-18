@@ -1,4 +1,4 @@
-cc=gcc
+cc=clang
 
 # 将.c 编译生成 .o文件, 无论是静态库文件还是动态库文件，都是由 .o 文件创建的
 object:
@@ -23,9 +23,9 @@ program: object dylib
 
 exec: program
 # 环境变量LD_LIBRARY_PATH指定动态库搜索路径(在 shell 里执行)
-#	export LD_LIBRARY_PATH=./
+	export LD_LIBRARY_PATH=./
 # 默认的动态库搜索路径 /lib  /usr/lib
-	 sudo mv libmymath.so /usr/lib
+#	 sudo mv libmymath.so /usr/lib
 	./main
 
 
