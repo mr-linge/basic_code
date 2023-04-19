@@ -21,9 +21,9 @@
 
 
 ## 链接动态库或静态库
-linux 默认的依赖库搜索路径: /lib  /usr/lib
+linux 下编译和执行ELF文件时,默认的依赖库搜索路径: /lib  /usr/lib
 
-使用-L指定依赖库搜索路径
+编译时使用-L指定依赖库搜索路径
 gcc main.c -o main -L./ -lmymath
 在 ./ 目录下链接 libmymath.so或libmymath.a,当目录下同时有静态库和动态库时,优先链接动态库. 
 
