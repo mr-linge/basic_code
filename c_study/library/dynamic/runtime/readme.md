@@ -51,6 +51,6 @@ dlerror() 包含头文件: #include <dlfcn.h>
 函数原型: const char *dlerror(void); 
 函数描述: 当动态链接库操作函数执行失败时,dlerror可以返回出错信息,返回值为NULL时表示操作函数执行成功。
 
-## 注意
+### 注意
 #include <dlfcn.h> 里的函数 dlopen、dlsym、dlclose、dlerror 没有在libc库中,gcc编译时要指定链接libdl.so或libdl.a库 -ldl
 如 gcc main.c -o main -ldl
