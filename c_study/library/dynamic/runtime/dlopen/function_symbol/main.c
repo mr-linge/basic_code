@@ -46,7 +46,7 @@ int main() {
 	cac_func = dlsym(handle, "div");
 	printf("div: %d\n", cac_func(8,2));
 
-	while(1);
+	// while(1);
 
 	//关闭动态链接库,关闭后该动态库就会从 当前进程中 移除
 	dlclose(handle);
