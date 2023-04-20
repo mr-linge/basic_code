@@ -21,14 +21,14 @@ program: object dylib
 	${cc} -o main main.c -L./ -lmymath
 
 
-exec: program
+all: program
 # 环境变量LD_LIBRARY_PATH指定动态库搜索路径(在 shell 里执行)
 	export LD_LIBRARY_PATH=./
-# 默认的动态库搜索路径 /lib  /usr/lib
+# 默认的动态库搜索路径 /lib  /usr/lib  /usr/local/lib
 #	 sudo mv libmymath.so /usr/lib
 	./main
 
 
 clean:
 	@-rm -rf *.o *.so ./main
-	@-sudo rm -rf /usr/lib/libmymath.so
+	@-sudo rm -rf /usr/local/lib/libmymath.so /usr/lib/libmymath.so

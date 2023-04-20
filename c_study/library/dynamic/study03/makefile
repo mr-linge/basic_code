@@ -4,7 +4,8 @@ cc=clang
 # 先编译一个静态库
 static_library:
 	${cc} -c add.c -o add.o
-	ar -cr libmymath.a add.o
+	${cc} -c sub.c -o sub.o
+	ar -cr libmymath.a add.o sub.o
 
 
 # 编译的动态库需要引用另一个静态库
@@ -14,7 +15,7 @@ dynamic_library: static_library
 	 ${cc} -shared -fPIC func.o libmymath.a -o libmymath.so
 	 @rm -rf libmymath.a
 
-# 	下面这种方式在linux下也是可以使用的,而且编译的动态库体积更小
+# 	下面这种方式在linux下也是可以使用的
 #	 ${cc} -c func.c -o func.o
 #	 ${cc} -shared -fPIC -static func.o -o libmymath.so -L./ -lmymath
 #	 @rm -rf libmymath.a
