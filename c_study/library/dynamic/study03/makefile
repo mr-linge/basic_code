@@ -13,12 +13,10 @@ static_library:
 dynamic_library: static_library
 	 ${cc} -c func.c -o func.o
 	 ${cc} -shared -fPIC func.o libmymath.a -o libmymath.so
-	 @rm -rf libmymath.a
 
 # 	下面这种方式 linux clang 是支持的
 #	 ${cc} -c func.c -o func.o
 #	 ${cc} -shared -fPIC -static func.o -o libmymath.so -L./ -lmymath
-#	 @rm -rf libmymath.a
 
 
 # -L 指定依赖库查找的位置，注意L后面还有'./',表示在当前目录下查找
@@ -36,5 +34,5 @@ all: program
 
 
 clean:
-	@-rm -rf *.o *.so ./main
+	@-rm -rf *.o *.so *.a ./main
 	@-sudo rm -rf /usr/lib/libmymath.so
