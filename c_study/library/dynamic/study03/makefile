@@ -1,4 +1,4 @@
-cc=clang
+cc=gcc
 
 
 # 先编译一个静态库
@@ -15,14 +15,14 @@ dynamic_library: static_library
 	 ${cc} -shared -fPIC func.o libmymath.a -o libmymath.so
 	 @rm -rf libmymath.a
 
-# 	下面这种方式在linux下也是可以使用的
+# 	下面这种方式 linux clang 是支持的
 #	 ${cc} -c func.c -o func.o
 #	 ${cc} -shared -fPIC -static func.o -o libmymath.so -L./ -lmymath
 #	 @rm -rf libmymath.a
 
-# 在程序中使用静态库
-# -L 指定函数库查找的位置，注意L后面还有'./',表示在当前目录下查找
-# -l 指定函数库名，其中的lib和.a(.so)省略。
+
+# -L 指定依赖库查找的位置，注意L后面还有'./',表示在当前目录下查找
+# -l 指定依赖库名，其中的lib和.a(.so)省略。
 program: dynamic_library
 	${cc} -o main main.c -L./ -lmymath
 

@@ -14,9 +14,8 @@ dylib: object
 	${cc} -shared -fPIC -o libmymath.so add.o sub.o
 
 
-# 在程序中使用静态库
-# -L 指定函数库查找的位置，注意L后面还有'./',表示在当前目录下查找
-# -l 指定函数库名，其中的lib和.a(.so)省略。
+# -L 指定依赖库查找的位置，注意L后面还有'./',表示在当前目录下查找
+# -l 指定依赖库名，其中的lib和.a(.so)省略。
 program: object dylib
 	${cc} -o main main.c -L./ -lmymath
 
