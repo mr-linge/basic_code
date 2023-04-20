@@ -14,9 +14,11 @@ dylib: object
 	${cc} -shared -fPIC -o libmymath.so add.o sub.o
 
 
-# -L 指定依赖库查找的位置，注意L后面还有'./',表示在当前目录下查找
-# -l 指定依赖库名，其中的lib和.a(.so)省略。
+# -L  					编译时指定依赖库搜寻目录,如指定当前目录 gcc -L./
+# -l    				编译时指定要链接的依赖库的名称,如库的名称是libtest.a,则 -ltest 即去头去尾
+# -Wl,-rpath=<path> 	编译时指定运行时动态库搜索路径
 program: object dylib
+#	${cc} -Wl,-rpath=./ -o main main.c -L./ -lmymath
 	${cc} -o main main.c -L./ -lmymath
 
 

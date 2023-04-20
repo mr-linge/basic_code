@@ -18,10 +18,8 @@ dynamic_library: static_library
 #	 ${cc} -c func.c -o func.o
 #	 ${cc} -shared -fPIC -static func.o -o libmymath.so -L./ -lmymath
 
-
-# -L 指定依赖库查找的位置，注意L后面还有'./',表示在当前目录下查找
-# -l 指定依赖库名，其中的lib和.a(.so)省略。
 program: dynamic_library
+#	${cc} -Wl,-rpath=./ -o main main.c -L./ -lmymath
 	${cc} -o main main.c -L./ -lmymath
 
 
