@@ -10,8 +10,19 @@ static_library:
 # 编译的动态库需要引用另一个静态库
 # 把静态库里的 object file 与 动态库的 object file链接成一个动态库
 dynamic_library: static_library
+#	 ${cc} -c func.c -o func.o
+#	 ${cc} -shared -fPIC func.o libmymath.a -o libmymath.so
+#	 @rm -rf libmymath.a
+
+# 	or
 	${cc} -c func.c -o func.o
-	${cc} -shared -fPIC func.o libmymath.a -o libmymath.so
+	${cc} -shared -fPIC -static func.o -o libmymath.so -L./ -lmymath
+	@rm -rf libmymath.a
+
+
+test: static_library
+	${cc} -c func.c -o func.o
+	${cc} -shared -fPIC -static func.o -o libmymath.so -L./ -lmymath
 	@rm -rf libmymath.a
 
 
