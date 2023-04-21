@@ -27,5 +27,5 @@ static Test config = {
 //加载动态库的自动初始化函数
 void _init(void) {
     printf("init\n");
-    __register(&config);//调用主程序的注册函数
+    // __register(&config);//调用主程序的注册函数
 }
