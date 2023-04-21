@@ -3,10 +3,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-/*
-   gcc -shared global_var.c -o libglobal.so
- * */
-
 typedef struct {
 	const char *module;
 	int  (*GetValue)(char *pszVal);

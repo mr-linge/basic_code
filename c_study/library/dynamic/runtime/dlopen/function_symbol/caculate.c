@@ -1,9 +1,3 @@
-/*
-   生成动态链接库
-
-   gcc -fPIC -shared caculate.c -o libcaculate.so
- * */
-
 int add(int a,int b) {
 	return (a + b);
 }

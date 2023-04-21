@@ -17,7 +17,7 @@ void __register(Test *p);
 static void __printf(Test *p) {
     printf("i = %d\n", p->i);
 }
- 
+
 //动态库申请一个全局变量空间。这种 ".成员"的赋值方式为c99标准
 static Test config = {
     .i = 0,

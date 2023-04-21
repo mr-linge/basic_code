@@ -1,8 +1,8 @@
 cc = gcc
 
 # 生成动态链接库
-dylib: caculate.c
-	@$(cc) -fPIC -shared caculate.c -o libcaculate.so
+dylib:
+	@$(cc) -fPIC -shared global_var.c -o libglobal.so
 
 program: 
 	@$(cc) -rdynamic main.c -o main -ldl
@@ -11,4 +11,4 @@ all: dylib program
 	@./main
 
 clean:
-	@-rm ./main ./libcaculate.so
+	@-rm -rf ./main ./libglobal.so
