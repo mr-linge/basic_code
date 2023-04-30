@@ -1,4 +1,0 @@
-
-gcc -no-pie execl.c -o execl.out
-
-./execl.out

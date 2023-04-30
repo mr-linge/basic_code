@@ -1,3 +1,0 @@
-gcc -no-pie execve_func.c -o execve.out
-
-./execve.out
