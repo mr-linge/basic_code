@@ -5,7 +5,7 @@ dylib: caculate.c
 	@$(cc) -fPIC -shared caculate.c -o libcaculate.so
 
 program: 
-	@$(cc) -rdynamic main.c -o main -ldl
+	@$(cc) main.c -o main -ldl
 
 all: dylib program
 	@./main
