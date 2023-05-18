@@ -20,7 +20,7 @@ struct option longopts[] = {
 ./optlong --test3 "p3" --test4 "p4"
 ./optlong --test5 "p5"
 ./optlong -l "pl"
-./optlong --test1 --test2 --test3 "p3" --test4 "p4" -l "pl"
+./optlong --test1 --test2 --test3 "p3" --test4 "p4" --test5 "p5" -l "pl"
 */
 int main(int argc, char *argv[])
 {
@@ -36,32 +36,38 @@ int main(int argc, char *argv[])
             printf("t1:%d, t2:%d, t3:%d, t4:%d\n", t1, t2, t3, t4);
             if (t1 == 0x100)
             {
-                printf("--test1 is going t1:%d \n", t1);
+                printf("have option: --test1\n");
             }
             if (t2 == 0x101)
             {
-                printf("--test2 is going t2:%d \n", t2);
+                printf("have option: --test2\n");
             }
             if (t3 == 0x102)
             {
+                printf("have option: --test3\n");
                 printf("The argument of --test3 is %s\n", optarg);
             }
             if (t4 == 0x103)
             {
+                printf("have option: --test4\n");
                 printf("The argument of --test4 is %s\n", optarg);
             }
             t1 = t2 = t3 = t4 = 0;
         }
         break;
         case 0x104:
+            printf("have option: --test5\n");
             printf("The argument of --test5 is %s\n", optarg);
             break;
         case 'l':
-            printf("HAVE option: -l\n");
+            printf("have option: -l\n");
             printf("The argument of -l is %s\n", optarg);
             break;
         case '?':
             printf("Unknown option: %c\n", (char)optopt);
+            break;
+        default:
+            printf("default:%d\n", c);
             break;
         }
     }

@@ -41,25 +41,28 @@ int main(int argc, char *argv[])
 		switch (ch)
 		{
 		case 'a':
-			printf("HAVE option: -a\n\n");
+			printf("have option: -a\n");
 			break;
 		case 'b':
-			printf("HAVE option: -b\n");
-			printf("The argument of -b is %s\n\n", optarg);
+			printf("have option: -b\n");
+			printf("The argument of -b is %s\n", optarg);
 			break;
 		case 'c':
-			printf("HAVE option: -c\n");
-			printf("The argument of -c is %s\n\n", optarg);
+			printf("have option: -c\n");
+			printf("The argument of -c is %s\n", optarg);
 			break;
 		case 'd':
-			printf("HAVE option: -d\n");
+			printf("have option: -d\n");
 			break;
 		case 'e':
-			printf("HAVE option: -e\n");
-			printf("The argument of -e is %s\n\n", optarg);
+			printf("have option: -e\n");
+			printf("The argument of -e is %s\n", optarg);
 			break;
 		case '?':
 			printf("Unknown option: %c\n", (char)optopt);
+			break;
+		default:
+			printf("default:%d\n", ch);
 			break;
 		}
 	}
