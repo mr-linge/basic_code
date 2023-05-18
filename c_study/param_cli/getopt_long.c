@@ -41,10 +41,10 @@ int val
 #include <getopt.h>
 
 struct option longopts[] = {
-    {"test1", no_argument, NULL, 1},
-    {"test2", no_argument, NULL, 2},
-    {"test3", required_argument, NULL, 3},
-    {"test4", required_argument, NULL, 4},
+    {"test1", no_argument, NULL, 0x100},
+    {"test2", no_argument, NULL, 0x101},
+    {"test3", required_argument, NULL, 0x102},
+    {"test4", required_argument, NULL, 0x103},
     {0, 0, 0, 0},
 };
 
@@ -52,7 +52,7 @@ struct option longopts[] = {
 ./optlong --test1 --test2
 ./optlong --test1 --test2 --test3 "p3" --test4 "p4"
 ./optlong -a -b"pb" -c"pc" -d -e"pc"
-./optlong --test1 --test2 --test3 "p3" --test4 "p4" -a -b"pb" -c"pc" -d -e"pc"
+./optlong --test1 --test2 --test3 "p3" --test4 "p4" -a -b"pb" -c"pc" -d -e"pe"
 */
 int main(int argc, char *argv[])
 {
@@ -63,16 +63,16 @@ int main(int argc, char *argv[])
         printf("optind:%d,opterr:%d,optopt:%d\n", optind, opterr, optopt);
         switch (c)
         {
-        case 1:
+        case 0x100:
             printf("--test1 is going\n");
             break;
-        case 2:
+        case 0x101:
             printf("--test2 is going\n");
             break;
-        case 3:
+        case 0x102:
             printf("The argument of --test3 is %s\n", optarg);
             break;
-        case 4:
+        case 0x103:
             printf("The argument of --test4 is %s\n", optarg);
             break;
         case 'a':

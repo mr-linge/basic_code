@@ -29,7 +29,7 @@ optstring
 /*
 ./opt -a -b"pb" -c"pc" -d -e
 ./opt -a -b"pb" -c"pc" -d -e -f
-./opt -a -b"pb" -c"pc" -d -e"pc"
+./opt -a -b"pb" -c"pc" -d -e"pe"
 */
 int main(int argc, char *argv[])
 {

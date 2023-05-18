@@ -4,14 +4,13 @@
 int t1, t2, t3, t4;
 
 struct option longopts[] = {
-    {"test1", no_argument, &t1, 1},
-    {"test2", no_argument, &t2, 2},
-    {"test3", required_argument, &t3, 3},
-    {"test4", required_argument, &t4, 4},
-    {"test5", required_argument, NULL, 5},
+    {"test1", no_argument, &t1, 0x100},
+    {"test2", no_argument, &t2, 0x101},
+    {"test3", required_argument, &t3, 0x102},
+    {"test4", required_argument, &t4, 0x103},
+    {"test5", required_argument, NULL, 0x104},
     {0, 0, 0, 0},
 };
-
 /*
 ./optlong --test1
 ./optlong --test2
@@ -35,26 +34,26 @@ int main(int argc, char *argv[])
         case 0:
         {
             printf("t1:%d, t2:%d, t3:%d, t4:%d\n", t1, t2, t3, t4);
-            if (t1 == 1)
+            if (t1 == 0x100)
             {
                 printf("--test1 is going t1:%d \n", t1);
             }
-            if (t2 == 2)
+            if (t2 == 0x101)
             {
                 printf("--test2 is going t2:%d \n", t2);
             }
-            if (t3 == 3)
+            if (t3 == 0x102)
             {
                 printf("The argument of --test3 is %s\n", optarg);
             }
-            if (t4 == 4)
+            if (t4 == 0x103)
             {
                 printf("The argument of --test4 is %s\n", optarg);
             }
             t1 = t2 = t3 = t4 = 0;
         }
         break;
-        case 5:
+        case 0x104:
             printf("The argument of --test5 is %s\n", optarg);
             break;
         case 'l':
