@@ -17,7 +17,7 @@ deamon()调用了fork()，如果fork成功，那么父进程就调用_exit(2)退
 */
 int main(int argc, char *argv[])
 {
-    char strCurPath[PATH_MAX];
+    char strCurPath[0x400];
     printf("current pid: %d\n", getpid());
     if (daemon(1, 1) < 0)
     {
