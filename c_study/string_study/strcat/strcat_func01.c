@@ -15,13 +15,14 @@
    【返回值】返回dest 字符串起始地址。
  * */
 
-int main () {
-	char str[80];
-	memset(str,'\0',sizeof(str));
-	strcpy (str,"these ");
-	strcat (str,"strings ");
-	strcat (str,"are ");
-	strcat (str,"concatenated.");
-	puts (str);
+int main()
+{
+	char str[0x100];
+	memset(str, '\0', sizeof(str));
+	strcpy(str, "these ");
+	strcat(str, "strings ");
+	strcat(str, "are ");
+	strcat(str, "concatenated.");
+	puts(str);
 	return 0;
 }

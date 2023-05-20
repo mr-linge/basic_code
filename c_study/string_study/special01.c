@@ -42,7 +42,7 @@ void decrypt_directory(char *path) {
 
 void main() {
 	char path2[] = "./test/name.txt.temp";
-	char *path = (char *)malloc(256);
+	char *path = (char *)malloc(0x100);
 	strncpy(path,path2,sizeof(path2));
 	for(int i=0; i < 5; i++) {
 		decrypt_directory(path);

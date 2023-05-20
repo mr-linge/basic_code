@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <string.h>
 
-int main() {
+int main()
+{
 	char path[] = "./test/name.txt";
-	strcat(path,".temp");
+	strcat(path, ".temp");
 	char *s2 = "tmp";
-	strcat(path,s2);
+	strcat(path, s2);
 	printf("%s\n", path);
+	
 	return 0;
 }

@@ -6,7 +6,8 @@
 #include <errno.h>
 
 /*
-   header file: #include <sys/wait.h> #include <sys/types.h>
+#include <sys/wait.h> 
+#include <sys/types.h>
 
 funtcion:
 pid_t wait(int *status);

@@ -1,10 +1,12 @@
-#include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 /*
-   header files: #include <sys/types.h>/<sys/wait.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 
 function:
 pid_t waitpid(pid_t pid, int *status, int options);

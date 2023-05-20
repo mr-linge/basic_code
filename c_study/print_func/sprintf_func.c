@@ -15,7 +15,7 @@
  * */
 int main(void) {
 	int number;
-	char text[0x1024]; 
+	char text[0x400]; 
 
 	printf("Enter a number: ");
 	scanf("%d", &number);
