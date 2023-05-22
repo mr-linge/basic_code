@@ -1,0 +1,1 @@
+echo "/home/me/Repository/basic_code/custom/elf_exec/test" > config.ini
