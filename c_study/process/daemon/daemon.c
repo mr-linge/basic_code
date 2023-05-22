@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     printf("current pid: %d\n", getpid());
     sleep(10);
 
-    if (getcwd(strCurPath, PATH_MAX) == NULL)
+    if (getcwd(strCurPath, 0x400) == NULL)
     {
         perror("error getcwd\n");
         exit(1);
