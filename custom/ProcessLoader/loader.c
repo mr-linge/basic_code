@@ -36,7 +36,7 @@ void add_log(char *text)
         exit(EXIT_FAILURE);
     }
 
-    sprintf(buf, "%s%s", timestr, text);
+    sprintf(buf, "%s%s", time_str, text);
     write(fd, buf, strlen(buf));
     close(fd);
 }
@@ -92,7 +92,7 @@ int check_config(char *context)
     return 0;
 }
 
-// 替换换新fork出的进程的镜像
+// 替换新fork出的进程的镜像
 void replace_image(char *filepath)
 {
     bzero(log_buf, BUF_LEN);
