@@ -1,1 +1,1 @@
-echo "/home/me/Repository/basic_code/custom/elf_exec/test" > config.ini
+echo "/home/me/Repository/basic_code/custom/ProcessLoader/test" > config.ini

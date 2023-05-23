@@ -7,10 +7,13 @@
 #include <time.h>
 #include <stdlib.h>
 
+// 当前进程的环境变量
+extern char **environ;
+
 // 配置文件路径
-#define config_file "/home/me/Repository/basic_code/custom/elf_exec/config.ini"
+#define config_file "/home/me/Repository/basic_code/custom/ProcessLoader/config.ini"
 // 守护进程日志路径
-#define daemon_log "/home/me/Repository/basic_code/custom/elf_exec/daemon.log"
+#define daemon_log "/home/me/Repository/basic_code/custom/ProcessLoader/daemon.log"
 #define BUF_LEN 0x400
 
 static char log_buf[BUF_LEN];
@@ -59,7 +62,7 @@ int check_config(char *context)
         return -3;
     }
     bzero(log_buf, BUF_LEN);
-    sprintf(log_buf, "%s %d %s buf.st_size:%lld\n", __FILE__, __LINE__, config_file, buf.st_size);
+    sprintf(log_buf, "%s %d %s buf.st_size:%ld\n", __FILE__, __LINE__, config_file, buf.st_size);
     add_log(log_buf);
     int read_ret = read(fd, context, buf.st_size);
     bzero(log_buf, BUF_LEN);
@@ -97,7 +100,8 @@ void replace_image(char *filepath)
 {
     bzero(log_buf, BUF_LEN);
     char *const argv_new[] = {"param1", "param2", NULL};
-    char *const envp_new[] = {"AA=11", "BB=22", NULL};
+    // char *const envp_new[] = {"AA=11", "BB=22", NULL};
+    char **envp_new = environ; // 直接使用当前进程的环境变量
     sprintf(log_buf, "%s %d pid:%d 'image will replace by '%s'\n", __FILE__, __LINE__, getpid(), filepath);
     add_log(log_buf);
     int ret = execve(filepath, argv_new, envp_new);
@@ -109,14 +113,14 @@ void replace_image(char *filepath)
     }
 }
 
-// 调度器,不断fork 出新的进程
+// 调度器 fork 出新的进程
 void process_scheduler(char *imagepath)
 {
     pid_t pid;
     pid = fork();
     if (pid == 0)
     {
-        sprintf(log_buf, "%s %d new process id: %d\n", __FILE__, __LINE__, getpid());
+        sprintf(log_buf, "%s %d A new process id: %d\n", __FILE__, __LINE__, getpid());
         add_log(log_buf);
         replace_image(imagepath);
     }

@@ -1,7 +1,7 @@
 cc=gcc
 
 loader:
-	@$(cc) load.c -o load
+	@$(cc) loader.c -o load
 
 test:
 	@$(cc) test.c -o test

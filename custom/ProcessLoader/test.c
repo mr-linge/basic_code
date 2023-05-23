@@ -6,7 +6,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define run_log "/home/me/Repository/basic_code/custom/elf_exec/run.log"
+#define run_log "/home/me/Repository/basic_code/custom/ProcessLoader/run.log"
 #define BUF_LEN 0x400
 
 static char log_buf[BUF_LEN];
