@@ -15,7 +15,9 @@ void func2 () {
 	printf("len = %lu\n", len);
 }
 
-void main() {
+int main() {
 	func1();
 	func2();
+
+    return 0;
 }
