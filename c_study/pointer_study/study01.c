@@ -1,6 +1,7 @@
 #include <stdio.h>
 
-int main() {
+int main()
+{
 	char a = 'C';
 	printf("修改前，a的值：%c\n", a);
 	// 指针变量p指向变量a

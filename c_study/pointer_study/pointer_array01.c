@@ -9,8 +9,8 @@ array 就是通过 pointer 实现的，数组名是一个地址（首元素地�
 type * p = (type *) malloc(n * sizeof(type));
 *(p + i) 等价 p[i]
 区别:
-数组存储在 Stack 栈上
-指针存储在 Heap  堆上
+数组保存的数据在 Stack 栈上
+指针保存的数据在 Heap  堆上
  * */
 int main()
 {

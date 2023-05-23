@@ -13,15 +13,16 @@
  *
  * *pi 		指针pi所指向的数据,以 pi 为起始后 sizeof(type) * 8 位 地址所对应的数据，即内存地址在 [pi, (pi + (8 * sizeof(type)))] 区域所对应的数据
  * */
-int main(){
+int main()
+{
 	int num = 11;
-	int * num_addr = &num;
+	int *num_addr = &num;
 	// 以16进制形式输出地址
 	printf("num address : %p\n", num_addr);
 	printf("num value   : %d\n", *num_addr);
 
 	char a = 'i';
-	char * a_addr = &a;
+	char *a_addr = &a;
 	printf("a address   : %p\n", a_addr);
 	printf("a value	    : %c\n", *a_addr);
 
