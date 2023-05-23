@@ -11,9 +11,11 @@
 extern char **environ;
 
 // 配置文件路径
-#define config_file "/home/me/Repository/basic_code/custom/ProcessLoader/config.ini"
+// #define config_file "/home/me/Repository/basic_code/custom/ProcessLoader/config.ini"
+#define config_file "/data/local/tmp/config.ini"
 // 守护进程日志路径
-#define daemon_log "/home/me/Repository/basic_code/custom/ProcessLoader/daemon.log"
+// #define daemon_log "/home/me/Repository/basic_code/custom/ProcessLoader/daemon.log"
+#define daemon_log "/data/local/tmp/daemon.log"
 #define BUF_LEN 0x400
 
 static char log_buf[BUF_LEN];
