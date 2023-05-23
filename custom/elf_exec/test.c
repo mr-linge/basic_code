@@ -1,13 +1,10 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
-#include <time.h>
 
 #define run_log "/home/me/Repository/basic_code/custom/elf_exec/run.log"
 #define BUF_LEN 0x400

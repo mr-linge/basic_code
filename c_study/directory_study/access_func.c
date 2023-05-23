@@ -25,7 +25,7 @@
    8、ELOOP 参数pathname 有过多符号连接问题.
    9、EIO I/O 存取错误.
  * */
-void main()
+int main()
 {
   if (access("/etc/passwd", R_OK) == 0)
   {
@@ -39,4 +39,6 @@ void main()
   {
     printf("/etc/passwd not exist\n");
   }
+
+    return 0;
 }

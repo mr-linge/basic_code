@@ -12,15 +12,13 @@
    perror() 函数显示您传给它的字符串，后跟一个冒号、一个空格和当前 errno 值的文本表示形式。
    strerror() 函数，返回一个指针，指针指向当前 errno 值的文本表示形式。
  * */
-extern int errno;
 
 int main () {
 	FILE *pf = fopen ("unexist.txt", "rb");
 	if (pf == NULL) {
-		int errnum = errno;
 		fprintf(stderr, "错误号: %d\n", errno);
 		perror("通过 perror 输出错误");
-		fprintf(stderr, "打开文件错误: %s\n", strerror(errnum));
+		fprintf(stderr, "打开文件错误: %s\n", strerror(errno));
 	} else {
 		fclose (pf);
 	}

@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <errno.h>
 
 /*
    头文件：
@@ -117,14 +114,14 @@ int main(int argc, char *argv[])
   {
     perror("open file fail");
   }
-  unsigned long size_w = write(fd, s, sizeof(s));
+  long size_w = write(fd, s, sizeof(s));
   if (size_w == -1)
   {
     perror("write fail!");
   }
   close(fd);
   fd = open("/tmp/temp", O_RDONLY);
-  unsigned long size_r = read(fd, buffer, sizeof(buffer));
+  long size_r = read(fd, buffer, sizeof(buffer));
   if (size_r == -1)
   {
     perror("read file fail");

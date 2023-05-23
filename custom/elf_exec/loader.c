@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -8,12 +7,15 @@
 #include <time.h>
 #include <stdlib.h>
 
+// 配置文件路径
 #define config_file "/home/me/Repository/basic_code/custom/elf_exec/config.ini"
+// 守护进程日志路径
 #define daemon_log "/home/me/Repository/basic_code/custom/elf_exec/daemon.log"
 #define BUF_LEN 0x400
 
 static char log_buf[BUF_LEN];
 
+// 由于fork 的新进程不能打印出日志,只好把日志写在日志文件中
 void add_log(char *text)
 {
     if (strlen(text) <= 0)
@@ -23,12 +25,12 @@ void add_log(char *text)
     int fd;
     fd = open(daemon_log, O_WRONLY | O_CREAT | O_APPEND, 0644);
     time_t t = time(0);
-    char *timestr = asctime(localtime(&t));
+    char *time_str = asctime(localtime(&t));
     char buf[BUF_LEN];
     bzero(buf, BUF_LEN);
     if (fd == -1)
     {
-        sprintf(buf, "%s%s %d %s\n", timestr, __FILE__, __LINE__, strerror(errno));
+        sprintf(buf, "%s%s %d %s\n", time_str, __FILE__, __LINE__, strerror(errno));
         add_log(buf);
         close(fd);
         exit(EXIT_FAILURE);
@@ -39,6 +41,7 @@ void add_log(char *text)
     close(fd);
 }
 
+// 检测配置文件,查看是否有新的需要处理的任务
 int check_config(char *context)
 {
     int fd = open(config_file, O_RDWR);
@@ -56,7 +59,7 @@ int check_config(char *context)
         return -3;
     }
     bzero(log_buf, BUF_LEN);
-    sprintf(log_buf, "%s %d %s buf.st_size:%lu\n", __FILE__, __LINE__, config_file, buf.st_size);
+    sprintf(log_buf, "%s %d %s buf.st_size:%lld\n", __FILE__, __LINE__, config_file, buf.st_size);
     add_log(log_buf);
     int read_ret = read(fd, context, buf.st_size);
     bzero(log_buf, BUF_LEN);
@@ -89,6 +92,7 @@ int check_config(char *context)
     return 0;
 }
 
+// 替换换新fork出的进程的镜像
 void replace_image(char *filepath)
 {
     bzero(log_buf, BUF_LEN);
@@ -105,7 +109,7 @@ void replace_image(char *filepath)
     }
 }
 
-// 调度器,不断fork新的进程并替换镜像
+// 调度器,不断fork 出新的进程
 void process_scheduler(char *imagepath)
 {
     pid_t pid;
@@ -154,6 +158,7 @@ void poll_query_task()
     }
 }
 
+// 创建一个守护进程
 void creat_daemon()
 {
     // chdir("/");

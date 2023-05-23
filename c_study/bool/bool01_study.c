@@ -4,7 +4,7 @@
    0 is false
    not 0 is ture
  * */
-void main() {
+int main() {
 	int b3 = -1;
 	int b4 = 0;
 	int b5 = 1;
@@ -29,4 +29,6 @@ void main() {
 	if(b8) {
 		printf("b8 is true, !(6 != 6) is %d\n", b8);
 	}
+
+    return 0;
 }

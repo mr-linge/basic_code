@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 /*
 header file:
@@ -48,6 +47,6 @@ int main()
 {
     struct stat buf;
     stat("/etc/hosts", &buf);
-    printf("/etc/hosts file size = %ld\n", buf.st_size);
+    printf("/etc/hosts file size = %lld\n", buf.st_size);
     return 0;
 }
