@@ -1,6 +1,6 @@
 cc=gcc
 
-load:
+loader:
 	@$(cc) load.c -o load
 
 test:

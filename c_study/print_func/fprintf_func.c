@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 /*
- header file: #include <stdio.h>
+ header file: 
+ #include <stdio.h>
 
 function:
 int fprintf(FILE *stream, const char *format, ...)

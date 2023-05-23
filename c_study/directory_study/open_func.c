@@ -6,15 +6,18 @@
 #include <errno.h>
 
 /*
-   头文件：#include <sys/types.h>    #include <sys/stat.h>    #include <fcntl.h>
+   头文件：
+   #include <sys/types.h>
+   #include <sys/stat.h>
+   #include <fcntl.h>
 
    定义函数：
    int open(const char * pathname, int flags);
    int open(const char * pathname, int flags, mode_t mode);
 
-   函数说明：
-
-   参数 pathname 指向欲打开的文件路径字符串. 下列是参数flags 所能使用的旗标:
+   函数说明:
+   参数 pathname 指向欲打开的文件路径字符串.
+   下列是参数flags 所能使用的旗标:
    O_RDONLY 以只读方式打开文件
    O_WRONLY 以只写方式打开文件
    O_RDWR 以可读写方式打开文件. 上述三种旗标是互斥的, 也就是不可同时使用, 但可与下列的旗标利用OR(|)运算符组合.
@@ -76,7 +79,7 @@
  * */
 
 /*
- 头文件：#include <unistd.h>
+头文件：#include <unistd.h>
 
 定义函数：ssize_t read(int fd, void * buf, size_t count);
 
@@ -93,23 +96,40 @@ EAGAIN 当使用不可阻断I/O 时(O_NONBLOCK), 若无数据可读取则返回�
 EBADF 参数fd 非有效的文件描述词, 或该文件已关闭.
  * */
 
-int main(int argc, char * argv[]) {
-	char s[] = "Linux Programmer!\n", buffer[80];
-	int fd = open("/tmp/temp", O_WRONLY|O_CREAT);
-	if(fd < 0)  {
-		perror("open file fail");
-	}
-	unsigned long size_w = write(fd, s, sizeof(s));
-	if (size_w < 0) {
-		perror("write fail!");
-	}
-	close(fd);
-	fd = open("/tmp/temp", O_RDONLY);
-	unsigned long size_r = read(fd, buffer, sizeof(buffer));
-	if(size_r < 0){
-		perror("read file fail");
-	}
-	close(fd);
-	printf("%s", buffer);
-	return 0;
+/*
+表头文件：#include <unistd.h>
+函数原型：int ftruncate(int fd, off_t  length)
+函数说明：ftruncate()会将参数fd指定的文件大小改为参数length指定的大小。参数fd为已打开的文件描述词，而且必须是以写入模式打开的文件。如果原来的文件件大小比参数length大，则超过的部分会被删去
+返回值： 0 表示成功;当有错误发生时则返回-1, 错误代码存入errno 中
+错误原因：errno
+          EBADF     参数fd文件描述词为无效的或该文件已关闭
+          EINVAL    参数fd为一socket并非文件，或是该文件并非以写入模式打开
+
+注:
+length = 0 清空文件
+**/
+
+int main(int argc, char *argv[])
+{
+  char s[] = "Linux Programmer!\n", buffer[0x100];
+  int fd = open("/tmp/temp", O_WRONLY | O_CREAT);
+  if (fd == -1)
+  {
+    perror("open file fail");
+  }
+  unsigned long size_w = write(fd, s, sizeof(s));
+  if (size_w == -1)
+  {
+    perror("write fail!");
+  }
+  close(fd);
+  fd = open("/tmp/temp", O_RDONLY);
+  unsigned long size_r = read(fd, buffer, sizeof(buffer));
+  if (size_r == -1)
+  {
+    perror("read file fail");
+  }
+  close(fd);
+  printf("%s", buffer);
+  return 0;
 }

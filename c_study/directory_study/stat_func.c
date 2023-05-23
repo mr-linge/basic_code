@@ -1,8 +1,11 @@
+#include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <stdio.h>
+
 /*
-header file: #include <sys/stat.h>  #include <unistd.h>
+header file:
+#include <sys/stat.h>
+#include <unistd.h>
 
 function:
 int stat(const char *file_name, struct stat *buf);
@@ -41,9 +44,10 @@ struct stat {
     time_t        st_ctime;     //最后一次改变时间(指属性)
 };
  * */
-int main() { 
-    struct stat buf; 
-    stat("/etc/hosts", &buf); 
-    printf("/etc/hosts file size = %ld\n", buf.st_size); 
+int main()
+{
+    struct stat buf;
+    stat("/etc/hosts", &buf);
+    printf("/etc/hosts file size = %ld\n", buf.st_size);
     return 0;
 }

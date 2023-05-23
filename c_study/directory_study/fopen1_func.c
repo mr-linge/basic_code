@@ -42,7 +42,8 @@ int fscanf(FILE *fp, const char *format, ...)
 Description:
 从文件中读取字符串，但是在遇到第一个空格和换行符时，它会停止读取
  * */
-int main() {
+int main()
+{
    FILE *fp = NULL;
    fp = fopen("/tmp/test.txt", "w+");
    fprintf(fp, "This is testing for fprintf...\n");

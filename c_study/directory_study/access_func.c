@@ -1,5 +1,5 @@
-#include <unistd.h>
 #include <stdio.h>
+#include <unistd.h>
 
 /*
    头文件：#include <unistd.h>
@@ -25,13 +25,18 @@
    8、ELOOP 参数pathname 有过多符号连接问题.
    9、EIO I/O 存取错误.
  * */
-void main() {
-	if(access("/etc/passwd", R_OK) == 0) {
-		printf("/etc/passwd can be read\n");
-	}
-	if(access("/etc/passwd", F_OK) == 0) {
-		printf("/etc/passwd exist\n");
-	}else{
-		printf("/etc/passwd not exist\n");
-	}
+void main()
+{
+  if (access("/etc/passwd", R_OK) == 0)
+  {
+    printf("/etc/passwd can be read\n");
+  }
+  if (access("/etc/passwd", F_OK) == 0)
+  {
+    printf("/etc/passwd exist\n");
+  }
+  else
+  {
+    printf("/etc/passwd not exist\n");
+  }
 }

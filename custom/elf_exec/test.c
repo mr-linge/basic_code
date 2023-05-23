@@ -10,34 +10,47 @@
 #include <time.h>
 
 #define run_log "/home/me/Repository/basic_code/custom/elf_exec/run.log"
+#define BUF_LEN 0x400
+
+static char log_buf[BUF_LEN];
 
 void add_log(char *text)
 {
-    int fd;
-    fd = open(run_log, O_WRONLY | O_CREAT | O_APPEND | O_CREAT, 0644);
-    if (fd == -1)
+    if (strlen(text) <= 0)
     {
-        perror("open error");
-        exit(EXIT_FAILURE);
+        return;
     }
-    char buf[0x400];
-    bzero(buf, 0x400);
-
+    int fd;
+    fd = open(run_log, O_WRONLY | O_CREAT | O_APPEND, 0644);
     time_t t = time(0);
     char *timestr = asctime(localtime(&t));
-    sprintf(buf, "%s pid:%d %s\n", timestr, getpid(), text);
+    char buf[BUF_LEN];
+    bzero(buf, BUF_LEN);
+    if (fd == -1)
+    {
+        sprintf(buf, "%s%s %d %s\n", timestr, __FILE__, __LINE__, strerror(errno));
+        add_log(buf);
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+
+    sprintf(buf, "%s%s", timestr, text);
     write(fd, buf, strlen(buf));
     close(fd);
 }
 
 int main(int argc, char *argv[])
 {
-    printf("%s %d current pid: %d\n", __FILE__, __LINE__, getpid());
+    // printf("%s %d current pid: %d\n", __FILE__, __LINE__, getpid());
     add_log("A new elf was loaded!");
-    printf("argc = %d\n", argc);
-    for (int i = 0; i < argc; i++)
-    {
-        printf("argv[%d] = %s\n", i, argv[i]);
-    }
+    // printf("argc = %d\n", argc);
+    // for (int i = 0; i < argc; i++)
+    // {
+    //     printf("argv[%d] = %s\n", i, argv[i]);
+    // }
+    bzero(log_buf, BUF_LEN);
+    sprintf(log_buf, "%s %d A new process was created id: %d\n", __FILE__, __LINE__, getpid());
+    add_log(log_buf);
+
     return 0;
 }
