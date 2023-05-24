@@ -1,5 +1,5 @@
-#include <stdlib.h>  
 #include <stdio.h>
+#include <stdlib.h>
 
 /****************
   函数指针作为某个函数的参数
