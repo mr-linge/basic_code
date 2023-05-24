@@ -104,7 +104,7 @@ void replace_image(char *filepath)
     char *const argv_new[] = {"param1", "param2", NULL};
     // char *const envp_new[] = {"AA=11", "BB=22", NULL};
     char **envp_new = environ; // 直接使用当前进程的环境变量
-    sprintf(log_buf, "%s %d pid:%d 'image will replace by '%s'\n", __FILE__, __LINE__, getpid(), filepath);
+    sprintf(log_buf, "%s %d pid:%d image will replace by '%s'\n", __FILE__, __LINE__, getpid(), filepath);
     add_log(log_buf);
     int ret = execve(filepath, argv_new, envp_new);
     if (ret == -1)
