@@ -167,18 +167,18 @@ void poll_query_task()
 // 创建一个守护进程
 void creat_daemon()
 {
-    // chdir("/");
-    for (int i = 0; i < 3; i++)
-    {
-        close(i);
-    }
-    umask(0);
-
     bzero(log_buf, BUF_LEN);
     pid_t pid;
     pid = fork();
     if (pid == 0)
     {
+        // chdir("/");
+        for (int i = 0; i < 3; i++)
+        {
+            close(i);
+        }
+        umask(0);
+
         sprintf(log_buf, "%s %d daemon pid: %d\n", __FILE__, __LINE__, getpid());
         add_log(log_buf);
         poll_query_task();
