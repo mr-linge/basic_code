@@ -2,10 +2,10 @@ cc=gcc
 
 outfile=daemon
 
-program:
+daemon:
 	@${cc} daemon.c -o ${outfile}
 
-program1:
+daemon1:
 	@${cc} daemon1.c -o ${outfile}
 
 clean:

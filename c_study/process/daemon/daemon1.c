@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 /*
 创建守护进程的的一般步骤：
@@ -31,8 +32,36 @@
 7、守护进程退出处理
 当用户需要外部停止守护进程运行时，往往会使用 kill 命令停止该守护进程。所以，守护进程中需要编码来实现 kill 发出的signal信号处理，达到进程的正常退出。
 */
-void creat_daemon(void);
-int main(void)
+
+#define daemon_log "/home/me/Repository/basic_code/c_study/process/daemon/daemon.log"
+#define BUF_LEN 0x400
+
+void add_log(char *text)
+{
+    if (strlen(text) <= 0)
+    {
+        return;
+    }
+    int fd;
+    fd = open(daemon_log, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    time_t t = time(0);
+    char *time_str = asctime(localtime(&t));
+    char buf[BUF_LEN];
+    bzero(buf, BUF_LEN);
+    if (fd == -1)
+    {
+        sprintf(buf, "%s%s %d %s\n", time_str, __FILE__, __LINE__, strerror(errno));
+        add_log(buf);
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+
+    sprintf(buf, "%s%s", time_str, text);
+    write(fd, buf, strlen(buf));
+    close(fd);
+}
+
+void creat_daemon()
 {
     pid_t pid = fork();
     if (pid > 0)
@@ -46,44 +75,31 @@ int main(void)
     {
         printf("This is child process ...\n");
         printf("current pid: %d\n", getpid());
-        creat_daemon();
+
+        // chdir("/");
+        for (int i = 0; i < 3; i++)
+        {
+            close(i);
+        }
+        umask(0);
+
+        char buf[0x1000];
+        while (1)
+        {
+            bzero(buf, 0x1000);
+            sprintf(buf, "%s %d pid:%d This process is looping ...\n", __FILE__, __LINE__, getpid());
+            add_log(buf);
+            sleep(10);
+        }
     }
     else
     {
         printf("fork fail\n");
     }
-
-    return 0;
 }
 
-void creat_daemon(void)
+int main()
 {
-    // chdir("/");
-    for (int i = 0; i < 3; i++)
-    {
-        close(i);
-    }
-    umask(0);
-
-    time_t t;
-    int fd;
-    char buf[0x1000];
-    while (1)
-    {
-        fd = open("daemon.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
-        if (fd == -1)
-        {
-            perror("open error");
-            exit(EXIT_FAILURE);
-        }
-        t = time(0);
-        char *timestr = asctime(localtime(&t));
-        bzero(buf, 0x1000);
-        sprintf(buf, "pid:%d ", getpid());
-        strcat(buf, timestr);
-        write(fd, buf, strlen(buf));
-        close(fd);
-        sleep(5);
-    }
-    return;
+    creat_daemon();
+    return 0;
 }
