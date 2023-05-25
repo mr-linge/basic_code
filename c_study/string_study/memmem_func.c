@@ -4,6 +4,9 @@
 #include <string.h>
 
 /*
+    Header:
+    #include <string.h>
+    
     Function:
     void *memmem(const void *haystack, size_t haystacklen, const void *needle, size_t needlelen);
 
