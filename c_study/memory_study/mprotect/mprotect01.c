@@ -4,12 +4,11 @@
 #include <errno.h>
 #include <string.h>
 
-/****************
+/*
    #include <unistd.h>
    #include <sys/mmap.h>
-
    int mprotect(const void *start, size_t len, int prot);
- * *****************/
+**/
 
 // 获取 addr 页的上边界和下边界地址(页的上边界)
 #define PAGE_SHIFT 12
