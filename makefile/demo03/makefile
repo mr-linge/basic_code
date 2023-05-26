@@ -3,16 +3,15 @@ cc = gcc
 so = libcaculate.so
 exec = main
 
-all: $(exec) $(so)
-	@ ./$(exec)
+$(so): caculate.c
+	@$(cc) -fPIC -shared caculate.c -o $(so)
 
 $(exec): main.c
-	@ $(cc) -rdynamic main.c -o $(exec) -ldl
+	@$(cc) -rdynamic main.c -o $(exec) -ldl
 
-$(so): caculate.c
-	@ $(cc) -fPIC -shared caculate.c -o $(so)
+all: $(exec) $(so)
+	@./$(exec)
 
 .PHONY: clean
 clean:
-	clear
-	@ - rm $(so) $(exec)
+	@-rm -rf $(so) $(exec)

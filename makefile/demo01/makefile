@@ -1,12 +1,14 @@
-cc = gcc
+cc=gcc
 
-# make .out
-template: template.o
-	$(cc) -no-pie -o template template.o
+source=template.c
 
 # make .o
-template.o: template.c
-	$(cc) -c -o template.o template.c
+objectfile: ${source}
+	$(cc) -c template.c -o template.o
+
+# make .out
+execute: objectfile
+	$(cc) -no-pie template.o -o template
 
 clean:
-	rm template.o template
+	@-rm -rf template.o template
