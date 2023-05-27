@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 
 #define PORT 8000
+#define LISTEN_HOST "127.0.0.1"
 int listen_max = 100; // 最大监听数
 
 int main(int argc, char *argv[])
@@ -19,7 +20,7 @@ int main(int argc, char *argv[])
 	struct sockaddr_in client_addr;
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(PORT);
-	server_addr.sin_addr.s_addr = INADDR_ANY; // inet_addr("127.0.0.1") INADDR_ANY
+	server_addr.sin_addr.s_addr = INADDR_ANY; // inet_addr(LISTEN_HOST); INADDR_ANY
 	memset(&(server_addr.sin_zero), '\0', sizeof(server_addr.sin_zero));
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -39,11 +40,11 @@ int main(int argc, char *argv[])
 		perror("listen fail");
 		exit(-1);
 	}
-
 loop:
 	printf("Ready for Accept,Waitting...\n");
 	client_fd = accept(sockfd, (struct sockaddr *)&client_addr, &struct_len);
 	printf("Client was accepting\n");
+
 	while (1)
 	{
 		memset(buff, '\0', BUFSIZ);
@@ -65,6 +66,7 @@ loop:
 				perror("write");
 				break;
 			}
+			memset(buff, '\0', BUFSIZ);
 		}
 		else
 		{
@@ -72,8 +74,9 @@ loop:
 			break;
 		}
 	}
+
 	close(client_fd);
 	goto loop;
-	close(sockfd);
+	// close(sockfd);
 	return 0;
 }

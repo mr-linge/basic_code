@@ -33,29 +33,34 @@ int main(int argc, char *argv[])
 	}
 	printf("Connect Server success!\n");
 
-	memset(buff, '\0', BUFSIZ);
-	printf("input your message:");
-	fgets(buff, BUFSIZ, stdin);
-	buff[strlen(buff) - 1] = '\0'; // 去除输入的 \n
-	printf("client len:%02lu msg:%s\n", strlen(buff), buff);
-	if (send(sockfd, buff, strlen(buff), 0) < 0)
+	while (1)
 	{
-		perror("send");
-	}
-	memset(buff, '\0', BUFSIZ);
-	numbytes = recv(sockfd, buff, BUFSIZ, 0);
-	if (numbytes > 0)
-	{
-		printf("server len:%02lu msg:", numbytes);
-		for (unsigned long i = 0; i < numbytes; i++)
+		memset(buff, '\0', BUFSIZ);
+		printf("input your message:");
+		fgets(buff, BUFSIZ, stdin);
+		buff[strlen(buff) - 1] = '\0'; // 去除输入的 \n
+		printf("client len:%02lu msg:%s\n", strlen(buff), buff);
+		if (send(sockfd, buff, strlen(buff), 0) < 0)
 		{
-			printf("%c", buff[i]);
+			perror("send");
+			break;
 		}
-		printf("\n");
-	}
-	else
-	{
-		perror("recv\n");
+		memset(buff, '\0', BUFSIZ);
+		numbytes = recv(sockfd, buff, BUFSIZ, 0);
+		if (numbytes > 0)
+		{
+			printf("server len:%02lu msg:", numbytes);
+			for (unsigned long i = 0; i < numbytes; i++)
+			{
+				printf("%c", buff[i]);
+			}
+			printf("\n");
+		}
+		else
+		{
+			perror("recv\n");
+			break;
+		}
 	}
 
 	close(sockfd);
