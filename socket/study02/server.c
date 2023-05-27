@@ -65,7 +65,6 @@ loop:
 				perror("write");
 				break;
 			}
-			memset(buff, '\0', BUFSIZ);
 		}
 		else
 		{
