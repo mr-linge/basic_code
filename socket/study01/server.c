@@ -72,6 +72,7 @@ loop:
 			break;
 		}
 	}
+	
 	close(client_fd);
 	goto loop;
 	close(sockfd);

@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
 	if (send(sockfd, buff, strlen(buff), 0) < 0)
 	{
 		perror("send");
+		exit(-1);
 	}
 	memset(buff, '\0', BUFSIZ);
 	numbytes = recv(sockfd, buff, BUFSIZ, 0);
@@ -56,6 +57,7 @@ int main(int argc, char *argv[])
 	else
 	{
 		perror("recv\n");
+		exit(-1);
 	}
 
 	close(sockfd);
