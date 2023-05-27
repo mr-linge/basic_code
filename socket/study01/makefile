@@ -1,12 +1,12 @@
 cc = clang
 
-client: client.c
-	$(cc) client.c -o client
+client:
+	@$(cc) client.c -o client
 
-server: server.c
-	$(cc) server.c -o server #-lpthread
+server:
+	@$(cc) server.c -o server #-lpthread
 
-all: clean client server
+all: client server
 
 clean:
-	@- rm -rf client server
+	@-rm -rf client server

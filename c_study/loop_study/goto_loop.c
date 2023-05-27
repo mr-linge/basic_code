@@ -1,13 +1,13 @@
 #include <stdio.h>
 
-int main(){
+int main()
+{
 	int num = 0;
 loop:
-	num++;
-	printf("loop num = %d\n",num);
-
-	if (num < 10) {
-		printf("if block num = %d\n",num);
+	if (num < 10)
+	{
+		printf("num = %d\n", num);
+		num++;
 		goto loop;
 	}
 	return 0;

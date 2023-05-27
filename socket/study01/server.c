@@ -2,49 +2,46 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <errno.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 
-int port = 8000;
-int listen_port = 5; // 最大监听数
+#define PORT 8000
+#define LISTEN_HOST "127.0.0.1"
+int listen_max = 100; // 最大监听数
 
 int main(int argc, char *argv[])
 {
+	char buff[BUFSIZ];
 	int sockfd, client_fd;
 	unsigned int struct_len;
 	unsigned long numbytes;
 	struct sockaddr_in server_addr;
 	struct sockaddr_in client_addr;
-	char buff[BUFSIZ];
-	bzero(buff, BUFSIZ);
-	struct_len = sizeof(struct sockaddr_in);
-
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(port);
-	server_addr.sin_addr.s_addr = INADDR_ANY;
+	server_addr.sin_port = htons(PORT);
+	server_addr.sin_addr.s_addr = inet_addr(LISTEN_HOST); // INADDR_ANY
 loop:
-	bzero(&(server_addr.sin_zero), sizeof(server_addr.sin_zero));
-	
+	memset(&(server_addr.sin_zero), '\0', sizeof(server_addr.sin_zero));
+
+	// struct_len = sizeof(struct sockaddr_in);
+
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1)
 	{
-		printf("socket create fail!\n");
-		return -1;
+		perror("socket create fail");
+		exit(-1);
 	}
 	int ret;
 	do
 	{
-		ret = bind(sockfd, (struct sockaddr *)&server_addr, struct_len);
+		ret = bind(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr_in));
 	} while (ret != -1);
 
-	if (listen(sockfd, listen_port) == -1)
+	if (listen(sockfd, listen_max) == -1)
 	{ // 监听 port
-		printf("Listening fail\n");
-		return -1;
+		perror("listen fail");
+		exit(-1);
 	}
 
 	printf("Ready for Accept,Waitting...\n");
@@ -53,29 +50,36 @@ loop:
 
 	while (1)
 	{
-		// recv 返回接收的数据长度
+		memset(buff, '\0', BUFSIZ);
 		numbytes = recv(client_fd, buff, BUFSIZ, 0);
 		if (numbytes > 0)
 		{
-			buff[numbytes] = '\0'; // 把接收到的二进制数据当作字符串来处理
-			printf("message from client:%s\n", buff);
-			strcat(buff, " | your message was received!");
-			if (send(client_fd, buff, strlen(buff) - 1, 0) < 0)
+			printf("client len:%02lu msg:", numbytes);
+			for (unsigned long i = 0; i < numbytes; i++)
+			{
+				printf("%c", buff[i]);
+			}
+			printf("\n");
+			char *suffix = " | your message was received!";
+			memcpy(buff + numbytes, suffix, strlen(suffix));
+			unsigned long msg_len = (numbytes + strlen(suffix));
+			printf("server len:%02lu msg:%s\n", msg_len, buff);
+			if (send(client_fd, buff, msg_len, 0) < 0)
 			{
 				perror("write");
-				return -1;
+				break;
 			}
-			bzero(buff, BUFSIZ);
+			memset(buff, '\0', BUFSIZ);
 		}
 		else
 		{
-			printf("Client accepting close!\n");
-			close(client_fd);
-			close(sockfd);
+			perror("recv");
 			break;
 		}
 	}
 
+	close(client_fd);
+	close(sockfd);
 	goto loop;
 	return 0;
 }

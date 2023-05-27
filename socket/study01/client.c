@@ -1,66 +1,68 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <string.h>
-#include <netdb.h>
-#include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <fcntl.h>	// for open
 #include <unistd.h> // for close
+#include <errno.h>
 
-int port = 8000;
-char *addr = "127.0.0.1";
+#define PORT 8000
+#define SERVER_IP "127.0.0.1"
 
 int main(int argc, char *argv[])
 {
+	char buff[BUFSIZ];
 	int sockfd;
 	unsigned long numbytes;
-	char buff[BUFSIZ];
-	bzero(buff, BUFSIZ);
 	struct sockaddr_in server_addr;
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 	{
-		printf("socket create fail!\n");
-		return -1;
+		perror("socket fd create fail");
+		exit(-1);
 	}
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(port);
-	server_addr.sin_addr.s_addr = inet_addr(addr);
-	bzero(&(server_addr.sin_zero), sizeof(server_addr.sin_zero));
+	server_addr.sin_port = htons(PORT);
+	server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
+	memset(&(server_addr.sin_zero), '\0', sizeof(server_addr.sin_zero));
 
 	if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1)
 	{
-		printf("connect fail!\n");
-		return -1;
+		printf("errno:%d,%s\n", errno, strerror(errno));
+		exit(-1);
 	}
 	printf("Connect Server success!\n");
 
 	while (1)
 	{
+		memset(buff, '\0', BUFSIZ);
 		printf("input your message:");
 		fgets(buff, BUFSIZ, stdin);
-		if (send(sockfd, buff, strlen(buff) - 1, 0) < 0)
+		buff[strlen(buff) - 1] = '\0'; // 去除输入的 \n
+		printf("client len:%02lu msg:%s\n", strlen(buff), buff);
+		if (send(sockfd, buff, strlen(buff), 0) < 0)
 		{
-			perror("socket send");
-			return -1;
+			perror("send");
+			break;
 		}
-		bzero(buff, BUFSIZ);
+		memset(buff, '\0', BUFSIZ);
 		numbytes = recv(sockfd, buff, BUFSIZ, 0);
-		if (numbytes)
+		if (numbytes > 0)
 		{
-			buff[numbytes] = '\0';
-			printf("From Server:\n%s\n", buff);
-			bzero(buff, BUFSIZ);
+			printf("server len:%02lu msg:", numbytes);
+			for (unsigned long i = 0; i < numbytes; i++)
+			{
+				printf("%c", buff[i]);
+			}
+			printf("\n");
 		}
 		else
 		{
-			printf("Server accepting close!\n");
-			close(sockfd);
+			perror("recv\n");
 			break;
 		}
 	}
 
+	close(sockfd);
 	return 0;
 }

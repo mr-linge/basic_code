@@ -1,13 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <string.h>
-#include <netdb.h>
-#include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <fcntl.h> // for open
 #include <unistd.h> // for close
 
 int port = 8000;
@@ -18,8 +14,8 @@ int main(int argc,char *argv[]) {
 	char buf[BUFSIZ];
 	struct sockaddr_in their_addr;
 	if((sockfd = socket(AF_INET,SOCK_STREAM,0)) == -1){
-		printf("socket create fail!\n");
-		return -1;
+		perror("socket create fail");
+		exit(-1);
 	}
 	printf("We get the sockfd~\n");
 	their_addr.sin_family = AF_INET;
@@ -28,8 +24,8 @@ int main(int argc,char *argv[]) {
 	bzero(&(their_addr.sin_zero), sizeof(their_addr.sin_zero));
 
 	if(connect(sockfd,(struct sockaddr*)&their_addr,sizeof(struct sockaddr)) == -1) {
-		printf("connect fail!\n");
-		return -1;
+		perror("connect fail");
+		exit(-1);
 	}
 	printf("Get the Server~Cheers!\n");
 	numbytes = recv(sockfd, buf, BUFSIZ,0);//接收服务器端信息  
@@ -41,7 +37,7 @@ int main(int argc,char *argv[]) {
 		// printf("buf = %s\n",buf);
 		if(send(sockfd, buf, strlen(buf) - 1, 0) < 0) {
 			perror("write");
-			return -1;
+			exit(-1);
 		}
 		numbytes = recv(sockfd,buf,BUFSIZ,0);  
 		buf[numbytes]='\0'; 
