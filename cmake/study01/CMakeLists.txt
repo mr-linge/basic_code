@@ -7,7 +7,7 @@ set (CMAKE_CXX_COMPILER "/usr/bin/clang++")
 
 
 # 项目信息  指定项目名为 hello_cmake，项目版本号为 1.0.0，项目源代码用到 C 语言
-project(hello_cmake VERSION 1.0.0 LANGUAGES C)
+project(cmake_study VERSION 1.0.0 LANGUAGES C)
 
-# 将 main.c 添加到需要构建的可执行文件里
-add_executable(hello_cmake src/main.c)
+# 编译源文件生成可执行文件
+add_executable(main src/main.c)
