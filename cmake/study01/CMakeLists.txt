@@ -1,9 +1,9 @@
 # 指定 CMake 的最低版本 3.24
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.2)
 
 # 指定编译器(不指定会使用默认编译器)
-set (CMAKE_C_COMPILER "/usr/bin/clang")
-set (CMAKE_CXX_COMPILER "/usr/bin/clang++")
+set (CMAKE_C_COMPILER "/usr/bin/gcc")
+set (CMAKE_CPP_COMPILER "/usr/bin/g++")
 
 
 # 项目信息  指定项目名为 hello_cmake，项目版本号为 1.0.0，项目源代码用到 C 语言
