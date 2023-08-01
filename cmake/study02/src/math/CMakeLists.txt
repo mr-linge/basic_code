@@ -3,4 +3,6 @@
 aux_source_directory(./ DIR_LIB_SRCS)
 
 # 生成静态链接库
-add_library (mymath STATIC ${DIR_LIB_SRCS})
+# add_library(mymath STATIC ${DIR_LIB_SRCS})
+# 生成动态链接库
+add_library(mymath SHARED ${DIR_LIB_SRCS})

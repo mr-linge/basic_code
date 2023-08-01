@@ -14,5 +14,5 @@ add_subdirectory(./src/math)
 # 源文件生成可执行文件
 add_executable(main ${DIR_SRCS})
 
-# 源文件添加依赖的静态库
+# 可执行文件指定依赖库
 target_link_libraries(main mymath)
