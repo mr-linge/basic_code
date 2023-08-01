@@ -1,8 +1,8 @@
 # CMake 最低版本号要求
-cmake_minimum_required (VERSION 3.2)
+cmake_minimum_required(VERSION 3.20)
 
 # 项目信息
-project (cmake_study VERSION 1.0.0 LANGUAGES C)
+project(cmake_study VERSION 1.0.0 LANGUAGES C)
 
 # 查找目录下的所有源文件
 # 并将名称保存到 DIR_SRCS 变量
