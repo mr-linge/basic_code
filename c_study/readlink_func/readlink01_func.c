@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <linux/limits.h>
-#include <errno.h>
 
-/* 
+/*
    表头文件
 #include <unistd.h>
 
@@ -32,13 +30,18 @@ cmdline就是程序运行时输入的命令行命令；
 environ记录了进程运行时的环境变量；
 fd目录下是进程打开或使用的文件的符号连接。
  * */
-int main() {
+
+#define PATH_MAX 0x1000
+
+int main()
+{
 	char dir[PATH_MAX] = {0};
 	// 返回当前进程镜像所在目录(绝对路径)
 	int n = readlink("/proc/self/exe", dir, PATH_MAX);
-	if(n < 0) {
+	if (n < 0)
+	{
 		perror("readlink");
-		exit(-1);
+		return -1;
 	}
 	printf("dir: %s\n", dir);
 
