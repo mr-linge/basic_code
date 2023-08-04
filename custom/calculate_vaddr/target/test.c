@@ -2,7 +2,7 @@
 
 unsigned long printf_vaddr = 0;
 
-void hello(){
+void hello()
+{
 	printf("%s, go here ...\n", __FILE__);
 }
-
