@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "test.h"
 
 unsigned long printf_vaddr = 0;
 

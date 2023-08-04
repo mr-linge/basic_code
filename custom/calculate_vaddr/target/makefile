@@ -1,16 +1,17 @@
-cc = gcc
+cc=gcc
 
-dylib_source = test.c
+source=main.c
+dylib_source=test.c
 
-program: main.c
-	@$(cc) -rdynamic main.c -o main -ldl
-	@./main
-
-dylib: $(.so)
+dylib: test.c
 	@$(cc) -fPIC -shared $(dylib_source) -o libtest.so
 
-all: program dylib
+program: main.c
+	@$(cc) -no-pie main.c -o tracee -L. -ltest -ldl
 
+all: dylib program
+	@# export LD_LIBRARY_PATH=./
+	./tracee
 
 clean:
-	@-rm ./main
+	@-rm -rf tracee libtest.so

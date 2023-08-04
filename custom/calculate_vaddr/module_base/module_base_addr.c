@@ -3,6 +3,7 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 // 计算模块在进程中的虚拟地址(即so加载到进程后的首地址)
 unsigned long get_module_vaddr(pid_t pid, char *module)

@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dlfcn.h>
+#include "test.h"
 
 typedef void *(*MY_MMAP)(void *start, size_t length, int prot, int flags, int fd, off_t offsize);
 
@@ -24,7 +25,7 @@ int main()
 		printf("mmap            addr: %p\n", (void *)mmap);
 		printf("my_mmap         addr: %p\n", (void *)my_mmap);
 		printf("my_mmap2        addr: %p\n", (void *)my_mmap2);
-		printf("pid : %d. wait a minutes ...\n", getpid());
+		printf("pid : %d wait a minutes ...\n", getpid());
 		sleep(10);
 	}
 
