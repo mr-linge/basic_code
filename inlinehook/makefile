@@ -1,0 +1,30 @@
+base_dir=~/Library/Android/Sdk/ndk/25.2.9519653/toolchains/llvm/prebuilt/linux-x86_64/bin
+cc=$(base_dir)/aarch64-linux-android33-clang
+
+source=main.c
+outfile=main
+
+library_source=hook.c
+lib_outfile=libhook.so
+
+program:
+	@$(cc) $(source) -o $(outfile)
+
+dylib:
+	@$(cc) -fPIC -shared ${library_source} -o $(lib_outfile)
+
+push:
+	@adb push $(outfile) /data/local/tmp/
+
+push_dylib:
+	@adb push $(lib_outfile) /data/local/tmp/
+
+
+program_all: program push
+
+
+all: dylib push_dylib
+
+
+clean:
+	@-rm -rf $(outfile) $(lib_outfile)
