@@ -1,0 +1,36 @@
+AArch64 常用汇编指令
+
+相对地址寻址
+目标地址是相对PC的偏移地址
+B       只跳转
+BL      会把下一条指令地址保存到LR(x30)寄存器里,当子程序执行完了也能借助LR(x30)寄存器跳转回到主程序继续执行
+
+例子
+b 8                     ;跳转到PC+8的地方去执行
+
+绝对地址寻址跳转
+BR      只跳转
+BLR     会把下一条指令地址保存到LR(x30)寄存器里,当子程序执行完了也能借助LR(x30)寄存器跳转回到主程序继续执行
+
+例子
+mov x0, 0x400000        ;把0x400000地址赋值给x0寄存器
+br x0                   ;跳转到0x400000去
+
+
+操作码	条件码助记符	标志	含义
+0000	EQ	Z=1	相等
+0001	NE(Not Equal)	Z=0	不相等
+0010	CS/HS(Carry Set/High or Same)	C=1	无符号数大于或等于
+0011	CC/LO(Carry Clear/LOwer)	C=0	无符号数小于
+0100	MI(MInus)	N=1	负数
+0101	PL(PLus)	N=0	正数或零
+0110	VS(oVerflow set)	V=1	溢出
+0111	VC(oVerflow clear)	V=0	没有溢出
+1000	HI(HIgh)	C=1,Z=0	无符号数大于
+1001	LS(Lower or Same)	C=0,Z=1	无符号数小于或等于
+1010	GE(Greater or Equal)	N=V	有符号数大于或等于
+1011	LT(Less Than)	N!=V	有符号数小于
+1100	GT(Greater Than)	Z=0,N=V	有符号数大于
+1101	LE(Less or Equal)	Z=1,N!=V	有符号数小于或等于
+1110	AL	任何	无条件执行(默认)
+1111	NV	任何	从不执行
