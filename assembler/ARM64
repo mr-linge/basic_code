@@ -5,25 +5,8 @@ ARM 64位架构有两种主要的执行状态:
 32 位执行状态,包括该状态的异常模型、内存模型、程序员模型和指令集支持
 64 位执行状态,包括该状态的异常模型、内存模型、程序员模型和指令集支持
 分别对应两套架构的指令集:
-AArch32(简称“A32”)的 ARM、Thumb、Thumb-2 指令集
-AArch64(简称“A64”)的 64 位指令集
-
-
-寄存器
-AArch64指令集可以操作34个寄存器,包括31个通用寄存器、SP、PC、CPSR。其中w0~w31分别是x0~x31的低32位
-寄存器功能如下:
-x0~x7  	    用于传递子程序参数和结果,使用时不需要保存,多余参数采用堆栈传递,64位返回结果采用x0表示,128位返回结果采用x1:x0表示。
-x8  		用于保存子程序返回地址, 尽量不要使用
-x9~x15 	    临时寄存器,使用时不需要保存
-x16~x17     子程序内部调用寄存器,使用时不需要保存,尽量不要使用
-x18 		平台寄存器,它的使用与平台相关,尽量不要使用
-x19~x28     临时寄存器,使用时必须保存
-x29 		帧指针寄存器,用于连接栈帧,使用时需要保存
-x30 		链接寄存器LR,用于保存过程调用的返回地址
-x31 		堆栈指针寄存器SP(指向当前堆栈的栈顶)
-x32   	    pc寄存器,存储当前的执行地址
-x33 		cpsr程序状态寄存器
-
+AArch32(简称"A32")的 ARM、Thumb、Thumb-2 指令集
+AArch64(简称"A64")的 64 位指令集
 
 函数参数传递(ARM64 参数调用规则遵循AAPCS64,规定堆栈为满递减堆栈)
 aarch32
@@ -37,22 +20,7 @@ AArch32 :
 A32模式(ARM instruction sets),指令固定的编码长度为32bit
 T32模式(Thumb instruction sets),指令可以编码成16bit长,也可编码成32bit长
 AArch64 :
-A64指令集所有指令的长度固定,每条指令是4字节(32bit),没有Thumb指令集。
-
-
-AArch64指令构成
-汇编代码 mov x0,#0xff
-对应的二进制机器码(little end)
-1110 00 1 1101 0 0000 0001 000011111111
-指令不同部分功能介绍:
-11--0位:	操作数,若为立即数则填该立即数的二进制值,若为通用寄存器则填通用寄存器标号的二进制值
-15--12位:	标明目的寄存器
-19--16位:	标明第一个源操作数寄存器
-20位:		表明该指令是否会影响程序状态字寄存器。是则置1,否则置0
-24~21位:	标明指令的类型。mov是 1101
-25位:		标志 shifter_operand 段存放的是立即数还是寄存器。若为寄存器则置0,若为立即数则置1。
-27~26位:	保留位,恒定为00
-31~28位:	条件段 mov 后面没有跟条件,所以为 1110
+A64指令集所有指令的长度固定,每条指令是4字节(32bit),没有Thumb指令集
 
 
 当前正在执行的指令地址
@@ -64,3 +32,18 @@ Program counter
 The current Program Counter (PC) cannot be referred to by number as if part of the general register file and therefore cannot be used as the source or destination of arithmetic instructions, or as the base, index or transfer register of load and store instructions.
 The only instructions that read the PC are those whose function it is to compute a PC-relative address (ADR, ADRP, literal load, and direct branches), and the branch-and-link instructions that store a return address in the link register (BL and BLR). The only way to modify the program counter is using branch, exception generation and exception return instructions.
 Where the PC is read by an instruction to compute a PC-relative address, then its value is the address of that instruction. Unlike A32 and T32, there is no implied offset of 4 or 8 bytes.
+
+
+AArch32指令构成
+汇编代码 mov r1, #0xff
+对应的二进制机器码(little end)
+1110 00 1 1101 0 0000 0001 000011111111
+指令不同部分功能介绍:
+11--0位:	操作数,若为立即数则填该立即数的二进制值,若为通用寄存器则填通用寄存器标号的二进制值
+15--12位:	标明目的寄存器
+19--16位:	标明第一个源操作数寄存器
+20位:		表明该指令是否会影响程序状态字寄存器。是则置1,否则置0
+24~21位:	标明指令的类型。mov是 1101
+25位:		标志 shifter_operand 段存放的是立即数还是寄存器。若为寄存器则置0,若为立即数则置1。
+27~26位:	保留位,恒定为00
+31~28位:	条件段 mov 后面没有跟条件,所以为 1110

@@ -6,7 +6,7 @@
 
 /*
    #include <unistd.h>
-   #include <sys/mmap.h>
+   #include <sys/mman.h>
    int mprotect(const void *start, size_t len, int prot);
 **/
 
