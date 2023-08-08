@@ -3,7 +3,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/mmap.h>
+#include <sys/mman.h>
 
 #define PAGE_SHIFT 12
 #define PAGE_SIZE (1UL << PAGE_SHIFT)

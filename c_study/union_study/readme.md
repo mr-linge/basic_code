@@ -12,4 +12,3 @@ union [union tag]
    member definition;
 } [one or more union variables];
 union tag 是可选的，每个 member definition 是标准的变量定义，比如 int i; 或者 float f; 或者其他有效的变量定义。
-
