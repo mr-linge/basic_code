@@ -1,5 +1,10 @@
+.section	.rodata
+msg:
+	.ascii	"hello world!\n"
+	len = 14
+
 .section	.text
-.globl main
+.globl 		main
 main:
     mov     x0, #1      			// fd := STDOUT_FILENO
 
@@ -15,8 +20,3 @@ main:
     mov     x0, #0      			// status := 0 
     mov     w8, #93     			// exit is syscall #93 
     svc     #0          			// invoke syscall 
-
-.section	.rodata
-msg:
-    .ascii        "hello world!\n"
-	len = 14
