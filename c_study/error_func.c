@@ -11,16 +11,20 @@
    C 语言提供了 perror() 和 strerror() 函数来显示与 errno 相关的文本消息。
    perror() 函数显示您传给它的字符串，后跟一个冒号、一个空格和当前 errno 值的文本表示形式。
    strerror() 函数，返回一个指针，指针指向当前 errno 值的文本表示形式。
- * */
+ **/
 
-int main () {
-	FILE *pf = fopen ("unexist.txt", "rb");
-	if (pf == NULL) {
+int main()
+{
+	FILE *pf = fopen("unexist.txt", "rb");
+	if (pf == NULL)
+	{
 		fprintf(stderr, "错误号: %d\n", errno);
 		perror("通过 perror 输出错误");
 		fprintf(stderr, "打开文件错误: %s\n", strerror(errno));
-	} else {
-		fclose (pf);
+	}
+	else
+	{
+		fclose(pf);
 	}
 
 	return 0;

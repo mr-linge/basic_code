@@ -4,6 +4,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <signal.h>
+#include "register.h"
 
 #define PAGE_SHIFT 12
 #define PAGE_SIZE (1UL << PAGE_SHIFT)
@@ -60,7 +62,7 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
     printf("page start : %lx\n", page_start);
     // printf("page end   : %lx\n", page_end);
     status = mprotect((void *)page_start, PAGE_SIZE, PROT_READ | PROT_WRITE);
-    if (status < 0)
+    if (status != 0)
     {
         perror("mprotect err");
         return;
@@ -102,15 +104,23 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
     puts("");
 
     status = mprotect((void *)page_start, PAGE_SIZE, PROT_EXEC);
-    if (status < 0)
+    if (status != 0)
     {
         perror("2 mprotect err");
         return;
     }
 }
 
+void sighandler(int signum)
+{
+   printf("捕获信号 %d,跳出...\n", signum);
+   exit(1);
+}
+
 void __attribute__((constructor)) dylibInject(void)
 {
+    signal(SIGSEGV, sighandler);
+
     printf("Hello, hook was starting ...\n");
     char *module_name = "/data/local/tmp/main";
     unsigned long module_vaddr = get_module_vaddr(module_name);

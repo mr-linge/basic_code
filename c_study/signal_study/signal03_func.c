@@ -9,9 +9,9 @@
 int main()
 {
     signal(SIGINT, SIG_DFL);
-    while(1)
+    while (1)
     {
-	printf("开始休眠一秒钟...\n");
+        printf("开始休眠一秒钟...\n");
         sleep(1);
     }
     return 0;

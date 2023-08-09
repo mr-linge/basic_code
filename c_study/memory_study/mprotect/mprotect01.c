@@ -36,7 +36,7 @@ int main()
 	printf("page start : %lx\n", page_start);
 	printf("page end   : %lx\n", page_end);
 	int err = mprotect((void *)page_start, PAGE_SIZE, PROT_READ); //  | PROT_WRITE
-	if (err < 0)
+	if (err != 0)
 	{
 		perror("mprotect err");
 		return -1;

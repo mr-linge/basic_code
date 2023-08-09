@@ -8,10 +8,10 @@
  * */
 int main()
 {
-    signal(SIGINT,SIG_IGN);
-    while(1)
+    signal(SIGINT, SIG_IGN);
+    while (1)
     {
-	printf("开始休眠一秒钟...\n");
+        printf("开始休眠一秒钟...\n");
         sleep(1);
     }
     return 0;
