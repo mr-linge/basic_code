@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <dlfcn.h>
-#include <unistd.h>
 
 /*
 goto   实现从汇编到C代码的跳转
@@ -9,7 +7,7 @@ goto   实现从汇编到C代码的跳转
 void test(long a)
 {
     asm volatile goto(
-        "cmp %x0, 10\n"
+        "cmp %0, 10\n"
         "b.eq %l[label]\n"
         :
         : "r"(a)

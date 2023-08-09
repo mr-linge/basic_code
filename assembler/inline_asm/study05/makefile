@@ -12,4 +12,4 @@ all: program
 	@adb push $(outfile) /data/local/tmp/
 
 clean:
-	@-rm -rf $(outfile) $(lib_outfile)
+	@-rm -rf $(outfile)
