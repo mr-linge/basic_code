@@ -5,9 +5,6 @@ cc=${base_dir}/aarch64-linux-android33-clang
 
 outfile=main
 
-asm:
-	@$(cc) -S main.c -o main.asm
-
 program:
 	@$(cc) -c main.asm -o main.o
 	@$(cc) main.o -o main
