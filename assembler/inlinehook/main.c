@@ -2,10 +2,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
-int c_test_func(int num)
-{
-    return num + 10;
-}
+int c_test_func(int num);
 
 int main(int argc, char const *argv[])
 {
@@ -25,6 +22,7 @@ int main(int argc, char const *argv[])
         printf("%s is not exist\n", inject_dylib_path);
     }
 
+    getchar();
     printf("c_test_func vaddr:0x%lx\n", (unsigned long)&c_test_func);
     int ret = c_test_func(10);
     printf("c_test_func ret:%d\n", ret);

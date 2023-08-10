@@ -91,8 +91,10 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
     puts("");
 
     // 40 02 1F D6
-    // D6 1F 02 40          0xD6, 0x1F, 0x02, 0x40
-    unsigned char jumpCode[4] = {0x40, 0x02, 0x1F, 0xD6};
+    // D6 1F 02 40              0xD6, 0x1F, 0x02, 0x40
+    // 82 46 82 D2             mov x2, #0x1234
+    // 81 46 82 D2                 mov x1, #0x1234
+    unsigned char jumpCode[4] = {0x81, 0x46, 0x82, 0xD2};
     memcpy((void *)origin_vaddr, jumpCode, 4);
 
     memcpy((void *)instruction, (void *)origin_vaddr, 4);
@@ -126,7 +128,7 @@ void __attribute__((constructor)) dylibInject(void)
     unsigned long module_vaddr = get_module_vaddr(module_name);
     printf("%s --> %s vaddr:0x%lx\n", __FUNCTION__, module_name, module_vaddr);
 
-    unsigned long target_func_vaddr = module_vaddr + 0x18bc;
+    unsigned long target_func_vaddr = module_vaddr + 0x19A0;
 
     printf("new_c_test_func vaddr:0x%lx\n", (unsigned long)&new_c_test_func);
     hook(target_func_vaddr, (unsigned long)&new_c_test_func);
