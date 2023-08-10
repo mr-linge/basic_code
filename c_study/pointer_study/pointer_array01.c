@@ -4,9 +4,10 @@
 
 /*
 pointer and array
-array 就是通过 pointer 实现的，数组名是一个地址（首元素地址），即是一个指针常量。（不是指针变量）
+array 就是通过 pointer 实现的,数组名是一个地址（首元素地址）,即是一个指针常量。（不是指针变量）
 指针也可以通过下标管理数据
 type * p = (type *) malloc(n * sizeof(type));
+p	是 heap 中一段内存的起始地址
 *(p + i) 等价 p[i]
 区别:
 数组保存的数据在 Stack 栈上
