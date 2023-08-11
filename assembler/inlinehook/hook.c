@@ -15,10 +15,10 @@
 #define PAGE_END(addr) (PAGE_START(addr) + PAGE_SIZE)
 
 // 函数指针用于保留原来的执行流程
-static int (*old_c_test_func)(int i);
+int (*old_c_test_func)(int i);
 
 // 新函数
-static int new_c_test_func(int i)
+int new_c_test_func(int i)
 {
     int origin_ret = old_c_test_func(i);
     printf("原来的参数:%d,返回值:%d\n", i, origin_ret);

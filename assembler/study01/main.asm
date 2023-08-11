@@ -9,9 +9,9 @@ main:
     mov     x0, #1      			// fd := STDOUT_FILENO
 
 	adrp	x1, msg					// 计算出 page
-	add		x1, x1, :lo12:msg		// :lo12:msg 取 msg 低12位 即页内偏移offset,  msging vaddr = page + offset
+	add		x1, x1, :lo12:msg		// :lo12:msg 取 msg 低12位 即页内偏移offset,  msg vaddr = page + offset
 
-    mov     x2, #len    			// msging length
+    mov     x2, #len    			// msg length
 
     mov     w8, #64     			// write is syscall #64 
     svc     #0          			// invoke syscall 
