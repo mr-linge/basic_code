@@ -1,5 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/mman.h>
+#include <errno.h>
+#include <string.h>
+
+/*
 函数原型如下:
-#include <unistd.h>
 #include <sys/mman.h>
 int mprotect(const void *start, size_t len, int prot);
 
@@ -24,3 +30,38 @@ ENOMEM              内核内部的结构体无法分配
 ENOMEM              进程的地址空间在区间 [start, start+len] 范围内是无效,或者有一个或多个内存页没有映射
 
 如果调用进程内存访问行为侵犯了这些设置的保护属性,内核会为该进程产生 SIGSEGV (Segmentation fault 段错误)信号,并且终止该进程
+**/
+
+// 获取 addr 所在的 page
+#define PAGE_SIZE 0x1000
+#define PAGE_START(addr) ((addr) & (~(PAGE_SIZE - 1)))
+
+int main()
+{
+	/* Allocate a buffer; it will have the default protection of PROT_READ|PROT_WRITE. */
+	char *p = (char *)malloc(0x80);
+	printf("start address of string : %p\n", p);
+	memset(p, 'a', 0x80);
+	printf("line : %d, str : %s\n", __LINE__, p);
+	char c = p[0]; /* Read; ok */
+	printf("line : %d, p[0] : %c\n", __LINE__, c);
+	p[0] = 'b'; /* Write; ok */
+	printf("line : %d, str : %s\n", __LINE__, p);
+	/* Mark the buffer read-only. */
+	unsigned long page_start = PAGE_START((unsigned long)p);
+	unsigned long page_end = page_start + PAGE_SIZE;
+	printf("page start : %lx\n", page_start);
+	printf("page end   : %lx\n", page_end);
+	int err = mprotect((void *)page_start, PAGE_SIZE, PROT_READ); //  | PROT_WRITE
+	if (err != 0)
+	{
+		perror("mprotect err");
+		return -1;
+	}
+	printf("line : %d, the test string : %s\n", __LINE__, p);
+	c = p[0]; /* Read; ok */
+	printf("try read : %d, p[0] : %c\n", __LINE__, c);
+	p[0] = 'c'; /* Write; program dies on SIGSEGV */
+	printf("try write : %d, str : %s\n", __LINE__, p);
+	return 0;
+}

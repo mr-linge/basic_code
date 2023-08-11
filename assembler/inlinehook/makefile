@@ -27,7 +27,10 @@ push_dylib:
 program_all: program push
 
 
-all: dylib push_dylib
+dylib_all: dylib push_dylib
+
+
+all: program_all dylib_all
 
 
 clean:

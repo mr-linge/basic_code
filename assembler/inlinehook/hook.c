@@ -7,12 +7,8 @@
 #include <signal.h>
 #include "register.h"
 
-#define PAGE_SHIFT 12
-#define PAGE_SIZE (1UL << PAGE_SHIFT)
-#define PAGE_MASK (~(PAGE_SIZE - 1))
-
-#define PAGE_START(addr) ((addr)&PAGE_MASK)
-#define PAGE_END(addr) (PAGE_START(addr) + PAGE_SIZE)
+#define PAGE_SIZE 0x1000
+#define PAGE_START(addr) ((addr) & (~(PAGE_SIZE - 1)))
 
 // 函数指针用于保留原来的执行流程
 int (*old_c_test_func)(int i);
@@ -105,7 +101,7 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
     }
     puts("");
 
-    status = mprotect((void *)page_start, PAGE_SIZE, PROT_EXEC);
+    status = mprotect((void *)page_start, PAGE_SIZE, PROT_READ | PROT_EXEC);
     if (status != 0)
     {
         perror("2 mprotect err");
