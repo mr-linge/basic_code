@@ -6,13 +6,13 @@ c_test_func:
 //	str x32, [sp]
 //	ldr x4, [sp]
 //	add sp, sp, #16
-//	br  x18
+	//br  x17
+	NOP
+	NOP
+	NOP
+	NOP
 	sub	sp, sp, #0x10
-	adrp x4, c_test_func2
-	add	x4, x4, :lo12:c_test_func2
-	BR 	#12
-	mov x2, #0x1234
-	cmp x1, x2
+	cmp x1, #0x123
 	b.ne l1
 	add	x0, x0, #100
 l1:

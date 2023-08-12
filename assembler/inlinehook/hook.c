@@ -7,8 +7,8 @@
 #include <signal.h>
 #include "register.h"
 
-#define PAGE_SIZE 0x1000
-#define PAGE_START(addr) ((addr) & (~(PAGE_SIZE - 1)))
+#define PAGESIZE 0x1000
+#define PAGE_START(addr) ((addr) & (~(PAGESIZE - 1)))
 
 // 函数指针用于保留原来的执行流程
 int (*old_c_test_func)(int i);
@@ -55,9 +55,9 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
 {
     int status;
     unsigned long page_start = PAGE_START(origin_vaddr);
-    printf("page start : %lx\n", page_start);
+    printf("page start:0x%lx\n", page_start);
     // printf("page end   : %lx\n", page_end);
-    status = mprotect((void *)page_start, PAGE_SIZE, PROT_READ | PROT_WRITE);
+    status = mprotect((void *)page_start, PAGESIZE, PROT_READ | PROT_WRITE);
     if (status != 0)
     {
         perror("mprotect err");
@@ -68,13 +68,11 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
     unsigned long jmp_vaddr = new_vaddr;
     printf("jmp_vaddr:0x%lx\n", jmp_vaddr);
     asm volatile(
-        "mov x18, %[vaddr]                \n"
-        "mov %[result], x18               \n"
-        "mov x0, #20                      \n"
-        // "blr x18                          \n"
+        "mov x17, %[vaddr]                  \n"
+        "mov %[result], x17                 \n"
         : [result] "=r"(result)
         : [vaddr] "r"(jmp_vaddr)
-        : "x0", "x18");
+        : "x17");
 
     printf("result:0x%lx\n", result);
     unsigned char instruction[4] = {0};
@@ -87,10 +85,9 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
     puts("");
 
     // 40 02 1F D6
-    // D6 1F 02 40              0xD6, 0x1F, 0x02, 0x40
-    // 82 46 82 D2             mov x2, #0x1234
-    // 81 46 82 D2                 mov x1, #0x1234
-    unsigned char jumpCode[4] = {0x81, 0x46, 0x82, 0xD2};
+    // D6 1F 02 40             0xD6, 0x1F, 0x02, 0x40
+    // 61 24 80 D2             mov x1, #0x123
+    unsigned char jumpCode[4] = {0x61, 0x24, 0x80, 0xD2};
     memcpy((void *)origin_vaddr, jumpCode, 4);
 
     memcpy((void *)instruction, (void *)origin_vaddr, 4);
@@ -101,7 +98,7 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
     }
     puts("");
 
-    status = mprotect((void *)page_start, PAGE_SIZE, PROT_READ | PROT_EXEC);
+    status = mprotect((void *)page_start, PAGESIZE, PROT_READ | PROT_EXEC);
     if (status != 0)
     {
         perror("2 mprotect err");
@@ -111,8 +108,8 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
 
 void sighandler(int signum)
 {
-   printf("捕获信号 %d,跳出...\n", signum);
-   exit(1);
+    printf("捕获信号 %d,跳出...\n", signum);
+    exit(1);
 }
 
 void __attribute__((constructor)) dylibInject(void)
