@@ -121,7 +121,7 @@ void __attribute__((constructor)) dylibInject(void)
     unsigned long module_vaddr = get_module_vaddr(module_name);
     printf("%s --> %s vaddr:0x%lx\n", __FUNCTION__, module_name, module_vaddr);
 
-    unsigned long target_func_vaddr = module_vaddr + 0x19A0;
+    unsigned long target_func_vaddr = module_vaddr + 0x19C0;
 
     printf("new_c_test_func vaddr:0x%lx\n", (unsigned long)&new_c_test_func);
     hook(target_func_vaddr, (unsigned long)&new_c_test_func);

@@ -14,6 +14,31 @@ str     (store register)写入指令,将数据从寄存器中读出来,写入到
 str x0, [sp, #0x8]      ;将寄存器 x0 中的值保存到栈内存 [sp + 0x8] 处 
 
 
+栈操作
+16 字节对齐
+stp/ldp 操作0x10字节
+入栈
+sub     sp,     sp,     #0x30
+stp     x9,     x10,    [sp]
+stp     x11,    x12,    [sp, #0x10]
+stp     x13,    x14,    [sp, #0x20]
+出栈
+ldp     x9,     x10,    [sp]
+ldp     x11,    x12,    [sp, #0x10]
+ldp     x13,    x14,    [sp, #0x20]
+add     sp,     sp,     #0x30
+
+str/ldr 操作8字节
+入栈
+sub	sp, sp, #0x10
+str	x0, [sp, #8]
+str	x1, [sp]
+出栈
+ldr	x0, [sp, #8]
+ldr	x1, [sp]
+add	sp, sp, #0x10
+
+
 判断
 cmp <wn>, #<imm>        ;该指令中#<imm>为无符号立即数,取值范围为0~4095 (12 bit)
 
