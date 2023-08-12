@@ -24,12 +24,13 @@ void __register(Test *p)
 
 int main()
 {
+	char *error;
 	char *lib_path = "./libtest.so";
 	void *handle = dlopen(lib_path, RTLD_NOW);
-	if (handle == NULL)
+	if ((error = dlerror()) != NULL)
 	{
-		printf("dlopen - %s\n", dlerror());
-		exit(-1);
+		fprintf(stderr, "%s\n", error);
+		exit(EXIT_FAILURE);
 	}
 
 	return 0;

@@ -2,7 +2,7 @@
 msg:
 	.asciz	"add(%ld,%ld) = %ld\n"
 str1:
-	.asciz	"./libhook.so\n"
+	.asciz	"This is a test string\n"
 
 .section 	.text
 .global 	main
