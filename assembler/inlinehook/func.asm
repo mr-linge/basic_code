@@ -17,9 +17,12 @@ c_test_func:
 
 	adrp x0,	msg
 	add  x0, x0, :lo12:msg
-	mov  x1, #17
-	mov  x2, x17
+	mov  x1, #18
+	mov  x2, x18
 	bl printf
+
+	sub x0, x32, x18
+	ldr x32, x18
 
 	ldp x0, x1, [sp]
 	cmp x1, #0x123

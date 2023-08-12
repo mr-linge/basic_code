@@ -68,11 +68,11 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
     unsigned long jmp_vaddr = new_vaddr;
     printf("jmp_vaddr:0x%lx\n", jmp_vaddr);
     asm volatile(
-        "mov x17, %[vaddr]                  \n"
-        "mov %[result], x17                 \n"
+        "mov x18, %[vaddr]                  \n"
+        "mov %[result], x18                 \n"
         : [result] "=r"(result)
         : [vaddr] "r"(jmp_vaddr)
-        : "x17");
+        : "x18");
 
     printf("result:0x%lx\n", result);
     unsigned char instruction[4] = {0};
