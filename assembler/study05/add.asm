@@ -1,6 +1,6 @@
 	.text
-	.globl	add_test                        // -- Begin function add_test
-add_test:                               // @add_test
+	.globl	add_test
+add_test:
 	sub	sp, sp, #16
 	str	w0, [sp, #12]
 	str	w1, [sp, #8]
