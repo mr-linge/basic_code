@@ -12,7 +12,7 @@ c_test_func:
 	NOP
 	NOP
 	sub sp, sp, #0x20
-	stp x30, x29, [sp,#0x10] // 保存 fp,lr
+	stp x29, x30, [sp,#0x10] // 保存 fp,lr
 	stp x0, x1, [sp]
 
 	adrp x0,	msg
@@ -27,11 +27,6 @@ c_test_func:
 	add	x0, x0, #100
 l1:
 	add	x0, x0, #10
-	ldp x30, x29, [sp,#0x10]
+	ldp x29, x30, [sp,#0x10]
 	add sp, sp, #0x20
-	ret
-
-c_test_func2:
-	NOP
-	add	x0, x0, #1000
 	ret
