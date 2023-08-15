@@ -21,8 +21,9 @@ c_test_func:
 	mov  x2, x18
 	bl printf
 
-	sub x0, x32, x18
-	ldr x32, x18
+	br x18
+	//sub x0, x32, x18
+	//ldr x32, x18
 
 	ldp x0, x1, [sp]
 	cmp x1, #0x123

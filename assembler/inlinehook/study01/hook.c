@@ -109,6 +109,44 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
 void sighandler(int signum)
 {
     printf("捕获信号 %d,跳出...\n", signum);
+
+    struct registers reg;
+    reg.x0.val = 0x0;
+    unsigned long jmp_vaddr = 0x0;
+    asm volatile(
+        "mov %[out_x0], x0                  \n"
+        "mov %[out_x1], x1                  \n"
+        "mov %[out_x2], x2                  \n"
+        "mov %[out_x3], x3                  \n"
+        "mov %[out_x4], x4                  \n"
+        "mov %[out_x5], x5                  \n"
+        "mov %[out_x6], x6                  \n"
+        "mov %[out_x7], x7                  \n"
+        "mov %[out_fp], x29                  \n"
+        "mov %[out_lr], x30                  \n"
+        "mov %[out_sp], x31                  \n"
+        // "mov %[out_pc], x32                  \n"
+        : [out_x0] "=r"(reg.x0.val),
+          [out_x1] "=r"(reg.x1.val),
+          [out_x2] "=r"(reg.x2.val),
+          [out_x3] "=r"(reg.x3.val),
+          [out_x4] "=r"(reg.x4.val),
+          [out_x5] "=r"(reg.x5.val),
+          [out_x6] "=r"(reg.x6.val),
+          [out_x7] "=r"(reg.x7.val),
+          [out_fp] "=r"(reg.fp.val),
+          [out_lr] "=r"(reg.lr.val),
+          [out_sp] "=r"(reg.sp.val),
+        //   [out_pc] "=r"(reg.pc.val)
+        : [jmp_vaddr] "r"(jmp_vaddr)
+        : );
+
+    for (int i = 0; i < 34; i++)
+    {
+        unsigned long val = reg.uregs[i].val;
+        printf("x[%d] = %lx\n", i, val);
+    }
+    puts("");
     exit(1);
 }
 

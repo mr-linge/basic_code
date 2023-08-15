@@ -15,7 +15,7 @@
    sig		信号
 
    return value:
-   如果成功该函数返回零，否则返回非零。
+   如果成功该函数返回零,否则返回非零。
  * */
 
 void sighandler(int);
@@ -35,7 +35,7 @@ int main()
 			int ret = raise(SIGINT);
 			if (ret != 0)
 			{
-				printf("错误，不能生成SIGINT信号\n");
+				printf("错误,不能生成SIGINT信号\n");
 				exit(-1);
 			}
 		}
@@ -49,6 +49,6 @@ int main()
 
 void sighandler(int signum)
 {
-	printf("捕获信号 %d，跳出...\n", signum);
+	printf("捕获信号 %d,跳出...\n", signum);
 	exit(1);
 }
