@@ -11,6 +11,7 @@ c_test_func:
 	NOP
 	NOP
 	NOP
+	NOP
 	sub sp, sp, #0x20
 	stp x29, x30, [sp,#0x10] // 保存 fp,lr
 	stp x0, x1, [sp]
@@ -21,7 +22,7 @@ c_test_func:
 	mov  x2, x18
 	bl printf
 
-	br x18
+	//br x18
 	//sub x0, x32, x18
 	//ldr x32, x18
 

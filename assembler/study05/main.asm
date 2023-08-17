@@ -6,11 +6,11 @@ str1:
 
 .section 	.text
 .global 	main
-main:                                   // @main
-	mov	x0, #0x23
-	mov	x1, #0x34
+main:
+	mov	x0, #0x70
+	mov	x1, #0x60
 
-	sub sp, sp, #-0x10
+	sub sp, sp, #0x10
 	stp x0, x1, [sp]
 
 	bl	add_test

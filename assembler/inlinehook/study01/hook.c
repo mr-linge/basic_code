@@ -10,6 +10,20 @@
 #define PAGESIZE 0x1000
 #define PAGE_START(addr) ((addr) & (~(PAGESIZE - 1)))
 
+void log_matchine_code(void *vaddr, unsigned long len)
+{
+    unsigned char *machine_codes = (unsigned char *)vaddr;
+    for (unsigned long i = 0; i < len; i++)
+    {
+        printf("%02x ", (int)machine_codes[i]);
+        if ((i + 1) % 4 == 0)
+        {
+            puts("");
+        }
+    }
+}
+
+
 // 函数指针用于保留原来的执行流程
 int (*old_c_test_func)(int i);
 
@@ -64,39 +78,38 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
         return;
     }
 
-    unsigned long result = 0;
-    unsigned long jmp_vaddr = new_vaddr;
-    printf("jmp_vaddr:0x%lx\n", jmp_vaddr);
-    asm volatile(
-        "mov x18, %[vaddr]                  \n"
-        "mov %[result], x18                 \n"
-        : [result] "=r"(result)
-        : [vaddr] "r"(jmp_vaddr)
-        : "x18");
+    // unsigned long result = 0;
+    // unsigned long jmp_vaddr = new_vaddr;
+    // printf("jmp_vaddr:0x%lx\n", jmp_vaddr);
+    // asm volatile(
+    //     "mov x18, %[vaddr]                  \n"
+    //     "mov %[result], x18                 \n"
+    //     : [result] "=r"(result)
+    //     : [vaddr] "r"(jmp_vaddr)
+    //     : "x18");
 
-    printf("result:0x%lx\n", result);
-    unsigned char instruction[4] = {0};
-    memcpy((void *)instruction, (void *)origin_vaddr, 4);
-    puts("1 instruction:");
-    for (int i = 0; i < 4; i++)
-    {
-        printf("%02x ", (unsigned int)instruction[i]);
-    }
-    puts("");
+    // printf("result:0x%lx\n", result);
+    puts("normal machine instruction(c_test_func) --->");
+    log_matchine_code((void *)origin_vaddr, 0x20);
 
     // 40 02 1F D6
     // D6 1F 02 40             0xD6, 0x1F, 0x02, 0x40
     // 61 24 80 D2             mov x1, #0x123
-    unsigned char jumpCode[4] = {0x61, 0x24, 0x80, 0xD2};
-    memcpy((void *)origin_vaddr, jumpCode, 4);
+    // 51 00 00 58             ldr x17, #8
+    // 20 02 1f d6             br x17
+    // 20 02 3F D6             blr x17
+    // C0 03 5F D6             ret
+    unsigned char jumpCode[] = {0x51, 0x00, 0x00, 0x58,0x20, 0x02, 0x3f, 0xd6};
+    union Register reg = {0};
+    reg.val = origin_vaddr;
+    memcpy((void *)(jumpCode + 8), reg.bytes, 8);
+    unsigned char ret_mathine_code[] = {0xC0, 0x03, 0x5F, 0xD6};
+    memcpy((void *)(jumpCode + 16), ret_mathine_code, 8);
 
-    memcpy((void *)instruction, (void *)origin_vaddr, 4);
-    puts("2 instruction:");
-    for (int i = 0; i < 4; i++)
-    {
-        printf("%02x ", (unsigned int)instruction[i]);
-    }
-    puts("");
+    memcpy((void *)origin_vaddr, jumpCode, 24);
+
+    puts("modify machine instruction(c_test_func) --->");
+    log_matchine_code((void *)origin_vaddr, 0x20);
 
     status = mprotect((void *)page_start, PAGESIZE, PROT_READ | PROT_EXEC);
     if (status != 0)
@@ -110,43 +123,43 @@ void sighandler(int signum)
 {
     printf("捕获信号 %d,跳出...\n", signum);
 
-    struct registers reg;
-    reg.x0.val = 0x0;
-    unsigned long jmp_vaddr = 0x0;
-    asm volatile(
-        "mov %[out_x0], x0                  \n"
-        "mov %[out_x1], x1                  \n"
-        "mov %[out_x2], x2                  \n"
-        "mov %[out_x3], x3                  \n"
-        "mov %[out_x4], x4                  \n"
-        "mov %[out_x5], x5                  \n"
-        "mov %[out_x6], x6                  \n"
-        "mov %[out_x7], x7                  \n"
-        "mov %[out_fp], x29                  \n"
-        "mov %[out_lr], x30                  \n"
-        "mov %[out_sp], x31                  \n"
-        // "mov %[out_pc], x32                  \n"
-        : [out_x0] "=r"(reg.x0.val),
-          [out_x1] "=r"(reg.x1.val),
-          [out_x2] "=r"(reg.x2.val),
-          [out_x3] "=r"(reg.x3.val),
-          [out_x4] "=r"(reg.x4.val),
-          [out_x5] "=r"(reg.x5.val),
-          [out_x6] "=r"(reg.x6.val),
-          [out_x7] "=r"(reg.x7.val),
-          [out_fp] "=r"(reg.fp.val),
-          [out_lr] "=r"(reg.lr.val),
-          [out_sp] "=r"(reg.sp.val),
-        //   [out_pc] "=r"(reg.pc.val)
-        : [jmp_vaddr] "r"(jmp_vaddr)
-        : );
+    // struct registers reg;
+    // reg.x0.val = 0x0;
+    // unsigned long jmp_vaddr = 0x0;
+    // asm volatile(
+    //     "mov %[out_x0], x0                  \n"
+    //     "mov %[out_x1], x1                  \n"
+    //     "mov %[out_x2], x2                  \n"
+    //     "mov %[out_x3], x3                  \n"
+    //     "mov %[out_x4], x4                  \n"
+    //     "mov %[out_x5], x5                  \n"
+    //     "mov %[out_x6], x6                  \n"
+    //     "mov %[out_x7], x7                  \n"
+    //     "mov %[out_fp], x29                  \n"
+    //     "mov %[out_lr], x30                  \n"
+    //     "mov %[out_sp], x31                  \n"
+    //     // "mov %[out_pc], x32                  \n"
+    //     : [out_x0] "=r"(reg.x0.val),
+    //       [out_x1] "=r"(reg.x1.val),
+    //       [out_x2] "=r"(reg.x2.val),
+    //       [out_x3] "=r"(reg.x3.val),
+    //       [out_x4] "=r"(reg.x4.val),
+    //       [out_x5] "=r"(reg.x5.val),
+    //       [out_x6] "=r"(reg.x6.val),
+    //       [out_x7] "=r"(reg.x7.val),
+    //       [out_fp] "=r"(reg.fp.val),
+    //       [out_lr] "=r"(reg.lr.val),
+    //       [out_sp] "=r"(reg.sp.val),
+    //     //   [out_pc] "=r"(reg.pc.val)
+    //     : [jmp_vaddr] "r"(jmp_vaddr)
+    //     : );
 
-    for (int i = 0; i < 34; i++)
-    {
-        unsigned long val = reg.uregs[i].val;
-        printf("x[%d] = %lx\n", i, val);
-    }
-    puts("");
+    // for (int i = 0; i < 34; i++)
+    // {
+    //     unsigned long val = reg.uregs[i].val;
+    //     printf("x[%d] = %lx\n", i, val);
+    // }
+    // puts("");
     exit(1);
 }
 
