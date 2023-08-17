@@ -16,8 +16,7 @@ int (*old_c_test_func)(int i);
 // 新函数
 int new_c_test_func(int i)
 {
-    int origin_ret = old_c_test_func(i);
-    printf("原来的参数:%d,返回值:%d\n", i, origin_ret);
+    puts("go new_c_test_func");
     return i * 10;
 }
 
@@ -137,8 +136,8 @@ void sighandler(int signum)
           [out_fp] "=r"(reg.fp.val),
           [out_lr] "=r"(reg.lr.val),
           [out_sp] "=r"(reg.sp.val)
-        //   [out_pc] "=r"(reg.pc.val)
-        ::);
+          //   [out_pc] "=r"(reg.pc.val)
+          ::);
 
     for (int i = 0; i < 34; i++)
     {

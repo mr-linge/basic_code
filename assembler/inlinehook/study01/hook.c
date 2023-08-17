@@ -23,15 +23,15 @@ void log_matchine_code(void *vaddr, unsigned long len)
     }
 }
 
-
 // 函数指针用于保留原来的执行流程
 int (*old_c_test_func)(int i);
 
 // 新函数
 int new_c_test_func(int i)
 {
-    int origin_ret = old_c_test_func(i);
-    printf("原来的参数:%d,返回值:%d\n", i, origin_ret);
+    // int origin_ret = old_c_test_func(i);
+    // printf("原来的参数:%d,返回值:%d\n", i, origin_ret);
+    printf("go new_c_test_func\n");
     return i * 10;
 }
 
@@ -71,7 +71,7 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
     unsigned long page_start = PAGE_START(origin_vaddr);
     printf("page start:0x%lx\n", page_start);
     // printf("page end   : %lx\n", page_end);
-    status = mprotect((void *)page_start, PAGESIZE, PROT_READ | PROT_WRITE);
+    status = mprotect((void *)page_start, PAGESIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
     if (status != 0)
     {
         perror("mprotect err");
@@ -89,24 +89,24 @@ void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
     //     : "x18");
 
     // printf("result:0x%lx\n", result);
-    puts("normal machine instruction(c_test_func) --->");
-    log_matchine_code((void *)origin_vaddr, 0x20);
+    // puts("normal machine instruction(c_test_func) --->");
+    // log_matchine_code((void *)origin_vaddr, 0x20);
 
-    // 40 02 1F D6
-    // D6 1F 02 40             0xD6, 0x1F, 0x02, 0x40
+    // 52 00 00 58             ldr x18, #8
+    // 40 02 1F D6             br x18
     // 61 24 80 D2             mov x1, #0x123
     // 51 00 00 58             ldr x17, #8
     // 20 02 1f d6             br x17
     // 20 02 3F D6             blr x17
     // C0 03 5F D6             ret
-    unsigned char jumpCode[] = {0x51, 0x00, 0x00, 0x58,0x20, 0x02, 0x3f, 0xd6};
+    unsigned char jumpCode[0x10] = {
+        0x52, 0x00, 0x00, 0x58,
+        0x40, 0x02, 0x1F, 0xD6};
     union Register reg = {0};
-    reg.val = origin_vaddr;
+    reg.val = new_vaddr;
+    // printf("reg.val:0x%lx\n", reg.val);
     memcpy((void *)(jumpCode + 8), reg.bytes, 8);
-    unsigned char ret_mathine_code[] = {0xC0, 0x03, 0x5F, 0xD6};
-    memcpy((void *)(jumpCode + 16), ret_mathine_code, 8);
-
-    memcpy((void *)origin_vaddr, jumpCode, 24);
+    memcpy((void *)origin_vaddr, jumpCode, 0x10);
 
     puts("modify machine instruction(c_test_func) --->");
     log_matchine_code((void *)origin_vaddr, 0x20);
