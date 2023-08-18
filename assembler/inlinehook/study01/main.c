@@ -2,11 +2,14 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
-int c_test_func(int num);
+int c_test_func(int num)
+{
+    return num + 10;
+}
 
 int main(int argc, char const *argv[])
 {
-    char *inject_dylib_path = "./libhook.so";
+    char *inject_dylib_path = "./libtest.so";
     if (access(inject_dylib_path, F_OK) == 0)
     {
         // 打开动态链接库

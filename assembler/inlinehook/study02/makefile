@@ -9,17 +9,29 @@ library_source=hook.c
 lib_outfile=libhook.so
 
 program:
-	@$(cc) ${source} -o $(outfile)
+	@$(cc) -c func.asm -o func.o
+	@$(cc) -S main.c -o main.asm
+	@$(cc) -c main.asm -o main.o
+	@$(cc) main.o func.o -o $(outfile)
 
 dylib:
 	@$(cc) -fPIC -shared ${library_source} -o $(lib_outfile)
 
-test:
-	@$(cc) -fPIC -shared hook.c test.c -o libtest.so
-
-all: program test
+push:
 	@adb push $(outfile) /data/local/tmp/
-	@adb push libtest.so /data/local/tmp/
+
+push_dylib:
+	@adb push $(lib_outfile) /data/local/tmp/
+
+
+program_all: program push
+
+
+dylib_all: dylib push_dylib
+
+
+all: program_all dylib_all
+
 
 clean:
-	@-rm -rf libtest.so $(outfile) $(lib_outfile)
+	@-rm -rf *.o $(outfile) $(lib_outfile)
