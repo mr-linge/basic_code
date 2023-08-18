@@ -53,9 +53,9 @@ void hook(void *target_vaddr, void *new_vaddr, void **old_vaddr)
 
     *old_vaddr = call_back; // 将需要回调的函数指针,指向上面已经构造好的指令处
 
-    unsigned long target_vaddr_page_start = PAGE_START((unsigned long)target_vaddr);
+    void *target_vaddr_page_start = (void *)PAGE_START((unsigned long)target_vaddr);
     // printf("target_vaddr_page_startt:0x%lx\n", target_vaddr_page_start);
-    status = mprotect((void *)target_vaddr_page_start, PAGESIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
+    status = mprotect(target_vaddr_page_start, PAGESIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
     if (status != 0)
     {
         fprintf(stderr, "%s:%d mprotect error: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -67,7 +67,7 @@ void hook(void *target_vaddr, void *new_vaddr, void **old_vaddr)
     reg.val = (unsigned long)new_vaddr;
     memcpy((void *)(target_vaddr + 8), reg.bytes, 8);
 
-    status = mprotect((void *)target_vaddr_page_start, PAGESIZE, PROT_READ | PROT_EXEC);
+    status = mprotect(target_vaddr_page_start, PAGESIZE, PROT_READ | PROT_EXEC);
     if (status != 0)
     {
         fprintf(stderr, "%s:%d mprotect error: %s\n", __FILE__, __LINE__, strerror(errno));
