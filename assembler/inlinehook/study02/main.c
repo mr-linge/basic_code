@@ -2,16 +2,14 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
-int c_test_func(int num);
-
-int new2_c_test_func(int i)
+int c_test_func(int num)
 {
-    return i * 100;
+    return num + 10;
 }
 
-void inject_imitate()
+int main(int argc, char const *argv[])
 {
-    char *inject_dylib_path = "./libhook.so";
+    char *inject_dylib_path = "./libtest.so";
     if (access(inject_dylib_path, F_OK) == 0)
     {
         // 打开动态链接库
@@ -26,15 +24,6 @@ void inject_imitate()
     {
         printf("%s is not exist\n", inject_dylib_path);
     }
-}
-
-void create_space() {
-    
-}
-
-int main(int argc, char const *argv[])
-{
-    inject_imitate();
 
     getchar();
     printf("c_test_func vaddr:0x%lx\n", (unsigned long)&c_test_func);

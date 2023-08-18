@@ -1,7 +1,9 @@
 # 内存映射
 
 ## mmap 函数介绍
-#include <sys/mman.h>
+
+# include <sys/mman.h>
+
 void *mmap(void*start, size_t length, int prot, int flags, int fd, off_t offsize)
 mmap()用来将某个文件内容映射到内存中,对该内存区域的存取即是直接对该文件内容的读写mmap映射的地址处于堆区与栈区中间.文件被映射到多个页上,如果文件的大小不是所有页的大小之和,最后一个页不被使用的空间将会清零
 
@@ -9,10 +11,10 @@ mmap()用来将某个文件内容映射到内存中,对该内存区域的存取�
 start           指向欲对应的内存起始地址,通常设为NULL,代表让系统自动选定地址,对应成功后该地址会返回
 length          代表将文件中多大的部分对应到内存
 prot            代表映射区域的保护方式,有下列组合:
-PROT_EXEC       映射区域可被执行
-PROT_READ       映射区域可被读取
-PROT_WRITE      映射区域可被写入
-PROT_NONE       映射区域不能存取
+                PROT_EXEC       映射区域可被执行
+                PROT_READ       映射区域可被读取
+                PROT_WRITE      映射区域可被写入
+                PROT_NONE       映射区域不能存取
 flags 会影响映射区域的各种特性:
                 MAP_FIXED           如果参数 start 所指的地址无法成功建立映射时,则放弃映射,不对地址做修正通常不鼓励用此旗标
                 MAP_SHARED          对映射区域的写入数据会复制回文件内,而且允许其他映射该文件的进程共享
@@ -20,7 +22,7 @@ flags 会影响映射区域的各种特性:
                 MAP_ANONYMOUS       建立匿名映射,此时会忽略参数fd,不涉及文件,而且映射区域无法和其他进程共享
                 MAP_DENYWRITE       只允许对映射区域的写入操作,其他对文件直接写入的操作将会被拒绝
                 MAP_LOCKED          将映射区域锁定住,这表示该区域不会被置换(swap)
-fd              open()返回的文件描述符,代表欲映射到内存的文件
+fd              open()返回的文件描述符,代表欲映射到内存的文件. 设置为 NULL 则不映射文件到内存中,只开辟一段内存
 offset          文件映射的偏移量,通常设置为0,代表从文件最前方开始对应,offset必须是分页大小的整数倍
 
 返回值:
@@ -33,9 +35,10 @@ EINVAL   参数start、length 或offset 有一个不合法
 EAGAIN   文件被锁住,或是有太多内存被锁住
 ENOMEM   内存不足
 
-
 ## msync 函数介绍
-#include <sys/mman.h>
+
+# include <sys/mman.h>
+
 int msync(void *addr, size_t len, int flags)
 进程在映射空间对共享内容的改变并不直接写回到磁盘文件中,往往在调用munmap()后才执行该操作
 也可以通过调用msync()函数来实现磁盘文件内容与共享内存一致,即同步操作
@@ -53,9 +56,10 @@ MS_INVALIDATE(通知使用该共享区域的进程,数据已经改变)时,在共
 可能的错误
 EBUSY/ EINVAL/ ENOMEM
 
-
 ## munmap 函数介绍
-#include <sys/mman.h>
+
+# include <sys/mman.h>
+
 int munmap(void *start,size_t length);
 用来取消参数start所指的映射内存起始地址,参数length则是欲取消的内存大小当进程结束或利用exec相关函数来执行其他程序时,
 映射内存会自动解除,但关闭对应的文件描述词时不会解除映射,当映射关系解除后,对原来映射地址的访问将导致段错误发生

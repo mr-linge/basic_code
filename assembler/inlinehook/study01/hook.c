@@ -29,9 +29,9 @@ int (*old_c_test_func)(int i);
 // 新函数
 int new_c_test_func(int i)
 {
-    // int origin_ret = old_c_test_func(i);
-    // printf("原来的参数:%d,返回值:%d\n", i, origin_ret);
-    printf("go new_c_test_func\n");
+    int origin_ret = old_c_test_func(i);
+    printf("原来的参数:%d,返回值:%d\n", i, origin_ret);
+    // printf("go new_c_test_func\n");
     return i * 10;
 }
 
@@ -65,56 +65,67 @@ unsigned long get_module_vaddr(char *module)
     return module_vaddr;
 }
 
-void hook(unsigned long origin_vaddr, unsigned long new_vaddr)
+void hook(void * target_vaddr, void * new_vaddr, void **old_vaddr)
 {
+    union Register reg = {0}; // 寄存器操作
+
+    unsigned long size = 32;
+    void *old_func = mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+    printf("old_func:%p\n", old_func);
+	if (old_func == MAP_FAILED) /* 判断是否映射成功 */
+	{
+		perror("mmap init fail");
+		exit(1);
+	}
+    unsigned char back_codes[32] = {0};
+    memcpy(back_codes,target_vaddr,16);
+    unsigned char jump_code[0x8] = {
+        0x52, 0x00, 0x00, 0x58,
+        0x40, 0x02, 0x1F, 0xD6};
+    memcpy((void *)(back_codes + 16), jump_code, 8);
+    reg.val =  (unsigned long)target_vaddr + 16;
+    // printf("reg.val:0x%lx\n", reg.val);
+    memcpy((void *)(back_codes + 24), reg.bytes, 8);
+    // 写到 heap
+    memcpy(old_func,back_codes,32);
+
+    *old_vaddr = old_func;
+
     int status;
-    unsigned long page_start = PAGE_START(origin_vaddr);
-    printf("page start:0x%lx\n", page_start);
+    unsigned long target_vaddr_page_start = PAGE_START((unsigned long)target_vaddr);
+    printf("target_vaddr_page_startt:0x%lx\n", target_vaddr_page_start);
     // printf("page end   : %lx\n", page_end);
-    status = mprotect((void *)page_start, PAGESIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
+    status = mprotect((void *)target_vaddr_page_start, PAGESIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
     if (status != 0)
     {
         perror("mprotect err");
         return;
     }
 
-    // unsigned long result = 0;
-    // unsigned long jmp_vaddr = new_vaddr;
-    // printf("jmp_vaddr:0x%lx\n", jmp_vaddr);
-    // asm volatile(
-    //     "mov x18, %[vaddr]                  \n"
-    //     "mov %[result], x18                 \n"
-    //     : [result] "=r"(result)
-    //     : [vaddr] "r"(jmp_vaddr)
-    //     : "x18");
-
-    // printf("result:0x%lx\n", result);
-    // puts("normal machine instruction(c_test_func) --->");
-    // log_matchine_code((void *)origin_vaddr, 0x20);
-
     // 52 00 00 58             ldr x18, #8
     // 40 02 1F D6             br x18
-    // 61 24 80 D2             mov x1, #0x123
-    // 51 00 00 58             ldr x17, #8
-    // 20 02 1f d6             br x17
-    // 20 02 3F D6             blr x17
-    // C0 03 5F D6             ret
     unsigned char jumpCode[0x10] = {
         0x52, 0x00, 0x00, 0x58,
         0x40, 0x02, 0x1F, 0xD6};
-    union Register reg = {0};
-    reg.val = new_vaddr;
+    reg.val = (unsigned long)new_vaddr;
     // printf("reg.val:0x%lx\n", reg.val);
     memcpy((void *)(jumpCode + 8), reg.bytes, 8);
-    memcpy((void *)origin_vaddr, jumpCode, 0x10);
+    memcpy(target_vaddr, jumpCode, 0x10);
 
-    puts("modify machine instruction(c_test_func) --->");
-    log_matchine_code((void *)origin_vaddr, 0x20);
+    // puts("modify machine instruction(c_test_func) --->");
+    // log_matchine_code((void *)origin_vaddr, 0x20);
 
-    status = mprotect((void *)page_start, PAGESIZE, PROT_READ | PROT_EXEC);
+    status = mprotect((void *)target_vaddr_page_start, PAGESIZE, PROT_READ | PROT_EXEC);
     if (status != 0)
     {
         perror("2 mprotect err");
+        return;
+    }
+
+    status = mprotect(old_func, PAGESIZE, PROT_READ | PROT_EXEC);
+    if (status != 0)
+    {
+        perror("3 mprotect err");
         return;
     }
 }
@@ -165,7 +176,7 @@ void sighandler(int signum)
 
 void __attribute__((constructor)) dylibInject(void)
 {
-    signal(SIGSEGV, sighandler);
+    // signal(SIGSEGV, sighandler);
 
     printf("Hello, hook was starting ...\n");
     char *module_name = "/data/local/tmp/main";
@@ -175,5 +186,5 @@ void __attribute__((constructor)) dylibInject(void)
     unsigned long target_func_vaddr = module_vaddr + 0x19C0;
 
     printf("new_c_test_func vaddr:0x%lx\n", (unsigned long)&new_c_test_func);
-    hook(target_func_vaddr, (unsigned long)&new_c_test_func);
+    hook((void *)target_func_vaddr, (void *)&new_c_test_func, (void **)&old_c_test_func);
 }
