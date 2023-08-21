@@ -105,9 +105,17 @@ int main(int argc, char **argv)
 
 	ptrace_attach(pid);
 	int status = 0;
-	waitpid(pid, &status, WUNTRACED);
-	// 0x137f PTRACE_ATTAC 后子进程暂停
+	int ret = waitpid(pid, &status, WUNTRACED);
+	if (ret < 0)
+	{
+		fprintf(stderr, "%s:%d waitpid error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(1);
+	}
 	printf("status = 0x%x\n", status);
+	if (WIFSTOPPED(status))
+	{
+		printf("child pid stop:%d\n", WSTOPSIG(status));
+	}
 
 	putdata(pid, addr, (unsigned char *)src, len);
 

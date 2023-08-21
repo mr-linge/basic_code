@@ -32,9 +32,18 @@ int main(int argc, char *argv[])
 	}
 
 	int status = 0;
-	waitpid(pid, &status, WUNTRACED);
-	// 0x137f PTRACE_ATTAC 后子进程暂停
+	ret = waitpid(pid, &status, WUNTRACED);
+	if (ret < 0)
+	{
+		fprintf(stderr, "%s:%d waitpid error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(1);
+	}
 	printf("status = 0x%x\n", status);
+	if (WIFSTOPPED(status))
+	{
+		// 子进程暂停原因
+		printf("child pid stop:%d\n", WSTOPSIG(status));
+	}
 
 	struct pt_regs regs = {0};
 
@@ -57,7 +66,7 @@ int main(int argc, char *argv[])
 
 	getchar(); // 接受一个输入后程序继续往下走
 	puts("往寄存器中写入数据");
-	regs.uregs[0] = 0x0; // 把 pc 置为 0, 程序会发生错误,可以看效果
+	regs.uregs[32] = 0x0; // 把 pc 置为 0, 程序会发生错误,可以看效果
 	ret = ptrace(PTRACE_SETREGSET, pid, (void *)regset, &ioVec);
 	if (ret < 0)
 	{
@@ -74,9 +83,18 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	waitpid(pid, &status, WUNTRACED);
-	// 0xb7f 子进程出现异常(因为pc = 0)
+	ret = waitpid(pid, &status, WUNTRACED);
+	if (ret < 0)
+	{
+		fprintf(stderr, "%s:%d waitpid error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(1);
+	}
 	printf("status = 0x%x\n", status);
+	if (WIFSTOPPED(status))
+	{
+		// 子进程暂停原因
+		printf("child pid stop:%d\n", WSTOPSIG(status));
+	}
 
 	puts("inter 当前进程取消对子进程的附加");
 	getchar(); // 接受一个输入后程序继续往下走

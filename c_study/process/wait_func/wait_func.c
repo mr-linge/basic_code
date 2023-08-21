@@ -6,7 +6,7 @@
 #include <errno.h>
 
 /*
-#include <sys/wait.h> 
+#include <sys/wait.h>
 #include <sys/types.h>
 
 funtcion:
@@ -33,34 +33,39 @@ errno:
 	EINTR ：未抓住信号。或者该信号未设置，或者为找到该信号;
  * */
 int main()
-{	
+{
 	pid_t pid;
 	int status; // child process exit status.
 	pid = fork();
-	if(pid > 0)
+	if (pid > 0)
 	{
 		sleep(1);
 		printf("This is the parent process, wait for child...\n");
 		int child_pid = wait(&status); /*阻塞等待子进程*/
-		if(child_pid < 0) {
+		if (child_pid < 0)
+		{
 			perror("wait fail");
 			exit(-1);
 		}
 		printf("wait return vaule -> child's pid = %d\n", pid);
 		printf("wait receieve param -> status : %d\n", status);
 		int exit_state = WIFEXITED(status);
-		if(exit_state == 0) {
+		if (exit_state == 0)
+		{
 			printf("The child process was terminated abnormally.signal %d\n", WTERMSIG(status));
-		}else {
+		}
+		else
+		{
 			int exitno = WEXITSTATUS(status);
 			printf("child process exit number : %d\n", exitno);
 		}
 	}
-	else if(pid == 0)
+	else if (pid == 0)
 	{
 		printf("This is the child process. pid = %d\n", getpid());
 		exit(5);
-	}else
+	}
+	else
 	{
 		printf("fork fail\n");
 	}
