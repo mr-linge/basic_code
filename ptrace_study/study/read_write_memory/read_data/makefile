@@ -16,4 +16,3 @@ $(exec): $(source)
 
 clean:
 	@-rm $(exec)
-

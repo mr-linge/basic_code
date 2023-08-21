@@ -6,18 +6,20 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#define LONGSIZE sizeof(long)
 
-#define LONGSIZE  sizeof(long)
-
-int getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long len) {
-	union {
+int getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long len)
+{
+	union
+	{
 		long val;
 		uint8_t bytes[LONGSIZE];
 	} data;
 	unsigned long i = 0;
 	unsigned long j = len / LONGSIZE;
 	uint8_t *laddr = dst;
-	while (i < j) {
+	while (i < j)
+	{
 		data.val = ptrace(PTRACE_PEEKDATA, target_pid, addr + (i * LONGSIZE), NULL);
 		memcpy(laddr, data.bytes, LONGSIZE);
 		++i;
@@ -25,7 +27,8 @@ int getdata(pid_t target_pid, unsigned long addr, uint8_t *dst, unsigned long le
 	}
 
 	unsigned long remainder = len % LONGSIZE;
-	if (remainder != 0) { // save the remainder, which less than LONGSIZE
+	if (remainder != 0)
+	{ // save the remainder, which less than LONGSIZE
 		data.val = ptrace(PTRACE_PEEKDATA, target_pid, addr + (i * LONGSIZE), NULL);
 		memcpy(laddr, data.bytes, remainder);
 	}
@@ -58,9 +61,11 @@ int ptrace_detach(pid_t pid)
 }
 
 //  附加到正在运行的进程
-int ptrace_attach(pid_t target_pid) {
+int ptrace_attach(pid_t target_pid)
+{
 	printf("+ Tracing process %d\n", target_pid);
-	if (ptrace(PTRACE_ATTACH, target_pid, NULL, NULL) < 0) {
+	if (ptrace(PTRACE_ATTACH, target_pid, NULL, NULL) < 0)
+	{
 		perror("ptrace(ATTACH):");
 		return -1;
 	}
@@ -69,8 +74,10 @@ int ptrace_attach(pid_t target_pid) {
 	return 0;
 }
 
-int main(int argc, char **argv) {
-	if (argc != 3) {
+int main(int argc, char **argv)
+{
+	if (argc != 3)
+	{
 		fprintf(stderr, "Usage:\n\t%s pid\n", argv[0]);
 		return -1;
 	}
@@ -83,10 +90,10 @@ int main(int argc, char **argv) {
 	wait(NULL);
 
 	unsigned long len = 32;
-	uint8_t *dst = (uint8_t *) calloc(len,1);
+	uint8_t *dst = (uint8_t *)calloc(len, 1);
 	getdata(pid, addr, dst, len);
 
-	printf("dst:%p\nvalue:%s\n", (void *) addr, dst);
+	printf("dst:%p\nvalue:%s\n", (void *)addr, dst);
 
 	ptrace_cont(pid);
 	//	int i = 0;
@@ -104,4 +111,3 @@ int main(int argc, char **argv) {
 
 	return 0;
 }
-
