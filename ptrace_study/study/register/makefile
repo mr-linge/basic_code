@@ -3,17 +3,15 @@ base_dir=~/Library/Android/Sdk/ndk/25.2.9519653/toolchains/llvm/prebuilt/darwin-
 cc=${base_dir}/aarch64-linux-android33-clang
 strip=${base_dir}/llvm-strip
 
+source=main.c
+execfile=main
 
-tracee:
-	@$(cc) tracee.c -o tracee
-	@$(strip) tracee
+program:
+	@$(cc) $(source) -o $(execfile)
 
-tracee2:
-	@$(cc) tracee2.c -o tracee
-	@$(strip) tracee
-
-all: tracee2
-	@adb push tracee /data/local/tmp/
+all: program
+	@$(strip) $(execfile)
+	@adb push $(execfile) /data/local/tmp/
 
 clean:
-	@-rm -rf tracee
+	@-rm -rf ./tracee $(execfile)

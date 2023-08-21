@@ -39,8 +39,8 @@ char *func3(char *str)
 	char *ret = "You will be success!";
 	printf("<%s %d> param vaddr: %p, ret :%p\n", __FUNCTION__, __LINE__, str, ret);
 	char tmp[0x100];
-	memset(tmp,0,0x100);
-	memcpy(tmp,str,strlen(str));
+	memset(tmp, 0, 0x100);
+	memcpy(tmp, str, strlen(str));
 	printf("<%s %d> tmp string: %s, vaddr:%p\n", __FUNCTION__, __LINE__, tmp, &(tmp[0]));
 	return ret;
 }
@@ -107,43 +107,6 @@ int main()
 	int len = 64;
 	uint8_t *virtual_stack = (uint8_t *)malloc(len);
 	memset(virtual_stack, 'a', 32);
-	//	int fd = open("./loaded_file", O_RDONLY | O_WRONLY);
-	//打开动态链接库
-	//	void *handle = dlopen(path, RTLD_LAZY);
-	//	printf("handle = %p\n",handle);
-	// char c;
-	// while(1) {
-	// 	printf("****************** pid:%d *******************\n",getpid());
-	// 	//printf("input commond:");
-	// 	//c = getchar();
-	// 	printf("mem_space addr:%p,value:\n",mem_space);
-	// 	for(int i = 0; i< len; i++) {
-	// 		printf("%02x ", *(mem_space + i));
-	// 	}
-	// 	puts("");
-	// 	//		printf("fd = %d\n", fd);
-	// 	//read_mem((unsigned long)mem_space,len);
-	// 	//		printf("open            addr: %p\n", &open);
-	// 	//printf("mmap            addr: %p\n", &mmap);
-	// 	//printf("dlopen          addr: %p\n", &dlopen);
-	// 	printf("printf          addr: %p\n", &printf);
-	// 	//printf("&func0          addr: %p\n", &func0);
-	// 	printf("&global_var     addr: %p\n", &global_var);
-	// 	printf("&func1          addr: %p\n", &func1);
-	// 	printf("&func2          addr: %p\n", &func2);
-	// 	//printf("&read_mem       addr: %p\n", &read_mem);
-	// 	//printf(" path           addr: %p\n", path);
-	// 	//printf("&print          addr: %p\n", &print);
-	// 	printf("&func10         addr: %p\n", &func10);
-	// 	printf("&func20         addr: %p\n", &func20);
-	// 	global_var++;
-	// 	int ret = 0;
-	// 	//ret = func1(1,1);
-	// 	//ret = func10(1,2,3,4,5,6,7,8,9,10);
-	// 	ret = func20(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);
-	// 	printf("result = 0x%x\n", ret);
-	// 	sleep(5);
-	// }
 
 	int status = 0;
 	while (1)
@@ -155,7 +118,7 @@ int main()
 		{
 		case 1:
 		{
-			int result = func1(10);
+			int result = func1(0x10);
 			printf("<%s> func1 return value : 0x%x\n", __FUNCTION__, result);
 			break;
 		}
