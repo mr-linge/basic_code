@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	long ret = 0;
+	int status = 0;
 	pid_t pid = atoi(argv[1]);
 
 	ret = ptrace(PTRACE_ATTACH, pid, 0, 0);
@@ -31,7 +32,6 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	int status = 0;
 	ret = waitpid(pid, &status, WUNTRACED);
 	if (ret < 0)
 	{

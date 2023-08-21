@@ -14,4 +14,4 @@ all: program
 	@adb push $(execfile) /data/local/tmp/
 
 clean:
-	@-rm -rf ./tracee $(execfile)
+	@-rm -rf $(execfile)

@@ -96,13 +96,13 @@ PTRACE_CONT      让子进程继续运行
 PTRACE_DETACH    结束对子进程的跟踪,结束跟踪后被跟踪进程将继续执行
 除了上面这三条命令外,其他所有命令使用前子进程必须处于中止状态。否则可能会出错,如:子进程 stopped 或 读写数据失效。
 
-获取子进程状态 使用 wait 函数
+获取子进程信号 使用 wait 函数
 int status;
-wait(&status);
+waitpid(pid, &status, WUNTRACED);
 if(WIFSTOPPED(status)) 判断子程是否处于中止状态
-当子进程处于中止状态后
-WSTOPSIG(status) 获取子进程中止信号
-WSTOPSIG(status) == SIGCONT 则是 PTRACE_ATTACH 导致的子进程中止
+当子进程处于中止状态后,WSTOPSIG(status) 获取子进程中止信号
+WSTOPSIG(status) == SIGSTOP 则是 PTRACE_ATTACH 导致的子进程中止
 WSTOPSIG(status) == SIGTRAP 则是 由于子进程运行到调试断点后产生的 信号
+WSTOPSIG(status) == SIGSEGV 则是 pc 运行到非法地址 如: lr = 0
 
 参考资料:<https://man7.org/linux/man-pages/man2/ptrace.2.html>
