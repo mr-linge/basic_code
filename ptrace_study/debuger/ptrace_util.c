@@ -1,7 +1,7 @@
 #include "ptrace_util.h"
 
 // 附加到正在运行的进程
-void ptrace_attach(pid_t pid)
+void ptrace_attach()
 {
 	if (ptrace(PTRACE_ATTACH, pid, NULL, NULL) < 0)
 	{
@@ -11,7 +11,7 @@ void ptrace_attach(pid_t pid)
 }
 
 // 让子进程继续运行
-void ptrace_cont(pid_t pid)
+void ptrace_cont()
 {
 	if (ptrace(PTRACE_CONT, pid, NULL, NULL) < 0)
 	{
@@ -21,7 +21,7 @@ void ptrace_cont(pid_t pid)
 }
 
 // 单步执行一步
-void ptrace_single_step(pid_t pid)
+void ptrace_single_step()
 {
 	if (ptrace(PTRACE_SINGLESTEP, pid, NULL, NULL) < 0)
 	{
@@ -31,7 +31,7 @@ void ptrace_single_step(pid_t pid)
 }
 
 // 结束对目标进程的跟踪
-void ptrace_detach(pid_t pid)
+void ptrace_detach()
 {
 	if (ptrace(PTRACE_DETACH, pid, NULL, NULL) < 0)
 	{
@@ -41,7 +41,7 @@ void ptrace_detach(pid_t pid)
 }
 
 // 获取寄存器
-void get_registers(pid_t pid, struct pt_regs *regs)
+void get_registers(struct pt_regs *regs)
 {
 	long regset = NT_PRSTATUS; // 如果addr是NT_PRSTATUS,则读取通用寄存器。如果addr是NT_foo,则读取浮点或向量寄存器（如果有的话)
 	struct iovec ioVec = {0};
@@ -55,7 +55,7 @@ void get_registers(pid_t pid, struct pt_regs *regs)
 }
 
 // 写入寄存器
-void set_registers(pid_t pid, struct pt_regs *regs)
+void set_registers(struct pt_regs *regs)
 {
 	long regset = NT_PRSTATUS; // 如果addr是NT_PRSTATUS,则读取通用寄存器。如果addr是NT_foo,则读取浮点或向量寄存器（如果有的话)
 	struct iovec ioVec = {0};
@@ -68,7 +68,7 @@ void set_registers(pid_t pid, struct pt_regs *regs)
 	}
 }
 
-void getdata(pid_t pid, unsigned long addr, unsigned long len, unsigned char *dst)
+void getdata(unsigned long addr, unsigned long len, unsigned char *dst)
 {
 	union DataUnit data = {0};
 	unsigned long i = 0;
@@ -90,7 +90,7 @@ void getdata(pid_t pid, unsigned long addr, unsigned long len, unsigned char *ds
 	}
 }
 
-void putdata(pid_t pid, unsigned long addr, unsigned long len, unsigned char *src)
+void putdata(unsigned long addr, unsigned long len, unsigned char *src)
 {
 	int ret = 0;
 	union DataUnit data = {0};
@@ -124,7 +124,7 @@ void putdata(pid_t pid, unsigned long addr, unsigned long len, unsigned char *sr
 	}
 }
 
-void wait_child_signal(pid_t pid, int SIGNO)
+void wait_child_signal(int SIGNO)
 {
 	int status, ret;
 	do

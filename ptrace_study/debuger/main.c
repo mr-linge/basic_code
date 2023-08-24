@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include "console.h"
 
+int pid;
+
 enum debug_model
 {
 	ATTACH,
@@ -24,7 +26,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	enum debug_model model;
-	int c, pid;
+	int c;
 	while ((c = getopt_long(argc, argv, ":", longopts, NULL)) != -1)
 	{
 		switch (c)

@@ -13,6 +13,8 @@
 #include <elf.h>	 // NT_PRSTATUS
 #include <errno.h>
 
+extern int pid;
+
 #define REGISTERSIZE 8
 
 // AArch64 寄存器结构体
@@ -29,23 +31,23 @@ union DataUnit
 };
 
 // 附加到正在运行的进程
-void ptrace_attach(pid_t pid);
+void ptrace_attach();
 // 让子进程继续运行
-void ptrace_cont(pid_t pid);
+void ptrace_cont();
 // 单步执行一步
-void ptrace_single_step(pid_t pid);
+void ptrace_single_step();
 // 结束对目标进程的跟踪
-void ptrace_detach(pid_t pid);
+void ptrace_detach();
 
 // 获取寄存器
-void get_registers(pid_t pid, struct pt_regs *regs);
+void get_registers(struct pt_regs *regs);
 // 写入寄存器
-void set_registers(pid_t pid, struct pt_regs *regs);
+void set_registers(struct pt_regs *regs);
 
 // 读取内存中的数据
-void getdata(pid_t pid, unsigned long addr, unsigned long len, unsigned char *dst);
+void getdata(unsigned long addr, unsigned long len, unsigned char *dst);
 // 往内存中写入数据
-void putdata(pid_t pid, unsigned long addr, unsigned long len, unsigned char *src);
+void putdata(unsigned long addr, unsigned long len, unsigned char *src);
 
 // 等待子进程 指定信号
-void wait_child_signal(pid_t pid, int SIGNO);
+void wait_child_signal(int SIGNO);
