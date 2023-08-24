@@ -9,6 +9,7 @@ struct option longopts[] = {
     {"test3", required_argument, &t3, 0x102},
     {"test4", required_argument, &t4, 0x103},
     {"test5", required_argument, NULL, 0x104},
+    {"test6", required_argument, NULL, 0x105},
     {0, 0, 0, 0},
 };
 /*
@@ -21,6 +22,7 @@ struct option longopts[] = {
 ./optlong --test5 "p5"
 ./optlong -l "pl"
 ./optlong --test1 --test2 --test3 "p3" --test4 "p4" --test5 "p5" -l "pl"
+./optlong --test1 --test2 --test3 "p3" --test4 "p4" --test5 "p5" --test6 "p6" -l "pl"
 */
 int main(int argc, char *argv[])
 {
@@ -59,12 +61,16 @@ int main(int argc, char *argv[])
             printf("have option: --test5\n");
             printf("The argument of --test5 is %s\n", optarg);
             break;
+        case 0x105:
+            printf("have option: --test6\n");
+            printf("The argument of --test6 is %s\n", optarg);
+            break;
         case 'l':
             printf("have option: -l\n");
             printf("The argument of -l is %s\n", optarg);
             break;
         case '?':
-            printf("Unknown option: %c\n", (char)optopt);
+            printf("Unknown option: %d\n", optopt);
             break;
         default:
             printf("default:%d\n", c);

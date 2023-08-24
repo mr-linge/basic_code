@@ -6,7 +6,7 @@
  * 作用原理: relocation 时 Strong Symbol 覆盖 Weak Symbol
  * */
 
-int max(int x,int y);
+int max(int x, int y);
 
 int main(void)
 {
@@ -14,8 +14,8 @@ int main(void)
     /*外部变量声明*/
     extern int g_X;
     extern int g_Y;
-    result = max(g_X,g_Y);
-    printf("the max value is %d\n",result);
+    result = max(g_X, g_Y);
+    printf("the max value is %d\n", result);
     return 0;
 }
 

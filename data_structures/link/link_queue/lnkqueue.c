@@ -1,36 +1,41 @@
 #include "lnkqueue.h"
 
 // init queue
-queue *init() {
+queue *init()
+{
     queue *qu;
-    qu = (queue *) malloc(sizeof(queue));
+    qu = (queue *)malloc(sizeof(queue));
     qu->front = NULL;
     qu->rear = NULL;
     return qu;
 }
 
 // judge queue empty
-int empty(queue qu) {
+int empty(queue qu)
+{
     return (qu.front ? 0 : 1);
 }
 
 // display all item
-void display(queue *qu) {
+void display(queue *qu)
+{
     node *p;
     p = qu->front;
-    if(!p) {
+    if (!p)
+    {
         printf("The link queue is empty!\n");
     }
     while (p)
     {
-        printf("%5d ",p->info);
+        printf("%5d ", p->info);
         p = p->next;
     }
     puts("");
 }
 
 // read item value on front
-datatype read(queue qu) {
+datatype read(queue qu)
+{
     if (!qu.front)
     {
         printf("The link queue is empty!\n");
@@ -40,15 +45,17 @@ datatype read(queue qu) {
 }
 
 // insert
-queue * insert(queue *qu, datatype x) {
+queue *insert(queue *qu, datatype x)
+{
     node *p;
-    p = (node *) malloc(sizeof(node));
+    p = (node *)malloc(sizeof(node));
     p->info = x;
     p->next = NULL;
     if (qu->front == NULL) // 当前队列为空，新插入的结点为队列中的唯一结点
     {
         qu->front = qu->rear = p;
-    }else 
+    }
+    else
     {
         qu->rear->next = p;
         qu->rear = p;
@@ -57,16 +64,19 @@ queue * insert(queue *qu, datatype x) {
 }
 
 // delete item
-queue *dele(queue *qu) {
+queue *dele(queue *qu)
+{
     node *q;
-    if(!qu->front) {
+    if (!qu->front)
+    {
         printf("The link queue is empty!\n");
         return qu;
     }
     q = qu->front;
     qu->front = q->next;
     free(q);
-    if(qu->front == NULL) {
+    if (qu->front == NULL)
+    {
         qu->rear = NULL;
     }
     return qu;

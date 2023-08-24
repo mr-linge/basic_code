@@ -11,8 +11,8 @@ int main()
 	//    gets(b);
 	//    printf("the string2 : %s\n", b);
 	// 使用 fgets() 替换 gets()
-	char buffer[10];
-	fgets(buffer, (sizeof(buffer) / sizeof(char)), stdin);
+	char buffer[0x10];
+	fgets(buffer, sizeof(buffer), stdin);
 	printf("the string : %s\n", buffer);
 	return 0;
 }

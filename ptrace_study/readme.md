@@ -63,8 +63,8 @@ ptrace(PTRACE_SYS, pid, 0, signal)
 描述:杀掉子进程,使它退出。pid表示被跟踪的子进程。  
 
 9. PTRACE_SINGLESTEP  
-形式:ptrace(PTRACE_KILL, pid, 0, signle)
-描述:设置单步执行标志,单步执行一条指令。pid表示被跟踪的子进程。signal为0则忽略引起调试进程中止的信号,若不为0则继续处理信号signal。当被跟踪进程单步执行完一个指令后,被跟踪进程被中止,并通知父进程。
+形式:ptrace(PTRACE_SINGLESTEP, pid, 0, signal)
+描述:设置单步执行标志,单步执行一条指令。pid表示被跟踪的子进程。signal为0则忽略引起调试进程中止的信号,若不为0则继续处理信号signal。当被跟踪进程单步执行完一个指令后,被跟踪进程被中止,并通知父进程。 PTRACE_CONT 可以直接恢复子进程的执行,不需要清除断点
 
 10. PTRACE_ATTACH
 形式:ptrace(PTRACE_ATTACH,pid)
@@ -94,7 +94,7 @@ ptrace(PTRACE_SYS, pid, 0, signal)
 PTRACE_ATTACH    会让进程处于中止状态. 这个函数调用后必须用 wait 等待子进程的中止信号,收到子进程的信号后才能进行其他操作
 PTRACE_CONT      让子进程继续运行
 PTRACE_DETACH    结束对子进程的跟踪,结束跟踪后被跟踪进程将继续执行
-除了上面这三条命令外,其他所有命令使用前子进程必须处于中止状态。否则可能会出错,如:子进程 stopped 或 读写数据失效。
+除了上面这三条命令外,其他所有命令使用前子进程必须处于中止状态。否则可能会出错,如:子进程崩溃或读写数据失效。
 
 获取子进程信号 使用 wait 函数
 int status;

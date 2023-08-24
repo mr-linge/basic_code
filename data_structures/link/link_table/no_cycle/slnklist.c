@@ -1,21 +1,27 @@
 #include "slnklist.h"
 
 // init link list
-node *init() {
+node *init()
+{
 	node *head;
-	head = (node *) malloc(sizeof(node));
+	head = (node *)malloc(sizeof(node));
 	head->next = NULL;
 	return head;
 }
 
 // display all node
-void display(node *head) {
+void display(node *head)
+{
 	node *p = head->next;
-	if(!p) {
+	if (!p)
+	{
 		printf("The link is empty!\n");
-	}else {
-		while(p) {
-			printf("%5d ",p->info);
+	}
+	else
+	{
+		while (p)
+		{
+			printf("%5d ", p->info);
 			p = p->next;
 		}
 		puts("");
@@ -23,16 +29,21 @@ void display(node *head) {
 }
 
 // find node by index
-node * find(node *head, int i) {
+node *find(node *head, int i)
+{
 	node *p = head;
 	int j = 0;
-	if(i < 0) {
+	if (i < 0)
+	{
 		printf("The node(%d) is not exist!\n", i);
 		return NULL;
-	}else if(i == 0) {
+	}
+	else if (i == 0)
+	{
 		return p;
 	}
-	while(p && j != i) {
+	while (p && j != i)
+	{
 		p = p->next;
 		j++;
 	}
@@ -40,15 +51,17 @@ node * find(node *head, int i) {
 }
 
 // insert
-node * insert(node *head, datatype x, int i) {
-	node *p,*q;
+node *insert(node *head, datatype x, int i)
+{
+	node *p, *q;
 	q = find(head, i);
-	if(!q) {
-		printf("The node(%d) is not exist!\n",i);
+	if (!q)
+	{
+		printf("The node(%d) is not exist!\n", i);
 		return head;
 	}
 
-	p = (node *) malloc(sizeof(node));
+	p = (node *)malloc(sizeof(node));
 	p->info = x;
 	p->next = q->next;
 	q->next = p;
@@ -56,14 +69,17 @@ node * insert(node *head, datatype x, int i) {
 }
 
 // delete node by value
-node * delete(node *head, datatype x) {
-	node * pre = head;
-	node * q = head->next;
-	while(q && q->info != x) {
+node *delete(node *head, datatype x)
+{
+	node *pre = head;
+	node *q = head->next;
+	while (q && q->info != x)
+	{
 		pre = q;
 		q = q->next;
 	}
-	if(q) {
+	if (q)
+	{
 		pre->next = q->next;
 		free(q);
 	}

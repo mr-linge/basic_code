@@ -11,16 +11,20 @@
 
    返回值：返回下一个分割后的字符串指针，如果已无从分割则返回NULL。
 
-   在linux2.6.29以后的版本中，strtok被strsep代替了。   
+   在linux2.6.29以后的版本中，strtok被strsep代替了。
  * */
-void main() {
+int main()
+{
 	char s[] = "ab-cd : ef;gh :i-jkl;mnop;qrs-tu: vwx-y;z";
 	char *delim = "-: ";
 	char *p;
 	printf("%s\n", strtok(s, delim));
 	puts("\n-------- while before -------");
-	while(p = strtok(NULL, delim)) {
+	while (p = strtok(NULL, delim))
+	{
 		printf("%s\n", p);
 	}
 	puts("");
+
+	return 0;
 }

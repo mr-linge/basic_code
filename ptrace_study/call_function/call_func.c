@@ -37,6 +37,7 @@ int ptrace_call(pid_t pid, unsigned long func_addr, long *parameters, long num_p
     waitpid(pid, &stat, WUNTRACED);
     // 0xb7f表示子进程进入暂停状态
     //	printf("status = 0x%x\n", stat);
+    /** 这一块的代码可以优化,目前是没时间 **/
     while (stat != 0xb7f)
     {
         sleep(5);

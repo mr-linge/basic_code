@@ -1,18 +1,22 @@
 #include "lnkstack.h"
 
 // init stack
-node * init() {
+node *init()
+{
 	return NULL;
 }
 
-//judge stack is empty
-int empty(node *top) {
-	return (top ? 0 :1);
+// judge stack is empty
+int empty(node *top)
+{
+	return (top ? 0 : 1);
 }
 
 // read item on top
-datatype read(node *top) {
-	if(!top) {
+datatype read(node *top)
+{
+	if (!top)
+	{
 		printf("link stack is empty!\n");
 		exit(-1);
 	}
@@ -20,13 +24,16 @@ datatype read(node *top) {
 }
 
 // display all item in link stack
-void display(node *top) {
+void display(node *top)
+{
 	node *p;
 	p = top;
-	if(!p) {
+	if (!p)
+	{
 		printf("link stack is empty!\n");
 	}
-	while(p) {
+	while (p)
+	{
 		printf("%5d ", p->info);
 		p = p->next;
 	}
@@ -34,9 +41,10 @@ void display(node *top) {
 }
 
 // push
-node * push(node *top, datatype x) {
+node *push(node *top, datatype x)
+{
 	node *p;
-	p = (node *) malloc(sizeof(node));
+	p = (node *)malloc(sizeof(node));
 	p->info = x;
 	p->next = top;
 	top = p;
@@ -44,14 +52,16 @@ node * push(node *top, datatype x) {
 }
 
 // pop
-node * pop(node *top) {
+node *pop(node *top)
+{
 	node *q;
-	if(!top) {
+	if (!top)
+	{
 		printf("link stack is empty!\n");
 		return NULL;
 	}
 	q = top;
 	top = top->next;
 	free(q);
-	return top;	
+	return top;
 }

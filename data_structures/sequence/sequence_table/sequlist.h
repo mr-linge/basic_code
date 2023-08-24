@@ -14,7 +14,6 @@ typedef struct
 	int size;
 } sequence_list;
 
-
 /*
  * init table
  * */

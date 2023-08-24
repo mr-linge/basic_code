@@ -41,8 +41,10 @@ int main(int argc, char *argv[])
 	printf("status = 0x%x\n", status);
 	if (WIFSTOPPED(status))
 	{
-		// 子进程暂停原因
-		printf("child pid stop:%d\n", WSTOPSIG(status));
+		if (WSTOPSIG(status) == SIGSTOP)
+		{	// attach 导致的子进程中止
+			printf("%s:%d child pid stop:%d\n", __FILE__, __LINE__, WSTOPSIG(status));
+		}
 	}
 
 	struct pt_regs regs = {0};
@@ -93,7 +95,7 @@ int main(int argc, char *argv[])
 	if (WIFSTOPPED(status))
 	{
 		// 子进程暂停原因
-		printf("child pid stop:%d\n", WSTOPSIG(status));
+		printf("%s:%d child pid stop:%d\n", __FILE__, __LINE__, WSTOPSIG(status));
 	}
 
 	puts("inter 当前进程取消对子进程的附加");

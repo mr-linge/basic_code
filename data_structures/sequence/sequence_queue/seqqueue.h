@@ -4,11 +4,12 @@
 #define MAXSIZE 0x100
 typedef int datatype;
 
-typedef struct {
+typedef struct
+{
 	datatype a[MAXSIZE];
 	int front;
 	int rear;
-}sequence_queue;
+} sequence_queue;
 
 // init queue
 void init(sequence_queue *sq);
