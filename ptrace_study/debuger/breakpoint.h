@@ -1,7 +1,5 @@
 #include "ptrace_util.h"
 
-extern int pid;
-
 // 断点指令 	brk    #0xf000
 static unsigned char breakpoint[4] = {0x00, 0x00, 0x3E, 0xD4};
 static unsigned char backup_machine_code[4] = {0};

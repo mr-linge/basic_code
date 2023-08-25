@@ -18,6 +18,19 @@ struct option longopts[] = {
 	{0, 0, 0, 0},
 };
 
+/*
+./debuger --attach --pid
+
+breakpoint set
+register read r0
+register write r0 20
+
+continue
+
+memory read
+
+memory write
+**/
 int main(int argc, char *argv[])
 {
 	if (argc < 4)
