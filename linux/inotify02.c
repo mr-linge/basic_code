@@ -25,12 +25,13 @@ const char *event_str[EVENT_NUM] =
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2)
+    if (argc < 3)
     {
         printf("input file path\n");
         exit(1);
     }
     char *path1 = argv[1];
+    char *path2 = argv[2];
 
     int fd = inotify_init();
     if (fd < 0)
@@ -46,6 +47,14 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    int wd2 = inotify_add_watch(fd, path2, IN_ALL_EVENTS);
+    if (wd2 < 0)
+    {
+        fprintf(stderr, "%s:%d %s\n", __FILE__, __LINE__, strerror(errno));
+        exit(1);
+    }
+
+    // inotify_rm_watch(wd2);// delete inotiry
 
     unsigned long event_size = sizeof(struct inotify_event);
     // printf("event_size:%lu\n", event_size);
