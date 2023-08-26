@@ -91,7 +91,7 @@ loop:
             }
         }
         read_len -= event_size;
-        printf("==============%lu==============\n", index);
+        printf("==============%lu==============\n", index++);
     }
 
     goto loop;
