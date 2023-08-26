@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     unsigned long read_len;
 loop:
     read_len = read(fd, events, 0x100 * event_size);
-    printf("read_len:%lu\n", read_len);
+    // printf("read_len:%lu\n", read_len);
 
     // 如果read的返回值，小于inotify_event大小出现错误
     if (read_len < event_size)
@@ -71,6 +71,12 @@ loop:
         printf("wd      :%u\n", event.wd);
         printf("mask    :%u\n", event.mask);
         printf("len     :%u\n", event.len);
+        puts("name:");
+        for (int i = 0; i < event.len; i++)
+        {
+            printf("%c", event.name[i]);
+        }
+        puts("");
         for (unsigned long i = 0; i < EVENT_NUM; i++)
         {
             // 判断事件是否发生

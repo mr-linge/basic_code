@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    // inotify_rm_watch(wd2); // delete inotiry
+    // inotify_rm_watch(fd, wd2); // delete inotiry
     unsigned long index;
     struct inotify_event event;
     unsigned long event_size = sizeof(struct inotify_event);
