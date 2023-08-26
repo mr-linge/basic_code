@@ -46,7 +46,8 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-
+    unsigned long index;
+    struct inotify_event event;
     unsigned long event_size = sizeof(struct inotify_event);
     // printf("event_size:%lu\n", event_size);
     struct inotify_event events[0x100] = {0};
@@ -63,11 +64,10 @@ loop:
         return -1;
     }
 
-    unsigned long j = 0;
-    struct inotify_event event;
+    index = 0;
     while (read_len > 0)
     {
-        event = events[j];
+        event = events[index];
         printf("wd      :%u\n", event.wd);
         printf("mask    :%u\n", event.mask);
         printf("len     :%u\n", event.len);
@@ -90,7 +90,7 @@ loop:
             }
         }
         read_len -= event_size;
-        printf("==============%lu=============\n", j);
+        printf("==============%lu==============\n", index);
     }
 
     goto loop;
