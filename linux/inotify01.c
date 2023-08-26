@@ -72,11 +72,6 @@ loop:
         printf("mask    :%u\n", event.mask);
         printf("len     :%u\n", event.len);
         puts("name:");
-        for (int i = 0; i < event.len; i++)
-        {
-            printf("%c", event.name[i]);
-        }
-        puts("");
         for (unsigned long i = 0; i < EVENT_NUM; i++)
         {
             // 判断事件是否发生
@@ -90,7 +85,7 @@ loop:
                 { // 该监控项为文件时
                     if (event.wd == wd1)
                     {
-                        fprintf(stdout, "%s --- %s\n", argv[1], event_str[i]);
+                        fprintf(stdout, "%s --- %s\n", path1, event_str[i]);
                     }
                 }
             }

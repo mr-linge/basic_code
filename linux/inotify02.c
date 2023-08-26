@@ -92,7 +92,7 @@ loop:
                 }
                 else if (event.len == 0)
                 { // 该监控项为文件时
-                    if (event.wd == wd1)
+                    if (event.wd == wd1 || event.wd == wd2)
                     {
                         fprintf(stdout, "%s --- %s\n", argv[1], event_str[i]);
                     }
