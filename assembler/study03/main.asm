@@ -2,7 +2,7 @@
 msg:
     .asciz  "%lx + %lx = %lx\n"
 msg1:
-    .asciz  "modify value = %lx\n"
+    .asciz  "add(%lx + %lx) = %lx\n"
 
 .section    .data       //  定义数据段
 .align 3		        //  以 2^3 字节对齐
@@ -27,18 +27,14 @@ main:
     ldr     x2, [x7, #8]
     add     x3, x1, x2
 
+    // 测试一下修改数据
+    str     x3, [x7, #16]
+    ldr     x3, [x7, #16]
+
     adrp    x0, msg
     add		x0, x0, :lo12:msg
     bl 		printf
 
-//    add     x3, x3, 0x1000
-//    str     x3, [x7]
-//    ldr     x1, [x7]
-
-//   adrp    x0, msg1
-//   add	 x0, x0, :lo12:msg1
-//   bl 	printf
-
-    ldp     x29, x30, [sp] //从start函数栈恢复x29,x30寄存器
+    ldp     x29, x30, [sp]              // 从start函数栈恢复x29,x30寄存器
     add     sp, sp, #0x10
-	ret		//函数返回退出
+	ret

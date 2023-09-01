@@ -23,4 +23,4 @@ main:
 
     ldp     x29, x30, [sp] 					// 从start函数栈恢复x29,x30寄存器
     add     sp, sp, #0x10
-	ret		//函数返回退出
+	ret										// 函数返回退出
