@@ -3,7 +3,6 @@ base_dir=~/Library/Android/Sdk/ndk/25.2.9519653/toolchains/llvm/prebuilt/darwin-
 cc=${base_dir}/aarch64-linux-android33-clang
 
 program:
-	@$(cc) -S main.c -o main.asm
 	@$(cc) -c main.asm -o main.o
 	@$(cc) main.o -o main
 

@@ -1,37 +1,44 @@
-.section	.rodata
+.section	.rodata     //  定义只读数据段
 msg:
-    .asciz	"add(%lx,%lx) = %lx\n"
+    .asciz  "%lx + %lx = %lx\n"
+msg1:
+    .asciz  "modify value = %lx\n"
+
+.section    .data       //  定义数据段
+.align 3		        //  以 2^3 字节对齐
+number:		            //  定义一个数据
+	.quad   0x11
+	.quad   0x22
+	.quad   0x33
+	.quad   0x44
+	.quad   0x55
+	.quad   0x66
 
 .section 	.text
 .global 	main
 main:
-    sub     sp, sp, #0x10                   // 获取栈空间
+    sub     sp, sp, #0x10
     stp     x29, x30, [sp]
 
-    mov     x0, #0x70
-    mov     x1, #0x30
-    sub     sp, sp, #0x10
-    stp     x0, x1, [sp]
+    adrp    x7, number
+    add	    x7, x7, :lo12:number
 
-    bl      add_test                        // 跳转到子程序
+    ldr     x1, [x7]
+    ldr     x2, [x7, #8]
+    add     x3, x1, x2
 
-    ldp     x1, x2, [sp]                    // printf 参数 1 2
-    add     sp, sp, #0x10
-    mov     x3, x0                          // printf 参数 3
-	adrp	x0, msg		                    // printf 参数 0     要打印的字符串首地址
-	add		x0, x0, :lo12:msg		        // :lo12:msg 取 msg 低12位 即页内偏移offset,  msg vaddr = page + offset
-    bl 		printf					        // bl 跳转到 printf 子程序
+    adrp    x0, msg
+    add		x0, x0, :lo12:msg
+    bl 		printf
+
+//    add     x3, x3, 0x1000
+//    str     x3, [x7]
+//    ldr     x1, [x7]
+
+//   adrp    x0, msg1
+//   add	 x0, x0, :lo12:msg1
+//   bl 	printf
 
     ldp     x29, x30, [sp] //从start函数栈恢复x29,x30寄存器
     add     sp, sp, #0x10
 	ret		//函数返回退出
-
-add_test:
-    sub     sp, sp, #0x10                   // 获取栈空间
-    stp     x29, x30, [sp]
-    
-    add     x0, x0, x1
-
-    ldp     x29, x30, [sp] //从start函数栈恢复x29,x30寄存器
-    add     sp, sp, #0x10
-	ret

@@ -4,18 +4,18 @@ unsigned long add(unsigned long a, unsigned long b);
 /*
     .globl	add
 add:
-    sub	sp, sp, #16
-    str	x0, [sp, #8]
-    str	x1, [sp]
-    ldr	x8, [sp, #8]
-    ldr	x9, [sp]
-    add	x0, x8, x9
-    add	sp, sp, #16
+    sub     sp, sp, #0x10                   // 获取栈空间
+    stp     x29, x30, [sp]
+
+    add     x0, x0, x1
+
+    ldp     x29, x30, [sp]                  // 从start函数栈恢复x29,x30寄存器
+    add     sp, sp, #0x10
     ret
 */
 
 int main(void)
 {
-    printf("%ld\n", add(1, 2));
+    printf("%ld\n", add(11, 22));
     return 0;
 }

@@ -9,7 +9,7 @@ program:
 	@$(cc) main.o add.o -o main
 
 all: program
-	@adb push $(outfile) /data/local/tmp/
+	@adb push ./main /data/local/tmp/
 
 clean:
 	@-rm -rf *.o main.asm main
