@@ -3,8 +3,8 @@
 int a_var_global = 84; // 已初始化全局变量 -> .data
 int b_var_global;      // 未初始化全局变量 -> .bbs
 int h_var_global[256]; // 未初始化全局变量 -> .bbs 并且h不占有真正的内存
-static int d_var = 86;
-static int e_var;
+static int d_var = 86; // .data
+static int e_var;      // .bss
 
 void func_example(int i) // 指令函数地址 -> .text
 {
