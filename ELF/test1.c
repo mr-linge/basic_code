@@ -1,10 +1,10 @@
 #include <stdio.h>
 
-int a_var_global = 84; // 已初始化全局变量 -> .data
-int b_var_global;      // 未初始化全局变量 -> .bbs
-int h_var_global[256]; // 未初始化全局变量 -> .bbs 并且h不占有真正的内存
-static int d_var = 86; // .data
-static int e_var;      // .bss
+int a_var_global = 84; // .data 已初始化(global var)全局变量
+int b_var_global;      // .bbs  未初始化(global var)全局变量
+int h_var_global[256]; // .bbs  未初始化(global var)全局变量,并且h不占有真正的内存
+static int d_var = 86; // .data 已初始化(local var)局部变量(作用范围当前文件)
+static int e_var;      // .bbs  未初始化(local var)局部变量(作用范围当前文件)
 
 void func_example(int i) // 指令函数地址 -> .text
 {
