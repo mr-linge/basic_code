@@ -92,3 +92,12 @@ adrp  Rn, label
 
 :lo12:label
 取 label 低12位 即页内偏移offset
+
+## svc 系统调用
+
+在Linux下系统调用是用软中断实现的,在使用软中断进行系统调时,系统调用号通过x8寄存器传递,用svc指令产生软中断,实现从用户模式到root模式的切换。
+SVC 指令会引发一个异常。处理器模式会更改为超级用户模式,CPSR 会保存到超级用户模式 SPSR,并且执行会跳转到 SVC 向量表.
+例如:
+    mov     x0, #0         // status := 0
+    mov     w8, #93        // exit is syscall #93
+    svc     #0             // invoke syscall
