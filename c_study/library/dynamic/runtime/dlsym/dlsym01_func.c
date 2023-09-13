@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <dlfcn.h>
+#include <string.h>
 
 #define path "./loaded_file"
 
@@ -26,7 +27,7 @@ void origin_mmap()
 	start = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 	if (start == MAP_FAILED) /* 判断是否映射成功 */
 	{
-		perror("mmap init fail");
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
 	printf("start = %p, value = %s\n", start, (char *)start);
@@ -66,8 +67,8 @@ void my_by_dlsym()
 	my_mmap2 = (MY_MMAP)dlsym(0, "mmap");
 	if ((error = dlerror()) != NULL)
 	{
-		fprintf(stderr, "dlsym mmap error: %s\n", error);
-		exit(-1);
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
+		exit(EXIT_FAILURE);
 	}
 	printf("my_mmap2:%p\n", (void *)my_mmap2);
 

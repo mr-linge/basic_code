@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <dlfcn.h>
+#include <stdlib.h>
 
 /*
    gcc main.c -o main -ldl
@@ -29,15 +30,15 @@ int main(int argc, char **argv)
 	handle = dlopen("./libglobal.so", RTLD_LAZY);
 	if ((error = dlerror()) != NULL)
 	{
-		fprintf(stderr, "%s\n", error);
-		return -1;
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
+		exit(EXIT_FAILURE);
 	}
 
 	hello = dlsym(handle, "Hello");
 	if ((error = dlerror()) != NULL)
 	{
-		fprintf(stderr, "%s\n", error);
-		return -2;
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
+		exit(EXIT_FAILURE);
 	}
 
 	if (hello && hello->PrintfHello)

@@ -29,7 +29,7 @@ int main()
 	void *handle = dlopen(lib_path, RTLD_NOW);
 	if ((error = dlerror()) != NULL)
 	{
-		fprintf(stderr, "%s\n", error);
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
 		exit(EXIT_FAILURE);
 	}
 

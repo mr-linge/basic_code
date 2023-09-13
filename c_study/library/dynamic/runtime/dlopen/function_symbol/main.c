@@ -22,7 +22,7 @@ int main()
 	printf("handle = %p\n", handle);
 	if ((error = dlerror()) != NULL)
 	{
-		fprintf(stderr, "%s\n", error);
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
 		exit(EXIT_FAILURE);
 	}
 
@@ -30,7 +30,7 @@ int main()
 	int (*cac_func1)(int, int) = dlsym(handle, "add");
 	if ((error = dlerror()) != NULL)
 	{
-		fprintf(stderr, "%s\n", error);
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
 		exit(EXIT_FAILURE);
 	}
 	printf("add: %d\n", cac_func1(2, 7));
@@ -45,11 +45,8 @@ int main()
 	cac_func = dlsym(handle, "div");
 	printf("div: %d\n", cac_func(8, 2));
 
-	// while(1);
-
 	// 关闭动态链接库,关闭后该动态库就会从 当前进程中 移除
 	dlclose(handle);
-	// while(1);
 
 	return 0;
 }

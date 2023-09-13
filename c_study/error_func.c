@@ -21,7 +21,7 @@ int main()
 		fprintf(stderr, "错误号: %d\n", errno);
 		perror("通过 perror 输出错误");
 		fprintf(stderr, "打开文件错误: %s\n", strerror(errno));
-		fprintf(stderr, "%s:%d fopen error: %s\n", __FILE__, __LINE__, strerror(errno));
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}
 	else
 	{

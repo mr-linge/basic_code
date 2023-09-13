@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <string.h>
 
 int main()
 {
@@ -15,21 +17,23 @@ int main()
 	start = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 	if (start == MAP_FAILED) /* 判断是否映射成功 */
 	{
-		perror("mmap init fail");
-		exit(-1);
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(1);
 	}
 	printf("start = %p, value = %s\n", start, (char *)start);
 
 	ret = msync((void *)start, sb.st_size, MS_SYNC);
-	if (ret == -1)
+	if (ret != 0)
 	{
-		perror("msync error");
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(1);
 	}
 
 	ret = munmap(start, sb.st_size); /* 解除映射 */
-	if (ret == -1)
+	if (ret != 0)
 	{
-		perror("参数 start或length 不合法");
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(1);
 	}
 	close(fd);
 	//	printf("start = %p, value = %s\n",start,(char *)start);

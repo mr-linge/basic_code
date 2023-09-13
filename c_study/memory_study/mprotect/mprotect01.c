@@ -55,7 +55,7 @@ int main()
 	int err = mprotect((void *)page_start, PAGE_SIZE, PROT_READ); //  | PROT_WRITE
 	if (err != 0)
 	{
-		perror("mprotect err");
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		return -1;
 	}
 	printf("line : %d, the test string : %s\n", __LINE__, p);
