@@ -3,10 +3,9 @@
 __attribute__ 可以设置函数属性(Function Attribute)、变量属性(Variable Attribute)和类型属性(Type Attribute)      </br>
 __attribute__ 语法格式为: __attribute__ ((attribute-list))
 
-## 内存对齐
+## 内存对齐 aligned, packed
 
 __attribute__可以对结构体(struct)或共用体(union)进行属性设置        </br>
-大致有六个参数值可以被设定,即:aligned, packed, transparent_union, unused, deprecated, may_alias             </br>
 </br>
 需要注意的是,attribute属性的作用与链接器也有关,如果链接器最大只支持16字节对齐,那么你此时定义32字节对齐也不会生效
 
