@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <errno.h>
 
 /*
 #include <sys/wait.h>
@@ -44,7 +45,7 @@ int main()
 		int child_pid = wait(&status); /*阻塞等待子进程*/
 		if (child_pid < 0)
 		{
-			perror("wait fail");
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(-1);
 		}
 		printf("wait return vaule -> child's pid = %d\n", pid);

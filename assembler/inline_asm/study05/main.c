@@ -9,10 +9,8 @@ union Register
 
 void test()
 {
-    union Register dt1, dt2, dt3;
+    union Register dt1, dt2, dt3 = {0};
     dt1.val = 0x1234;
-    memset(&dt2, '\0', sizeof(union Register));
-    memset(&dt3, '\0', sizeof(union Register));
 
     /*
     输出约束: C变量接收汇编结果的都是输出约束

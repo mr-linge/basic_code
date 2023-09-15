@@ -19,14 +19,14 @@ export PATH=~/Library/Android/Sdk/ndk/25.2.9519653/toolchains/llvm/prebuilt/linu
 
 ## 数据定义伪指令
 
-.byte:                  把8位数当成数据插入到汇编中
-.hword:                 把16位数当成数据插入到汇编中
-.long 和 .int:          把32位数当成数据插入到汇编中
-.quad:                  把64位数当成数据插入到汇编中
-.float:                 把浮点数当成数据插入到汇编中
-.ascii "string" ->      把string当作数据插入到汇编中,ascii伪操作定义的字符串需要自行添加结尾字符'\0'
-.asciz "string" ->      类似ascii,在string后面插入一个结尾字符’\0’
-.rept:                  重复执行 .rept count .endr 把rept和endr之间的指令重复count次
+.byte                       把8位数当成数据插入到汇编中
+.hword                      把16位数当成数据插入到汇编中
+.long 和 .int               把32位数当成数据插入到汇编中
+.quad                       把64位数当成数据插入到汇编中
+.float                      把浮点数当成数据插入到汇编中
+.ascii "string" ->          把string当作数据插入到汇编中,ascii伪操作定义的字符串需要自行添加结尾字符'\0'
+.asciz "string" ->          类似ascii,在string后面插入一个结尾字符’\0’
+.rept                       重复执行 .rept count .endr 把rept和endr之间的指令重复count次
 
 ## 对齐伪指令
 
@@ -37,5 +37,5 @@ export PATH=~/Library/Android/Sdk/ndk/25.2.9519653/toolchains/llvm/prebuilt/linu
 
 ## 函数相关的伪操作
 
-.global:            定义一个全局符号,通常是为ld使用
-.include:           包含指定的头文件, 可以把一个汇编常量定义放在头文件中
+.global                     定义一个全局符号,通常是为ld使用
+.include                    包含指定的头文件, 可以把一个汇编常量定义放在头文件中

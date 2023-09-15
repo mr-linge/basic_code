@@ -1,24 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 #include <unistd.h>
+#include <signal.h>
 
 /*
-   header file:
-   #include <signal.h>
-
-   int raise(int sig)
-   Description:
-   促使生成信号 sig.
+   header file: #include <signal.h>
+   function: int raise(int sig)
+   Description: 促使生成信号 sig.
 
    params:
    sig		信号
 
-   return value:
-   如果成功该函数返回零,否则返回非零。
- * */
+   return value: 如果成功该函数返回零,否则返回非零。
+ **/
 
-void sighandler(int);
+void sighandler(int signum)
+{
+	printf("捕获信号 %d,跳出...\n", signum);
+	exit(1);
+}
 
 int main()
 {
@@ -45,10 +45,4 @@ int main()
 	}
 
 	return 0;
-}
-
-void sighandler(int signum)
-{
-	printf("捕获信号 %d,跳出...\n", signum);
-	exit(1);
 }

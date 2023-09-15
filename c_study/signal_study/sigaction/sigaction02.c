@@ -21,7 +21,7 @@ void sig_usr(int signum)
 	}
 }
 
-int main(void)
+int main()
 {
 	char buf[512];
 	int n;

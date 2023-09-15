@@ -17,7 +17,7 @@
     haystack        待查找内存起始地址
     haystacklen     待查找内存大小
     needle          需匹配内存起始地址
-    needlelen       需匹配内存起始大小
+    needlelen       需匹配内存大小
 
     return value:
     返回该位置的指针，如找不到，返回空指针

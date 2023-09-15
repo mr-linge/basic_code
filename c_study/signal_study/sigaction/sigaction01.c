@@ -3,7 +3,7 @@
 #include <signal.h>
 #include <errno.h>
 
-/*********
+/*
   sigaction函数原型：int sigaction(int signo,const struct sigaction *restrict act,struct sigaction *restrict oact);
   第一个参数为信号编号，第二个是sigaction结构体，第三个一般为NULL。
 
@@ -14,10 +14,10 @@
 
   Linux中信号相关的一个结构体struct sigaction主要在sigaction信号安装和sigqueue信号发送时会用到
   struct sigaction {
- 	 __sighandler_t sa_handler;
- 	 unsigned long sa_flags;
- 	 void (*sa_restorer)(void);
- 	 sigset_t sa_mask;   // mask last for extensibility
+	 __sighandler_t sa_handler;
+	 unsigned long sa_flags;
+	 void (*sa_restorer)(void);
+	 sigset_t sa_mask;   // mask last for extensibility
   };
   // Here we must cater to libcs that poke about in kernel headers.
   struct sigaction {
@@ -29,22 +29,22 @@
 	  unsigned long sa_flags;
 	  void (*sa_restorer)(void);
   };
-  
+
   sa_handler的原型是一个参数为int，返回类型为void的函数指针。参数即为信号值，所以信号不能传递除信号值之外的任何信息;
   sa_flags包含了许多标志位，比较重要的一个是SA_SIGINFO，当设定了该标志位时，表示信号附带的参数可以传递到信号处理函数中。即使sa_sigaction指定信号处理函数，如果不设置SA_SIGINFO，信号处理函数同样不能得到信号传递过来的数据，在信号处理函数中对这些信息的访问都将导致段错误。
   sa_mask指定在信号处理程序执行过程中，哪些信号应当被阻塞。默认当前信号本身被阻塞。
   sa_restorer已过时，POSIX不支持它，不应再使用。
-  
+
   当你的信号需要接收附加信息的时候，你必须给sa_sigaction赋信号处理函数指针，同时还要给sa_flags赋SA_SIGINFO
- * **********/
+**/
 
 static void sig_usr(int signum)
 {
-	if(signum == SIGUSR1)
+	if (signum == SIGUSR1)
 	{
 		printf("SIGUSR1 received\n");
 	}
-	else if(signum == SIGUSR2)
+	else if (signum == SIGUSR2)
 	{
 		printf("SIGUSR2 received\n");
 	}
@@ -54,12 +54,12 @@ static void sig_usr(int signum)
 	}
 }
 
-int main(void)
+int main()
 {
 	char buf[512];
-	int  n;
+	int n;
 	struct sigaction sa_usr;
-	sa_usr.sa_handler = sig_usr;   //信号处理函数
+	sa_usr.sa_handler = sig_usr; // 信号处理函数
 	sa_usr.sa_flags = 0;
 
 	sigaction(SIGUSR1, &sa_usr, NULL);
@@ -67,11 +67,11 @@ int main(void)
 
 	printf("My PID is %d\n", getpid());
 
-	while(1)
+	while (1)
 	{
-		if((n = read(STDIN_FILENO, buf, 511)) == -1)
+		if ((n = read(STDIN_FILENO, buf, 511)) == -1)
 		{
-			if(errno == EINTR)
+			if (errno == EINTR)
 			{
 				printf("read is interrupted by signal\n");
 			}

@@ -61,6 +61,8 @@ int main()
         }
     }
     else
+    {
         printf("fork()函数调用出现错误\n");
+    }
     return 0;
 }
