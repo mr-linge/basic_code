@@ -12,11 +12,11 @@
 #define PAGESIZE 0x1000
 #define PAGE_START(addr) ((addr) & (~(PAGESIZE - 1)))
 
-union Instruction
-{
-   uint32_t val;
-   uint8_t bytes[4];
-};
+// union Instruction
+// {
+//    uint32_t val;
+//    uint8_t bytes[4];
+// };
 
 // 断点机器码
 char break_machine_code[4] = {0x00, 0x00, 0x3E, 0xD4};
@@ -30,6 +30,10 @@ struct BreakPoint
 // 所有断点信息保存在这里
 struct BreakPoint breakpoints[0x1000];
 
+// 定义未决信号集(pending)
+sigset_t pset;
+// 定义阻塞信号集(block)
+sigset_t bset;
 // unsigned long breakpoint_vaddr = 0;
 
 // 在内存中设置断点
@@ -88,13 +92,35 @@ void del_breakpoint(unsigned long addr)
 // 捕获断点信号
 void sighandler(int signum)
 {
+   // sigprocmask(SIG_SETMASK, &pset, NULL); // 取消阻塞
+
    printf("捕获到断点 %d\n", signum);
    del_breakpoint(breakpoints[0].vaddr);
+
+   // // 进行位或操作，将信号集bset更新到进程控制块PCB结构中，阻塞信号SIGINT（即使用户按下ctrl+c，信号也不会递达）
+   // sigprocmask(SIG_BLOCK, &bset, NULL);
 }
 
 int main()
 {
+   // 定义未决信号集(pending)
+   // sigset_t pset;
+   // // 定义阻塞信号集(block)
+   // sigset_t bset;
+   // // 清空信号集
+   // sigemptyset(&bset);
+   // // 将信号SIGTRAP加入到信号集中
+   // sigaddset(&bset, SIGTRAP);
+
+   // 清空信号集
+   sigemptyset(&bset);
+   // 将信号SIGTRAP加入到信号集中
+   sigaddset(&bset, SIGTRAP);
+
    signal(SIGTRAP, sighandler);
+
+   // 进行位或操作，将信号集bset更新到进程控制块PCB结构中，阻塞信号SIGINT（即使用户按下ctrl+c，信号也不会递达）
+   // sigprocmask(SIG_BLOCK, &bset, NULL);
 
    // 在内存中搜索断点指令
    uint8_t target_code[4] = {0x01, 0x00, 0x00, 0xD4};
