@@ -44,7 +44,7 @@ Calls to subroutines, where it is necessary for the return address to be stored 
 union DataUnit
 {
 	unsigned long val;
-	unsigned char bytes[REGISTERSIZE];
+	unsigned char bytes[8];
 };
 
 // 附加到正在运行的进程
@@ -68,3 +68,6 @@ void putdata(unsigned long addr, void *src, unsigned long len);
 
 // 等待子进程 指定信号
 void wait_child_signal(int SIGNO);
+
+// 使用ptrace远程调用函数
+long long ptrace_call(unsigned long func_addr, long *parameters, unsigned long num);

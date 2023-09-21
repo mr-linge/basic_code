@@ -130,11 +130,57 @@ void wait_child_signal(int SIGNO)
 	do
 	{
 		ret = waitpid(pid, &status, WUNTRACED);
-		printf("%s:%d %s %x\n", __FILE__, __LINE__, __FUNCTION__, status);
+		// printf("%s:%d %s status:%d\n", __FILE__, __LINE__, __FUNCTION__, status);
 		if (ret < 0)
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(1);
 		}
 	} while (!(WIFSTOPPED(status) && WSTOPSIG(status) == SIGNO));
+}
+
+/*
+	Description:    使用ptrace远程call函数
+	Input:          func_addr 	子进程中函数的地址
+					parameters 	函数参数的地址
+					num			函数参数数量
+**/
+long long ptrace_call(unsigned long func_addr, long *parameters, unsigned long num)
+{
+	struct pt_regs regs, regs_origin, regs_finish = {0};
+	get_registers(&regs); // 获取此时的寄存器
+	memcpy(&regs_origin, &regs, sizeof(struct pt_regs));
+	// printf("%s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);
+	unsigned long i = 0;
+	// aarch64处理器,函数传递参数,将前 8 个参数放到r0-r7,剩下的参数压入栈中
+	for (i = 0; i < num && i < 8; i++)
+	{
+		regs.uregs[i] = parameters[i];
+	}
+	if (i < num)
+	{
+		regs.ARM_sp -= (num - i) * sizeof(long);
+		putdata((unsigned long)regs.ARM_sp, (void *)&parameters[i], (num - i) * sizeof(long));
+	}
+	// printf("%s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);
+	// 修改程序计数器
+	regs.ARM_pc = func_addr;
+	// printf("%s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);
+	// 让程序执行完后,返回到 0 地址处,此时会触发异来。触发异常后 子进程会暂停,此时可以借机获取返回值
+	regs.ARM_lr = 0;
+
+	// 设置好寄存器后,开始运行进程
+	set_registers(&regs);
+	ptrace_cont();
+	// printf("%s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);
+	// 将存放返回地址的lr寄存器设置为0,执行返回的时候就会发生错误,从子进程暂停
+	wait_child_signal(SIGSEGV);
+	// printf("%s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);
+	// 获取返回值
+	get_registers(&regs_finish);
+	// printf("%s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);
+	// 恢复寄存器
+	set_registers(&regs_origin);
+	// printf("%s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);
+	return regs_finish.ARM_x0;
 }
