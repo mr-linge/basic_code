@@ -24,14 +24,6 @@ int c_test_func(int num)
 
 int main(int argc, char const *argv[])
 {
-    // printf("==================== current pid:%d ====================\n", getpid());
-    // printf("%s:%d c_test_func vaddr:0x%lx\n", __FILE__, __LINE__, (unsigned long)&c_test_func);
-    // log_matchine_code((void *)&c_test_func, 0x30);
-    // getchar();
-    // int ret = c_test_func(10);
-    // printf("c_test_func ret:%d\n", ret);
-    // log_matchine_code((void *)&c_test_func, 0x30);
-    // getchar();
     char *test_str = "This is a test string";
     char *memory_heap = (char *)malloc(0x100);
     memset(memory_heap, '\0', 0x100);
@@ -52,12 +44,12 @@ int main(int argc, char const *argv[])
         printf("&memory_stack        addr: 0x%lx\n", (unsigned long)&memory_stack);
         printf("%s\n", memory_stack);
         log_matchine_code(memory_stack, 0x20);
-        printf("t1_stack_vaddr:0x%lx\n",t1_stack_vaddr);
+        printf("t1_stack_vaddr:0x%lx\n", t1_stack_vaddr);
         log_matchine_code((void *)t1_stack_vaddr, 0x20);
         long ret = c_test_func(10);
         printf("ret = 0x%lx\n", ret);
-        sleep(10);
-        // getchar();
+        // sleep(10);
+        getchar();
     }
     return 0;
 }

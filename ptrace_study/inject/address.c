@@ -32,11 +32,9 @@ unsigned long get_symbol_offset(char *module, char *symbol, int type)
     void *vaddr;
     char *error;
     unsigned long offset;
-    // printf("%s:%d\n", __FILE__, __LINE__);
     // type = 0 则是系统库而且已经加载到进程了
     if (type != 0)
     {
-        // printf("%s:%d\n", __FILE__, __LINE__);
         handle = dlopen(module, RTLD_LAZY);
         if ((error = dlerror()) != NULL)
         {
@@ -45,17 +43,16 @@ unsigned long get_symbol_offset(char *module, char *symbol, int type)
         }
     }
     // printf("handle = %p\n", handle);
-    // printf("%s:%d\n", __FILE__, __LINE__);
     vaddr = dlsym(handle, symbol);
     if ((error = dlerror()) != NULL)
     {
         fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
         exit(1);
     }
-    printf("vaddr = 0x%lx\n", (unsigned long)vaddr);
+    // printf("vaddr = 0x%lx\n", (unsigned long)vaddr);
 
     unsigned long module_vaddr = get_module_vaddr(getpid(), module);
-    printf("module_vaddr = 0x%lx\n", module_vaddr);
+    // printf("module_vaddr = 0x%lx\n", module_vaddr);
 
     offset = (unsigned long)vaddr - module_vaddr;
     if (type != 0)

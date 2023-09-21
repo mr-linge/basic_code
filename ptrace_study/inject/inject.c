@@ -11,20 +11,18 @@
 
 int pid;
 
-void test(char *lib_path)
+// 通过构建指令集实现 dlopen 加载动态库
+void test2(char *lib_path)
 {
     /*
-    blr     x18
-    brk 	#0xf000
-    40023FD6
-    00003ED4
+    40023FD6        blr     x18
+    00003ED4        brk 	#0xf000
     **/
     // 处理指令
     char shellcode[] = {
         0x40, 0x02, 0x3F, 0xD6,
         0x00, 0x00, 0x3E, 0xD4};
     unsigned long shellcode_len = sizeof(shellcode);
-    printf("%d: shellcode_len:0x%lx\n\n", __LINE__, shellcode_len);
     char backupcode[0x1000] = {0}; // 备份指令
 
     // stack
@@ -42,9 +40,7 @@ void test(char *lib_path)
     unsigned long current_pc = (unsigned long)regs.ARM_pc;
     unsigned long new_pc = current_pc - 8;
     unsigned long current_sp = (unsigned long)regs.ARM_sp;
-    // printf("%s: current_sp:0x%lx\n\n", __FILE__, current_sp);
     unsigned long data_vaddr = current_sp; // 栈上数据起始地址
-    // printf("%s: data_vaddr:0x%lx\n\n", __FILE__, data_vaddr);
 
     // 备份指令
     getdata(new_pc, backupcode, shellcode_len);
@@ -59,34 +55,74 @@ void test(char *lib_path)
     // 获取子进程 dlopen 的 vaddr
     char *dlopen_module = "libdl.so";
     unsigned long dlopen_module_vaddr = get_module_vaddr(pid, dlopen_module);
+    printf("%s:%d dlopen_module_vaddr   :0x%lx\n", __FILE__, __LINE__, dlopen_module_vaddr);
     unsigned long dlopen_offset = get_symbol_offset(dlopen_module, "dlopen", 0);
-    // printf("%s: dlopen_offset:0x%lx\n\n", __FILE__, dlopen_offset);
+    printf("%s:%d dlopen_offset         :0x%lx\n", __FILE__, __LINE__, dlopen_offset);
     unsigned long dlopen_vaddr = dlopen_module_vaddr + dlopen_offset;
-    // printf("%s: dlopen_vaddr:0x%lx\n\n", __FILE__, dlopen_vaddr);
+    printf("%s:%d dlopen_vaddr          :0x%lx\n", __FILE__, __LINE__, dlopen_vaddr);
 
-    // unsigned long tmp = 0x7fcffb6b10;
     regs_new.ARM_x0 = (long long)data_vaddr;
-    // regs_new.ARM_x0 = 0x7fde28d100;     // library path
-    // printf("%s: regs.ARM_x0:0x%llx\n\n", __FILE__, regs.ARM_x0);
     regs_new.ARM_x1 = (long long)0x1;             // RTLD_LAZY
     regs_new.uregs[18] = (long long)dlopen_vaddr; // dlopen vaddr
     regs_new.ARM_pc = (long long)new_pc;
-    // regs_new.ARM_sp = data_vaddr;
     set_registers(&regs_new);
-    // printf("%s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);
     ptrace_cont();
     wait_child_signal(SIGTRAP);
-    // wait_child_signal(SIGILL);
-    // printf("%s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);
     // 恢复 shellcode 占用的指令
     putdata(new_pc, backupcode, shellcode_len);
     // 恢复栈占用的数据
     putdata(data_vaddr, backup_stack, DATA_LEN);
+    // 恢复寄存器
     set_registers(&regs);
-    // printf("%s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);
     ptrace_cont();
-    ptrace_detach();
-    // printf("%s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);
+    // ptrace_detach();
+}
+
+// ptrace 调用 dlopen 加载动态库
+void test1(char *lib_path)
+{
+    ptrace_attach();
+    wait_child_signal(SIGSTOP);
+    struct pt_regs regs = {0};
+    get_registers(&regs);
+
+    char *c_module = "libc.so";
+    unsigned long c_module_vaddr = get_module_vaddr(pid, c_module);
+    char *dlopen_module = "libdl.so";
+    unsigned long dlopen_module_vaddr = get_module_vaddr(pid, dlopen_module);
+    // printf("%s: dlopen_module_vaddr:0x%lx\n", __FILE__, dlopen_module_vaddr);
+
+    // 1. 先调用 mmap 开辟一段内存
+    unsigned num_param = 6;
+    long parameters[num_param];
+    parameters[0] = 0;                                  // 设置为NULL表示让系统自动选择分配内存的地址
+    parameters[1] = 0x100;                              // 映射内存的大小
+    parameters[2] = PROT_READ | PROT_WRITE | PROT_EXEC; // 表示映射内存区域可读可写可执行
+    parameters[3] = MAP_PRIVATE | MAP_ANONYMOUS;        // 建立匿名映射
+    parameters[4] = 0;                                  // 若需要映射文件到内存中，则为文件的fd
+    parameters[5] = 0;                                  // 文件映射偏移量
+
+    unsigned long mmap_offset = get_symbol_offset(c_module, "mmap", 0);
+    unsigned long mmap_vaddr = c_module_vaddr + mmap_offset;
+    printf("%s:%d mmap_vaddr:0x%lx\n\n", __FILE__, __LINE__, mmap_vaddr);
+    long long mem_start = ptrace_call(mmap_vaddr, parameters, num_param);
+
+    // 2. 在子进程的这段内存中写入数据
+    putdata((unsigned long)mem_start, lib_path, strlen(lib_path));
+
+    // 3. 调用子进程的 dlopen 函数
+    unsigned long dlopen_offset = get_symbol_offset(dlopen_module, "dlopen", 0);
+    printf("%s: dlopen_offset:0x%lx\n\n", __FILE__, dlopen_offset);
+    unsigned long dlopen_vaddr = dlopen_module_vaddr + dlopen_offset;
+    printf("%s: dlopen_vaddr:0x%lx\n\n", __FILE__, dlopen_vaddr);
+
+    unsigned long num = 0x2;
+    long parameter[0x2] = {0};
+    parameter[0] = (unsigned long)mem_start;
+    parameter[1] = 0x2;
+    // 调用子进程函数
+    ptrace_call(dlopen_vaddr, parameter, num);
+    // ptrace_detach();
 }
 
 int main(int argc, char *argv[])
@@ -100,7 +136,8 @@ int main(int argc, char *argv[])
     pid = atoi(argv[1]);
     char *lib_path = argv[2];
 
-    test(lib_path);
+    test2(lib_path);
+    // test1(lib_path);
 
     return 0;
 }

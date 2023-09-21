@@ -24,14 +24,6 @@ int c_test_func(int num)
 
 int main(int argc, char const *argv[])
 {
-    // printf("==================== current pid:%d ====================\n", getpid());
-    // printf("%s:%d c_test_func vaddr:0x%lx\n", __FILE__, __LINE__, (unsigned long)&c_test_func);
-    // log_matchine_code((void *)&c_test_func, 0x30);
-    // getchar();
-    // int ret = c_test_func(10);
-    // printf("c_test_func ret:%d\n", ret);
-    // log_matchine_code((void *)&c_test_func, 0x30);
-    // getchar();
     char *test_str = "AAAAAAABBBBB";
     char *memory_heap = (char *)malloc(0x100);
     memset(memory_heap, '\0', 0x100);
