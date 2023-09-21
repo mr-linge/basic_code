@@ -1,6 +1,6 @@
 #include "ptrace_util.h"
 
-//  附加到正在运行的进程
+// 附加到正在运行的进程
 int ptrace_attach(pid_t pid)
 {
 	// printf("+ Attach process %d\n", pid);
@@ -35,7 +35,7 @@ int ptrace_cont(pid_t pid)
 	return 0;
 }
 
-//  结束对目标进程的跟踪
+// 结束对目标进程的跟踪
 int ptrace_detach(pid_t pid)
 {
 	// printf("+ Detach process %d\n", pid);

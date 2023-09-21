@@ -1,18 +1,20 @@
 #include <stdio.h>
 
-int main() {
+int main()
+{
     // 定义一个结构体类型
-    struct Student {
+    struct Student
+    {
         char *name;
         int age;
     };
-    
+
     // 定义一个结构体变量
     struct Student stu = {"MJ", 27};
-    
+
     // 定义一个指向结构体的指针变量
     struct Student *p;
-    
+
     // 指向结构体变量stu
     p = &stu;
 

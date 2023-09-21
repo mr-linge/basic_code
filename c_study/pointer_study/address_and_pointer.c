@@ -11,8 +11,8 @@
  * p = (type *) malloc(n * sizeof(type)); 	// 将指针指向一片内存区域
  * p 是 heap 中一段内存的起始地址
  * p[n] 等价于  *(p + (n * (sizeof(type))))  	即指针指向的内存区域 第n个 type 类型数据
- * 
- * &p		保存 p 的首地址, 在 stack 中
+ *
+ * &p		保存 p 的存储位置, 在 stack 中
  * *p 		指针p所指向的数据,以 p 为起始地址后 sizeof(type) * 8 位 地址所对应的数据,即内存地址在 [p, (p + (8 * sizeof(type)))] 区域所对应的数据
  * */
 int main()

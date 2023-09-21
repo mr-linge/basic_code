@@ -2,8 +2,7 @@
 
 ## mmap 函数介绍
 
-# include <sys/mman.h>
-
+`#include <sys/mman.h>`
 void *mmap(void*start, size_t length, int prot, int flags, int fd, off_t offsize)
 mmap()用来将某个文件内容映射到内存中,对该内存区域的存取即是直接对该文件内容的读写mmap映射的地址处于堆区与栈区中间.文件被映射到多个页上,如果文件的大小不是所有页的大小之和,最后一个页不被使用的空间将会清零
 
@@ -37,8 +36,7 @@ ENOMEM   内存不足
 
 ## msync 函数介绍
 
-# include <sys/mman.h>
-
+`# include <sys/mman.h>`
 int msync(void *addr, size_t len, int flags)
 进程在映射空间对共享内容的改变并不直接写回到磁盘文件中,往往在调用munmap()后才执行该操作
 也可以通过调用msync()函数来实现磁盘文件内容与共享内存一致,即同步操作
@@ -58,8 +56,7 @@ EBUSY/ EINVAL/ ENOMEM
 
 ## munmap 函数介绍
 
-# include <sys/mman.h>
-
+`# include <sys/mman.h>`
 int munmap(void *start,size_t length);
 用来取消参数start所指的映射内存起始地址,参数length则是欲取消的内存大小当进程结束或利用exec相关函数来执行其他程序时,
 映射内存会自动解除,但关闭对应的文件描述词时不会解除映射,当映射关系解除后,对原来映射地址的访问将导致段错误发生

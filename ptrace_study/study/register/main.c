@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 	if (WIFSTOPPED(status))
 	{
 		if (WSTOPSIG(status) == SIGSTOP)
-		{	// attach 导致的子进程中止
+		{ // attach 导致的子进程中止
 			printf("%s:%d child pid stop:%d\n", __FILE__, __LINE__, WSTOPSIG(status));
 		}
 	}
