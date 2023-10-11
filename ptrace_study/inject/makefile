@@ -12,16 +12,12 @@ inject:
 	@adb push ./inject /data/local/tmp/
 
 dylib:
-	@${cc} -shared -fPIC test.c -o liba.so
+	@${cc} -shared -fPIC a.c -o liba.so
 	@adb push ./liba.so /data/local/tmp/
 
 test2:
-	@$(cc) test2.c -o test2
+	@$(cc) -static test2.c -o test2 -ldl
 	@adb push ./test2 /data/local/tmp/
-
-test3: dylib
-	@$(cc) test3.c address.c -o test3
-	@adb push ./test3 /data/local/tmp/
 
 all: tracee inject
 
@@ -29,4 +25,4 @@ push:
 	@adb push ./liba.so /data/local/tmp/
 
 clean:
-	@-rm -rf ./tracee *.so test2 test3 inject
+	@-rm -rf ./tracee ./inject *.so test2 test3

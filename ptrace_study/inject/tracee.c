@@ -24,14 +24,11 @@ int c_test_func(int num)
 
 int main(int argc, char const *argv[])
 {
-    char *test_str = "This is a test string";
+    char *test_str = "AAAAAAABBBBB";
     char *memory_heap = (char *)malloc(0x100);
     memset(memory_heap, '\0', 0x100);
     memcpy(memory_heap, test_str, strlen(test_str));
-    char memory_stack[0x100];
-    memcpy(memory_stack, memory_heap, 0x100);
 
-    unsigned long t1_stack_vaddr = (unsigned long)memory_stack - 0x100;
     unsigned long index = 0;
     while (1)
     {
@@ -41,14 +38,9 @@ int main(int argc, char const *argv[])
         printf("&printf              addr: %p\n", &printf);
         printf("memory_heap          addr: 0x%lx\n", (unsigned long)memory_heap);
         printf("%s\n", memory_heap);
-        printf("&memory_stack        addr: 0x%lx\n", (unsigned long)&memory_stack);
-        printf("%s\n", memory_stack);
-        log_matchine_code(memory_stack, 0x20);
-        printf("t1_stack_vaddr:0x%lx\n", t1_stack_vaddr);
-        log_matchine_code((void *)t1_stack_vaddr, 0x20);
         long ret = c_test_func(10);
         printf("ret = 0x%lx\n", ret);
-        // sleep(10);
+        // sleep(5);
         getchar();
     }
     return 0;

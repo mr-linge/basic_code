@@ -26,7 +26,9 @@ data:       保存读取出或者要写入的数据
 形式:
 ptrace(PTRACE_PEEKTEXT, pid, addr, 0)
 ptrace(PTRACE_PEEKDATA, pid, addr, 0)
-描述:从内存地址中读取一个word,pid表示被跟踪的子进程,内存地址由addr给出,返回值为读到的数据。在Linux（i386）中用户代码段与用户数据段重合所以读取代码段和数据段数据处理是一样的。
+描述:从内存地址中读取一个word,pid表示被跟踪的子进程,内存地址由addr给出,返回值为读到的数据。
+在Linux（i386）中用户代码段与用户数据段重合所以读取代码段和数据段数据处理是一样的。
+由于Linux不区分文本与数据段的地址空间,PTRACE_PEEKDATA与PTRACE_PEEKTEXT无区别
 
 3. PTRACE_POKETEXT, PTRACE_POKEDATA
 形式:
