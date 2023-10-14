@@ -1,10 +1,11 @@
 #include <stdio.h>
+#include <errno.h>
+#include <string.h>
 #include <sys/stat.h>
 
 /*
 header file:
 #include <sys/stat.h>
-#include <unistd.h>
 
 function:
 int stat(const char *file_name, struct stat *buf);
@@ -18,13 +19,13 @@ params:
 
 retrun value:
  执行成功则返回0，失败返回-1，错误代码存于errno
- ENOENT         参数file_name指定的文件不存在
- ENOTDIR        路径中的目录存在但却非真正的目录
- ELOOP          欲打开的文件有过多符号连接问题，上限为16符号连接
- EFAULT         参数buf为无效指针，指向无法存在的内存空间
- EACCESS        存取文件时被拒绝
- ENOMEM         核心内存不足
- ENAMETOOLONG   参数file_name的路径名称太长
+    ENOENT         参数file_name指定的文件不存在
+    ENOTDIR        路径中的目录存在但却非真正的目录
+    ELOOP          欲打开的文件有过多符号连接问题，上限为16符号连接
+    EFAULT         参数buf为无效指针，指向无法存在的内存空间
+    EACCESS        存取文件时被拒绝
+    ENOMEM         核心内存不足
+    ENAMETOOLONG   参数file_name的路径名称太长
 
 struct stat in  Linux.
 struct stat {
@@ -42,11 +43,15 @@ struct stat {
     time_t        st_mtime;     //最后一次修改时间
     time_t        st_ctime;     //最后一次改变时间(指属性)
 };
- * */
+**/
 int main()
 {
     struct stat buf;
-    stat("/etc/hosts", &buf);
+    int ret = stat("/etc/hosts", &buf);
+    if(ret != 0) {
+        fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+        return -1;
+    }
     printf("/etc/hosts file size = %lld\n", buf.st_size);
     return 0;
 }

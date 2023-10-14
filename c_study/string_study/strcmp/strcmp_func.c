@@ -26,11 +26,11 @@ int main()
 
 	if (strcmp(str_1, str_3) == 0)
 	{
-		printf("str_1 is equal to str_3．\n");
+		printf("str_1 is equal to str_3\n");
 	}
 	else
 	{
-		printf("str_1 is not equalto str_3．\n");
+		printf("str_1 is not equalto str_3\n");
 	}
 	return 0;
 }
