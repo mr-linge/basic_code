@@ -1,5 +1,9 @@
 # AArch64 linux 系统调用表
 
+linux 源码里
+https://github.com/torvalds/linux/blob/v4.17/include/uapi/asm-generic/unistd.h
+
+
 /* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
 #include <asm/bitsperlong.h>
 
