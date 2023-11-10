@@ -10,7 +10,7 @@ program:
 	@$(cc) $(source) -o $(execfile)
 
 test:
-	@clang test.c -o test
+	@$(cc) test.c -o test
 
 all: program
 	@$(strip) $(execfile)
