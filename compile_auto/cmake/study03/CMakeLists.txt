@@ -4,8 +4,7 @@ cmake_minimum_required(VERSION 3.20)
 # 项目信息
 project(cmake_study VERSION 1.0.0 LANGUAGES C)
 
-# 查找目录下的所有源文件
-# 并将名称保存到 DIR_SRCS 变量
+# 查找 ./src目录 下的所有源文件,并将名称保存到 DIR_SRCS 变量
 aux_source_directory(./src DIR_SRCS)
 
 # 需要链接的依赖库路径(需要是绝对路径)
