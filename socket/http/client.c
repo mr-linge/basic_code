@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 	}
 	char *msg = make_post_info();
 	send(sockfd, msg, strlen(msg), 0);
-	char buff[BUFSIZ];
+	char buff[BUFSIZ] = {0};
 	unsigned long len = recv(sockfd, buff, BUFSIZ, 0);
 	// printf("%s\n", buff);
 	if (len > 0)

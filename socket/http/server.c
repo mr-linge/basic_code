@@ -37,7 +37,7 @@ int main()
 	}
 
 	// 客户端信息
-	char buff[BUFSIZ];
+	char buff[BUFSIZ] = {0};
 	struct sockaddr_in claddr;
 	socklen_t length = sizeof(claddr);
 
