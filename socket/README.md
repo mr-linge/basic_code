@@ -3,12 +3,7 @@
 Socket 是对 TCP/IP 协议族的一种封装,是应用层与TCP/IP协议族通信的中间软件抽象层。从设计模式的角度看来,Socket其实就是一个门面模式,它把复杂的TCP/IP协议族隐藏在Socket接口后面,对用户来说,一组简单的接口就是全部,让Socket去组织数据,以符合指定的协议。
 Socket 还可以认为是一种网络间不同计算机上的进程通信的一种方法,利用三元组（ip地址,协议,端口）就可以唯一标识网络中的进程,网络中的进程通信可以利用这个标志与其它进程进行交互。
 socket起源于Unix,而Unix/Linux基本哲学之一就是“一切皆文件”,都可以用“打开open –> 读写write/read –> 关闭close”模式来操作。Socket就是该模式的一个实现,socket即是一种特殊的文件,一些socket函数就是对其进行的操作（读/写IO、打开、关闭）
-Socket类型
-创建 socket 的时候需要指定 socket 的类型,一般有三种:
-SOCK_STREAM:    面向连接的稳定通信,底层是 TCP 协议。
-SOCK_DGRAM:     无连接的通信,底层是 UDP 协议,需要上层的协议来保证可靠性。
-SOCK_RAW:       更加灵活的数据控制,能让你指定 IP 头部
-Socket编程接口
+Socket编程常用接口
 socket():       创建一个通信的管道
 bind():         把一个地址三元组绑定到 socket 上,通常由服务端调用
 listen():       准备接受某个 socket 的数据,TCP专用,开启监听模式
@@ -30,9 +25,16 @@ socket函数对应于普通文件的打开操作。普通文件的打开操作�
 
 正如可以给fopen的传入不同参数值,以打开不同的文件。创建socket的时候,也可以指定不同的参数创建不同的socket描述符.
 socket函数的三个参数分别为:
-domain:     即协议域,又称为协议族（family）。常用的协议族有,AF_INET、AF_INET6、AF_LOCAL（或称AF_UNIX,Unix域socket）、AF_ROUTE等等。协议族决定了socket的地址类型,在通信中必须采用对应的地址,如AF_INET决定了要用ipv4地址（32位的）与端口号（16位的）的组合、AF_UNIX决定了要用一个绝对路径名作为地址。
-type:       指定socket类型。常用的socket类型有,SOCK_STREAM、SOCK_DGRAM、SOCK_RAW、SOCK_PACKET、SOCK_SEQPACKET等等（socket的类型有哪些？）。
-protocol:   就是指定协议。常用的协议有,IPPROTO_TCP、IPPTOTO_UDP、IPPROTO_SCTP、IPPROTO_TIPC等,它们分别对应TCP传输协议、UDP传输协议、STCP传输协议、TIPC传输协议（这个协议我将会单独开篇讨论！）。
+domain:     即协议域,又称为协议族（family）。
+常用的协议族有,AF_INET、AF_INET6、AF_LOCAL（或称AF_UNIX,Unix域socket）、AF_ROUTE等等。协议族决定了socket的地址类型,在通信中必须采用对应的地址,如AF_INET决定了要用ipv4地址（32位的）与端口号（16位的）的组合、AF_UNIX决定了要用一个绝对路径名作为地址。
+
+type:       指定socket类型。常用的socket类型有,SOCK_STREAM、SOCK_DGRAM、SOCK_RAW、SOCK_PACKET、SOCK_SEQPACKET等等
+常用的3种:
+SOCK_STREAM:    面向连接的稳定通信,底层是 TCP 协议。
+SOCK_DGRAM:     无连接的通信,底层是 UDP 协议,需要上层的协议来保证可靠性。
+SOCK_RAW:       更加灵活的数据控制,能让你指定 IP 头部
+
+protocol:   就是指定协议。常用的协议有,IPPROTO_TCP、IPPTOTO_UDP、IPPROTO_SCTP、IPPROTO_TIPC等,它们分别对应TCP传输协议、UDP传输协议、STCP传输协议、TIPC传输协议。
 注意:并不是上面的type和protocol可以随意组合的,如SOCK_STREAM不可以跟IPPROTO_UDP组合。当protocol为0时,会自动选择type类型对应的默认协议。
 
 如果出错的话，socketid 返回值是 -1
