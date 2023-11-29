@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -24,7 +25,7 @@ int main(int argc, char *argv[])
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1)
 	{
-		perror("socket create fail");
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
 	int ret;
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
 
 	if (listen(sockfd, listen_max) == -1)
 	{ // 监听 port
-		perror("listen fail");
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
 loop:
@@ -61,19 +62,24 @@ loop:
 			printf("server len:%02lu msg:%s\n", msg_len, buff);
 			if (send(client_fd, buff, msg_len, 0) < 0)
 			{
-				perror("write");
+				fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 				break;
 			}
 		}
-		else
+		else if (numbytes == 0)
 		{
-			perror("recv");
+			printf("client fd:%d disconnected\n", client_fd);
+			break;
+		}
+		else if (numbytes == -1)
+		{
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			break;
 		}
 	}
 
 	close(client_fd);
 	goto loop;
-	// close(sockfd);
+	close(sockfd);
 	return 0;
 }

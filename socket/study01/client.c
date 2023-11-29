@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h> // for close
-#include <errno.h>
 
 #define PORT 8000
 #define SERVER_IP "127.0.0.1"
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
 	if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1)
 	{
-		printf("errno:%d,%s\n", errno, strerror(errno));
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
 	printf("Connect Server success!\n");
@@ -38,9 +38,9 @@ int main(int argc, char *argv[])
 	fgets(buff, BUFSIZ, stdin);
 	buff[strlen(buff) - 1] = '\0'; // 去除输入的 \n
 	printf("client len:%02lu msg:%s\n", strlen(buff), buff);
-	if (send(sockfd, buff, strlen(buff), 0) < 0)
+	if (send(sockfd, buff, strlen(buff), 0) == -1)
 	{
-		perror("send");
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
 	memset(buff, '\0', BUFSIZ);
@@ -56,8 +56,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		perror("recv\n");
-		exit(-1);
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}
 
 	close(sockfd);

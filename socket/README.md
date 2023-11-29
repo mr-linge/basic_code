@@ -5,15 +5,16 @@ Socket 还可以认为是一种网络间不同计算机上的进程通信的一�
 socket起源于Unix,而Unix/Linux基本哲学之一就是“一切皆文件”,都可以用“打开open –> 读写write/read –> 关闭close”模式来操作。Socket就是该模式的一个实现,socket即是一种特殊的文件,一些socket函数就是对其进行的操作（读/写IO、打开、关闭）
 Socket编程常用接口
 socket():       创建一个通信的管道
-bind():         把一个地址三元组绑定到 socket 上,通常由服务端调用
-listen():       准备接受某个 socket 的数据,TCP专用,开启监听模式
-accept():       服务器等待客户端连接,一般是阻塞态,TCP专用,
-connect():      主动建立连接,客户端主动连接服务器,TCP专用
+bind():         server把一个地址三元组绑定到 socket 上
+listen():       server准备接收某个 socket 的数据,TCP专用,开启监听模式
+accept():       server等待客户端连接,一般是阻塞态,TCP专用
+connect():      client主动建立连接,客户端主动连接服务器,TCP专用
 send():         发送数据,TCP专用
 recv():         接收数据,TCP专用
-sendto():       发送数据到指定的IP地址和端口,UDP专用
-recvfrom():     接收数据,返回数据远端的IP地址和端口,UDP专用
+sendto():       发送数据,UDP专用
+recvfrom():     接收数据,UDP专用
 close():        关闭连接
+如果出错的话,返回 -1,通过返回值以及errno可以确定程序运行的状态、是否发生错误
 
 ## socket的基本操作
 
@@ -37,17 +38,15 @@ SOCK_RAW:       更加灵活的数据控制,能让你指定 IP 头部
 protocol:   就是指定协议。常用的协议有,IPPROTO_TCP、IPPTOTO_UDP、IPPROTO_SCTP、IPPROTO_TIPC等,它们分别对应TCP传输协议、UDP传输协议、STCP传输协议、TIPC传输协议。
 注意:并不是上面的type和protocol可以随意组合的,如SOCK_STREAM不可以跟IPPROTO_UDP组合。当protocol为0时,会自动选择type类型对应的默认协议。
 
-如果出错的话，socketid 返回值是 -1
-
 当调用socket创建一个socket时,返回的socket描述字它存在于协议族（address family,AF_XXX）空间中,但没有一个具体的地址。如果想要给它赋值一个地址,就必须调用bind()函数,否则就当调用connect()、listen()时系统会自动随机分配一个端口。
 
 ### bind()函数
 
-正如上面所说bind()函数把一个地址族中的特定地址赋给socket。例如对应AF_INET、AF_INET6就是把一个ipv4或ipv6地址和端口号组合赋给socket
+bind()函数把一个地址族中的特定地址赋给socket。例如对应AF_INET、AF_INET6就是把一个ipv4或ipv6地址和端口号组合赋给socket
 int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
-函数的三个参数分别为:
-sockfd:即socket描述字,它是通过socket()函数创建了,唯一标识一个socket。bind()函数就是将给这个描述字绑定一个名字。
-addr:一个const struct sockaddr *指针,指向要绑定给sockfd的协议地址。这个地址结构根据地址创建socket时的地址协议族的不同而不同,
+三个参数分别为:
+sockfd:         即socket描述字,它是通过socket()函数创建了,唯一标识一个socket。bind()函数就是将给这个描述字绑定一个名字。
+addr:           一个const struct sockaddr *指针,指向要绑定给sockfd的协议地址。这个地址结构根据地址创建socket时的地址协议族的不同而不同,
 如ipv4对应的是:
 struct sockaddr_in {
     sa_family_t    sin_family; /* address family: AF_INET */
@@ -81,26 +80,32 @@ struct sockaddr_un {
 addrlen:对应的是地址的长度。
 通常服务器在启动的时候都会绑定一个众所周知的地址（如ip地址+端口号）,用于提供服务,客户就可以通过它来接连服务器；而客户端就不用指定,有系统自动分配一个端口号和自身的ip地址组合。这就是为什么通常服务器端在listen之前会调用bind(),而客户端就不会调用,而是在connect()时由系统随机生成一个。
 
-如果出错的话，socketid 返回值是 -1
+### listen()
 
-### listen()、connect()函数
+服务器在调用socket()、bind()之后就会调用listen()来监听这个socket,如果客户端这时调用connect()发出连接请求,服务器端就会接收到这个请求。
 
-如果作为一个服务器,在调用socket()、bind()之后就会调用listen()来监听这个socket,如果客户端这时调用connect()发出连接请求,服务器端就会接收到这个请求。
+int listen(int sockfd, int max);
+第一个参数即为要监听的socket描述字
+第二个参数为相应socket可以排队的最大连接个数
+socket()函数创建的socket默认是一个主动类型的,listen函数将socket变为被动类型的,等待客户的连接请求
 
-int listen(int sockfd, int backlog);
+### connect()
+
 int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
-listen函数的第一个参数即为要监听的socket描述字,第二个参数为相应socket可以排队的最大连接个数。socket()函数创建的socket默认是一个主动类型的,listen函数将socket变为被动类型的,等待客户的连接请求。
+第一个参数即为客户端的socket描述字
+第二个参数为服务器的socket地址
+第三个参数为socket地址的长度
+客户端通过调用connect函数来建立与TCP服务器的连接
 
-connect函数的第一个参数即为客户端的socket描述字,第二参数为服务器的socket地址,第三个参数为socket地址的长度。客户端通过调用connect函数来建立与TCP服务器的连接。
-
-如果出错的话,返回值是 -1
-
-### accept()函数
+### accept()
 
 TCP服务器端依次调用socket()、bind()、listen()之后,就会监听指定的socket地址了。TCP客户端依次调用socket()、connect()之后就向TCP服务器发送了一个连接请求。TCP服务器监听到这个请求之后,就会调用accept()函数接收请求,这样连接就建立好了。之后就可以开始网络I/O操作了,即类同于普通文件的读写I/O操作。
 
-int accept(int sockfd, struct sockaddr *addr, socklen_t*addrlen);
-accept函数的第一个参数为服务器的socket描述字,第二个参数为指向struct sockaddr *的指针,用于返回客户端的协议地址,第三个参数为协议地址的长度。如果accpet成功,那么其返回值是由内核自动生成的一个全新的描述字,代表与返回客户的TCP连接。
+int accept(int sockfd, struct sockaddr *addr, socklen_t addrlen);
+第一个参数为服务器的socket描述字
+第二个参数为指向 struct sockaddr 的指针,用于返回客户端的协议地址
+第三个参数为协议地址的长度
+如果accept成功,那么其返回值是由内核自动生成的一个全新的描述字,代表与返回客户的TCP连接
 
 注意:accept的第一个参数为服务器的socket描述字,是服务器开始调用socket()函数生成的,称为监听socket描述字；而accept函数返回的是已连接的socket描述字。一个服务器通常只创建一个监听socket描述字,它在该服务器的生命周期内一直存在。内核为每个由服务器进程接收的客户连接创建了一个已连接socket描述字,当服务器完成了对某个客户的服务,相应的已连接socket描述字就被关闭。
 
@@ -159,13 +164,13 @@ MSG_EOR                     send recv都可用
 
 ##### send
 
-int send( SOCKET s, const char FAR *buf, int len, int flags);
+int send(SOCKET socket, char *buf, int len, int flags);
+第一个参数指定发送端套接字描述符
+第二个参数指明一个存放应用程序要发送数据的缓冲区
+第三个参数指明实际要发送的数据的字节数
+第四个参数一般置0
 不论是客户还是服务器应用程序都用send函数来向TCP连接的另一端发送数据。
 客户程序一般用send函数向服务器发送请求,而服务器则通常用send函数来向客户程序发送应答。
-（1）第一个参数指定发送端套接字描述符；
-（2）第二个参数指明一个存放应用程序要发送数据的缓冲区；
-（3）第三个参数指明实际要发送的数据的字节数；
-（4）第四个参数一般置0。
 这里只描述同步Socket的send函数的执行流程。当调用该函数时,send先比较待发送数据的长度len和套接字s的发送缓冲的长度, 如果len大于s的发送缓冲区的长度,该函数返回SOCKET_ERROR；如果len小于或者等于s的发送缓冲区的长度,那么send先检查协议是否正在发送s的发送缓冲中的数据,如果是就等待协议把数据发送完,如果协议还没有开始发送s的发送缓冲中的数据或者s的发送缓冲中没有数据,那么send就比较s的发送缓冲区的剩余空间和len,如果len大于剩余空间大小send就一直等待协议把s的发送缓冲中的数据发送完,如果len小于剩余空间大小send就仅仅把buf中的数据copy到剩余空间里（注意并不是send把s的发送缓冲中的数据传到连接的另一端的,而是协议的,send仅仅是把buf中的数据copy到s的发送缓冲区的剩余空间里）。
 
 返回值:成功返回发送的字节数；失败返回-1,同时errno被设置
@@ -177,12 +182,12 @@ int send( SOCKET s, const char FAR *buf, int len, int flags);
 
 ##### recv
 
-int recv( SOCKET s, char FAR *buf, int len, int flags );
-不论是客户还是服务器应用程序都用recv函数从TCP连接的另一端接收数据。
-第一个参数指定接收端套接字描述符；
-第二个参数指明一个缓冲区,该缓冲区用来存放recv函数接收到的数据；
-第三个参数指明buf的长度；
+int recv(SOCKET socket, char *buf, int len, int flags);
+第一个参数指定接收端套接字描述符
+第二个参数指明一个缓冲区,该缓冲区用来存放recv函数接收到的数据
+第三个参数指明buf的长度
 第四个参数一般置0
+不论是客户还是服务器应用程序都用recv函数从TCP连接的另一端接收数据。
 这里只描述同步Socket的recv函数的执行流程。当应用程序调用recv函数时,recv先等待s的发送缓冲中的数据被协议传送完毕,如果协议在传送s的发送缓冲中的数据时出现网络错误,那么recv函数返回SOCKET_ERROR,如果s的发送缓冲中没有数据或者数据被协议成功发送完毕后,recv先检查套接字s的接收缓冲区,如果s接收缓冲区中没有数据或者协议正在接收数据,那么recv就一直等待,只到协议把数据接收完毕。当协议把数据接收完毕,recv函数就把s的接收缓冲中的数据copy到buf中（注意协议接收到的数据可能大于buf的长度,所以在这种情况下要调用几次recv函数才能把s的接收缓冲中的数据copy完。recv函数仅仅是copy数据,真正的接收数据是协议来完成的）,recv函数返回其实际copy的字节数。如果recv在copy时出错,那么它返回SOCKET_ERROR；如果recv函数在等待协议接收数据时网络中断了,那么它返回0。
 
 返回值:成功返回发送的字节数；失败返回-1,同时errno被设置

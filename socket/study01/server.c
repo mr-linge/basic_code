@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -24,7 +25,7 @@ int main(int argc, char *argv[])
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1)
 	{
-		perror("socket create fail");
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
 	int ret;
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
 
 	if (listen(sockfd, listen_max) == -1)
 	{ // 监听 port
-		perror("listen fail");
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
 loop:
@@ -43,37 +44,36 @@ loop:
 	client_fd = accept(sockfd, (struct sockaddr *)&client_addr, &struct_len);
 	printf("Client was accepting\n");
 
-	while (1)
+	memset(buff, '\0', BUFSIZ);
+	numbytes = recv(client_fd, buff, BUFSIZ, 0);
+	if (numbytes > 0)
 	{
-		memset(buff, '\0', BUFSIZ);
-		numbytes = recv(client_fd, buff, BUFSIZ, 0);
-		if (numbytes > 0)
+		printf("client len:%02lu msg:", numbytes);
+		for (unsigned long i = 0; i < numbytes; i++)
 		{
-			printf("client len:%02lu msg:", numbytes);
-			for (unsigned long i = 0; i < numbytes; i++)
-			{
-				printf("%c", buff[i]);
-			}
-			printf("\n");
-			char *suffix = " | your message was received!";
-			memcpy(buff + numbytes, suffix, strlen(suffix));
-			unsigned long msg_len = (numbytes + strlen(suffix));
-			printf("server len:%02lu msg:%s\n", msg_len, buff);
-			if (send(client_fd, buff, msg_len, 0) < 0)
-			{
-				perror("write");
-				break;
-			}
+			printf("%c", buff[i]);
 		}
-		else
+		printf("\n");
+		char *suffix = " | your message was received!";
+		memcpy(buff + numbytes, suffix, strlen(suffix));
+		unsigned long msg_len = numbytes + strlen(suffix);
+		printf("server len:%02lu msg:%s\n", msg_len, buff);
+		if (send(client_fd, buff, msg_len, 0) < 0)
 		{
-			perror("recv");
-			break;
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		}
+	}
+	else if (numbytes == 0)
+	{
+		printf("client fd:%d disconnected\n", client_fd);
+	}
+	else if (numbytes == -1)
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}
 
 	close(client_fd);
 	goto loop;
-	// close(sockfd);
+	close(sockfd);
 	return 0;
 }
