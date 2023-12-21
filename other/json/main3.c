@@ -10,13 +10,12 @@ int main()
 	const unsigned int resolution_numbers[3][2] = {
 		{1280, 720},
 		{1920, 1080},
-		{3840, 2160}
-	};
+		{3840, 2160}};
 
-	//1. 创建cJSON对象
-	cJSON* root = cJSON_CreateObject();
+	// 1. 创建cJSON对象
+	cJSON *root = cJSON_CreateObject();
 
-	//2. 创建数组对象
+	// 2. 创建数组对象
 	cJSON *array = cJSON_CreateArray();
 	cJSON_AddItemToObject(root, "text", array);
 
@@ -32,11 +31,11 @@ int main()
 		cJSON_AddItemToObject(obj, "height", height);
 	}
 
-	//3. 打印生成的结果
-	char *json_data=cJSON_PrintUnformatted(root);
-	printf("%s\n",json_data);
+	// 3. 打印生成的结果
+	char *json_data = cJSON_PrintUnformatted(root);
+	printf("%s\n", json_data);
 
-	//4. 释放空间
+	// 4. 释放空间
 	cJSON_Delete(root);
 	return 0;
 }
