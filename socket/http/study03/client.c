@@ -15,6 +15,8 @@ char *client = "Android 8.1";
 char *token = "0eefffb6-32af-4fed-833c-866af540akdn";
 char *host = "jobs8.cn";
 
+const char *file_path = "./test.ipa";
+
 void send_http_header(int sock_client, unsigned long http_body_length)
 {
 	char *http_header = (char *)malloc(BUFSIZ);
@@ -57,29 +59,71 @@ void http_request(int sock_client)
 	send_http_body(sock_client, http_body, strlen(http_body));
 }
 
-void handle_response(char *buff, unsigned long len)
+void handle_response(int sockfd)
 {
-	char *p = strstr(buff, "Content-Length:");
-	if (p == NULL)
-	{
-		printf("http response body is empty.\n");
-		return;
-	}
-	p += strlen("Content-Length:");
+	unsigned char buff[BUFSIZ] = {0};
 
-	unsigned long val = strtoul(p, NULL, 10);
-	if (val == 0)
+	unsigned long len = 0;
+	unsigned long body_length = 0;
+	len = recv(sockfd, buff, BUFSIZ, 0); // 读取时遇到 \r\n\r\n(产生空行)就完成一次读入。读取 http 协议数据, 第一次读取到的是 header
+	printf("%s", buff);
+	if (len > 0 && len <= BUFSIZ)
+	{
+		char *p = strstr((char *)buff, "Content-Length:");
+		if (p == NULL)
+		{
+			printf("http response body is empty.\n");
+			return;
+		}
+		p += strlen("Content-Length:");
+		body_length = strtoul(p, NULL, 10);
+		printf("body_length:%lu\n", body_length);
+		if (body_length == 0)
+		{
+			printf("http response body is empty.\n");
+			return;
+		}
+	}
+	else
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		return;
 	}
-	// char *http_body = (char *)malloc(val + 1);
-	// char content[val + 1];
-	// memset(content, 0, val + 1);
-	// memcpy(content, buff + (len - val), val);
-	// printf("request length:%lu body:\n%s\n", val, content);
+
+	FILE *fp = fopen(file_path, "ab+");
+	if (fp == NULL)
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
+	}
+	unsigned long size_count = 0; // 写入文件时每次写入的 block 数
+	while (body_length > 0)
+	{
+		memset(buff, '\0', BUFSIZ);
+		len = recv(sockfd, buff, BUFSIZ, 0);
+		if (len > 0 && len <= BUFSIZ)
+		{
+			size_count = fwrite(buff, sizeof(char), len, fp); // 将读取的文件写入到另一个地方 ./test.ipa
+			if (size_count != len && ferror(fp))
+			{
+				printf("写入文件:%s 时发生错误\n", file_path);
+				break;
+			}
+			clearerr(fp);
+			printf("%s:%d body_length:%lu len:%lu\n", __FILE__, __LINE__, body_length, len);
+			body_length -= len;
+		}
+		else
+		{
+			printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+			break;
+		}
+	}
+	printf("%s:%d body_length:%lu\n", __FILE__, __LINE__, body_length);
+	fclose(fp);
 }
-// 还未实现
+
 int main(int argc, char *argv[])
 {
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -96,22 +140,8 @@ int main(int argc, char *argv[])
 
 	// 向服务器发出请求
 	http_request(sockfd);
-
-	char buff[BUFSIZ] = {0};
-	unsigned long len = recv(sockfd, buff, BUFSIZ, 0);
-	if (len > 0)
-	{
-		// printf("received data len:%02lu msg:", len);
-		for (unsigned long i = 0; i < len; i++)
-		{
-			printf("%c", buff[i]);
-		}
-		printf("\n");
-	}
-	else
-	{
-		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-	}
+	// 处理接收到的数据
+	handle_response(sockfd);
 
 	close(sockfd);
 	return 0;

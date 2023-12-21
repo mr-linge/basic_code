@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 
 #define PORT 9001
-int listen_max = 20; // 最大并发数量
+int listen_max = 10; // 最大并发数量
 
 const char *file_path = "/tmp/test.ipa";
 const char *file_name = "test.ipa";
@@ -67,7 +67,6 @@ void send_http_body(int sock_client)
 void http_response(int sock_client, char *buff, unsigned long len)
 {
 	printf("%s\n", buff);
-	// printf("%s:%d", __FILE__, __LINE__);
 	struct stat buf;
 	int fd, ret;
 	fd = open(file_path, O_RDONLY);
@@ -119,10 +118,10 @@ int main()
 			close(sock_client);
 			break;
 		}
-		memset(buff, '\0', sizeof(buff));
-		int len = recv(sock_client, buff, sizeof(buff), 0);
+		memset(buff, '\0', BUFSIZ);
+		int len = recv(sock_client, buff, BUFSIZ, 0);
 		// printf("recv len:%d\n", len);
-		if (len < 0)
+		if (len < 0 || len > BUFSIZ)
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			close(sock_client);
@@ -130,6 +129,7 @@ int main()
 		}
 
 		http_response(sock_client, buff, len);
+		// sleep(3); 可以减少错误断开连接的概率
 		close(sock_client);
 	}
 
