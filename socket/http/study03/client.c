@@ -19,8 +19,7 @@ const char *file_path = "./test.ipa";
 
 void send_http_header(int sock_client, unsigned long http_body_length)
 {
-	char *http_header = (char *)malloc(BUFSIZ);
-	memset(http_header, '\0', BUFSIZ);
+	char http_header[BUFSIZ] = {0};
 
 	sprintf(http_header, "%s\r\n", method_type);
 	sprintf(http_header, "%sUser-Agent: %s\r\n", http_header, client);
@@ -34,13 +33,12 @@ void send_http_header(int sock_client, unsigned long http_body_length)
 		sprintf(http_header, "%sContent-Length: %lu\r\n", http_header, http_body_length);
 	}
 	sprintf(http_header, "%sContent-Type: %s\r\n", http_header, "application/octet-stream");
-	sprintf(http_header, "%s\r\n", http_header); // \r\n 换行后是 body
+	sprintf(http_header, "%s\r\n", http_header); // \r\n 空行后是 body 数据
 
 	if (send(sock_client, http_header, strlen(http_header), 0) < 0)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}
-	free(http_header);
 }
 
 void send_http_body(int sock_client, char *http_body, unsigned long len)
@@ -61,15 +59,15 @@ void http_request(int sock_client)
 
 void handle_response(int sockfd)
 {
-	unsigned char buff[BUFSIZ] = {0};
+	char buff[BUFSIZ] = {0};
 
 	unsigned long len = 0;
 	unsigned long body_length = 0;
-	len = recv(sockfd, buff, BUFSIZ, 0); // 读取时遇到 \r\n\r\n(产生空行)就完成一次读入。读取 http 协议数据, 第一次读取到的是 header
+	len = recv(sockfd, buff, BUFSIZ, 0); // 读取时遇到 \r\n(空行)就完成一次读入。读取 http 协议数据, 第一次读取到的是 header
 	printf("%s", buff);
 	if (len > 0 && len <= BUFSIZ)
 	{
-		char *p = strstr((char *)buff, "Content-Length:");
+		char *p = strstr(buff, "Content-Length:");
 		if (p == NULL)
 		{
 			printf("http response body is empty.\n");
@@ -96,7 +94,7 @@ void handle_response(int sockfd)
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
-	unsigned long size_count = 0; // 写入文件时每次写入的 block 数
+	unsigned long size_count = 0; // 写入文件时每次写入的 size count
 	while (body_length > 0)
 	{
 		memset(buff, '\0', BUFSIZ);

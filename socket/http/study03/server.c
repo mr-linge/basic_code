@@ -17,8 +17,7 @@ const char *file_name = "test.ipa";
 
 void send_http_header(int sock_client, unsigned long http_body_length)
 {
-	char *http_header = (char *)malloc(BUFSIZ);
-	memset(http_header, '\0', BUFSIZ);
+	char http_header[BUFSIZ] = {0};
 
 	sprintf(http_header, "HTTP/1.1 200 OK\r\n");
 	sprintf(http_header, "%sServer: Apache Server V1.0\r\n", http_header);
@@ -28,16 +27,15 @@ void send_http_header(int sock_client, unsigned long http_body_length)
 	{
 		sprintf(http_header, "%sContent-Length: %lu\r\n", http_header, http_body_length);
 	}
-	sprintf(http_header, "%sContent-Disposition: %s%s\r\n", http_header, "attachment; filename=", file_name);
+	sprintf(http_header, "%sContent-Disposition: attachment; filename=%s\r\n", http_header, file_name);
 	sprintf(http_header, "%sContent-Type: %s\r\n", http_header, "application/octet-stream");
 
-	sprintf(http_header, "%s\r\n", http_header); // \r\n 换行后是 body
+	sprintf(http_header, "%s\r\n", http_header); // \r\n 空行后是 body 数据
 
 	if (send(sock_client, http_header, strlen(http_header), 0) < 0)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}
-	free(http_header);
 }
 
 void send_http_body(int sock_client)
@@ -53,7 +51,7 @@ void send_http_body(int sock_client)
 	}
 
 	// 循环将文件 fp 中的内容读取到 buff 中
-	while ((size_count = fread(buff, sizeof(char), BUFSIZ, fp)) > 0)
+	while ((size_count = fread(buff, sizeof(char), BUFSIZ, fp)) != 0)
 	{
 		if (send(sock_client, buff, size_count, 0) < 0)
 		{
@@ -83,6 +81,9 @@ void http_response(int sock_client, char *buff, unsigned long len)
 
 int main()
 {
+	char buff[BUFSIZ] = {0};
+	unsigned long len = 0;
+
 	// 定义 socket
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	// 定义 sockaddr_in
@@ -105,21 +106,20 @@ int main()
 	}
 
 	// 客户端信息
-	char buff[BUFSIZ] = {0};
 	struct sockaddr_in claddr;
 	socklen_t length = sizeof(claddr);
 
+	int sock_client = 0;
 	while (1)
 	{
-		int sock_client = accept(sockfd, (struct sockaddr *)&claddr, &length);
+		sock_client = accept(sockfd, (struct sockaddr *)&claddr, &length);
 		if (sock_client < 0)
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-			close(sock_client);
 			break;
 		}
 		memset(buff, '\0', BUFSIZ);
-		int len = recv(sock_client, buff, BUFSIZ, 0);
+		len = recv(sock_client, buff, BUFSIZ, 0);
 		// printf("recv len:%d\n", len);
 		if (len < 0 || len > BUFSIZ)
 		{
@@ -129,7 +129,6 @@ int main()
 		}
 
 		http_response(sock_client, buff, len);
-		// sleep(3); 可以减少错误断开连接的概率
 		close(sock_client);
 	}
 
