@@ -7,24 +7,24 @@
 #include <sys/socket.h> // socket
 #include <sys/shm.h>
 
-#define PORT 8888
+#define PORT 9000
 int listen_max = 20; // 最大并发数量
 
-char *insert_http_header(char *http_body)
+const char *content_type = "application/json";
+
+void insert_http_header(char *http_response, char *body)
 {
-	char *http_response = (char *)malloc(BUFSIZ);
-	memset(http_response, '\0', BUFSIZ);
+	char header[BUFSIZ] = {0};
 
-	sprintf(http_response, "HTTP/1.1 200 OK\r\n");
-	sprintf(http_response, "%sServer: Apache Server V1.0\r\n", http_response);
-	sprintf(http_response, "%sAccept-Ranges: bytes\r\n", http_response);
-	sprintf(http_response, "%sConnection: close\r\n", http_response);
-	sprintf(http_response, "%sContent-Length: %lu\r\n", http_response, strlen(http_body));
-	sprintf(http_response, "%sContent-Type: %s\r\n\r\n", http_response, "application/json"); // \r\n 换行后是 body
+	strcat(header, "HTTP/1.1 200 OK\r\n");
+	strcat(header, "Server: Apache Server V1.0\r\n");
+	strcat(header, "Accept-Ranges: bytes\r\n");
+	strcat(header, "Connection: close\r\n");
+	sprintf(header, "%sContent-Length: %lu\r\n", header, strlen(body));
+	sprintf(header, "%sContent-Type: %s\r\n", header, content_type);
+	strcat(header, "\r\n"); // \r\n 换行后是 body
 
-	sprintf(http_response, "%s%s", http_response, http_body);
-
-	return http_response;
+	sprintf(http_response, "%s%s", header, body);
 }
 
 void http_response(int sock_client, char *buff, int len)
@@ -53,12 +53,14 @@ void http_response(int sock_client, char *buff, int len)
 		http_body = "Client Http body is empty.";
 	}
 
-	char *http_response_content = insert_http_header(http_body);
-	if (send(sock_client, http_response_content, strlen(http_response_content), 0) < 0)
+	char *http_response = (char *)malloc(BUFSIZ);
+	memset(http_response, '\0', BUFSIZ);
+	insert_http_header(http_response, http_body);
+	if (send(sock_client, http_response, strlen(http_response), 0) < 0)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}
-	free(http_response_content);
+	free(http_response);
 }
 
 int main()
@@ -89,9 +91,11 @@ int main()
 	struct sockaddr_in claddr;
 	socklen_t length = sizeof(claddr);
 
+	int sock_client;
+	unsigned long len;
 	while (1)
 	{
-		int sock_client = accept(sockfd, (struct sockaddr *)&claddr, &length);
+		sock_client = accept(sockfd, (struct sockaddr *)&claddr, &length);
 		if (sock_client < 0)
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -99,7 +103,7 @@ int main()
 			break;
 		}
 		memset(buff, '\0', sizeof(buff));
-		int len = recv(sock_client, buff, sizeof(buff), 0);
+		len = recv(sock_client, buff, sizeof(buff), 0);
 		// printf("recv len:%d\n", len);
 		if (len < 0)
 		{

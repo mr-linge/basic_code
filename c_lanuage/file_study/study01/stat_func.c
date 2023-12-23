@@ -2,8 +2,6 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
 
 /*
 header: #include <sys/stat.h>
@@ -49,7 +47,7 @@ int main()
 {
     struct stat buf;
     int status = stat(path, &buf);
-    if (status != 0)
+    if (status == -1)
     {
         fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
         return -1;

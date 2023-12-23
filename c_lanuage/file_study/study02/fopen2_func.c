@@ -2,7 +2,6 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <sys/stat.h>
 
 /*
 函数:size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)

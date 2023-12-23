@@ -7,30 +7,32 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#define PORT 8888
+#define PORT 9000
 #define SERVER_IP "127.0.0.1"
 
-char *method_type = "POST /user HTTP/1.1";
-char *client = "Android 8.1";
-char *token = "0eefffb6-32af-4fed-833c-866af540akdn";
-char *host = "jobs8.cn";
+const char *method_type = "POST /user HTTP/1.1";
+const char *client = "Android 8.1";
+const char *token = "0eefffb6-32af-4fed-833c-866af540akdn";
+const char *host = "jobs8.cn";
+const char *content_type = "application/json";
 
-char *insert_http_header(char *http_body)
+void insert_http_header(char *http_response, char *body)
 {
-	char *http_response = (char *)malloc(BUFSIZ);
-	memset(http_response, '\0', BUFSIZ);
-	sprintf(http_response, "%s\r\n", method_type);
-	sprintf(http_response, "%sUser-Agent: %s\r\n", http_response, client);
-	sprintf(http_response, "%sAccept: */*\r\n", http_response);
-	sprintf(http_response, "%sToken: %s\r\n", http_response, token);
-	sprintf(http_response, "%sHost: %s\r\n", http_response, host);
-	sprintf(http_response, "%sAccept-Encoding: gzip, deflate, br\r\n", http_response);
-	sprintf(http_response, "%sConnection: keep-alive\r\n", http_response);
-	sprintf(http_response, "%sContent-Length: %lu\r\n", http_response, strlen(http_body));
-	sprintf(http_response, "%sContent-Type: %s\r\n\r\n", http_response, "application/json"); // http header 和 body 以空行为分隔 \r\n 换行后是 body
-	sprintf(http_response, "%s%s", http_response, http_body);
+	char header[BUFSIZ] = {0};
 
-	return http_response;
+	sprintf(header, "%s\r\n", method_type);
+	sprintf(header, "%sUser-Agent: %s\r\n", header, client);
+	sprintf(header, "%sAccept: */*\r\n", header);
+	sprintf(header, "%sToken: %s\r\n", header, token);
+	sprintf(header, "%sHost: %s\r\n", header, host);
+	sprintf(header, "%sAccept-Encoding: gzip, deflate, br\r\n", header);
+	sprintf(header, "%sConnection: keep-alive\r\n", header);
+	sprintf(header, "%sContent-Length: %lu\r\n", header, strlen(body));
+	sprintf(header, "%sContent-Type: %s\r\n", header, content_type);
+
+	strcat(header, "\r\n"); // http header 和 body 以空行为分隔 \r\n 换行后是 body
+
+	sprintf(http_response, "%s%s", header, body);
 }
 
 int main(int argc, char *argv[])
@@ -48,13 +50,15 @@ int main(int argc, char *argv[])
 	}
 
 	char *http_body = "{\"key\":\"123456\",\"name\":\"Dio\",\"address\":\"BJ\"}";
-	char *http_response_content = insert_http_header(http_body);
-	if (send(sockfd, http_response_content, strlen(http_response_content), 0) < 0)
+	char *http_response = (char *)malloc(BUFSIZ);
+	memset(http_response, '\0', BUFSIZ);
+	insert_http_header(http_response, http_body);
+	if (send(sockfd, http_response, strlen(http_response), 0) < 0)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		return -1;
 	}
-	
+
 	char buff[BUFSIZ] = {0};
 	unsigned long len = recv(sockfd, buff, BUFSIZ, 0);
 	if (len > 0)
@@ -72,6 +76,6 @@ int main(int argc, char *argv[])
 	}
 
 	close(sockfd);
-	free(http_response_content);
+	free(http_response);
 	return 0;
 }

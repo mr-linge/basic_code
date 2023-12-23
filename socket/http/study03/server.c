@@ -9,30 +9,32 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#define PORT 9001
+#define PORT 9000
 int listen_max = 10; // 最大并发数量
 
 const char *file_path = "/tmp/test.ipa";
 const char *file_name = "test.ipa";
 
+const char *content_type = "application/json";
+
 void send_http_header(int sock_client, unsigned long http_body_length)
 {
 	char http_header[BUFSIZ] = {0};
 
-	sprintf(http_header, "HTTP/1.1 200 OK\r\n");
-	sprintf(http_header, "%sServer: Apache Server V1.0\r\n", http_header);
-	sprintf(http_header, "%sAccept-Ranges: bytes\r\n", http_header);
-	sprintf(http_header, "%sConnection: close\r\n", http_header);
+	strcat(http_header, "HTTP/1.1 200 OK\r\n");
+	strcat(http_header, "Server: Apache Server V1.0\r\n");
+	strcat(http_header, "Accept-Ranges: bytes\r\n");
+	strcat(http_header, "Connection: close\r\n");
 	if (http_body_length > 0)
 	{
 		sprintf(http_header, "%sContent-Length: %lu\r\n", http_header, http_body_length);
 	}
 	sprintf(http_header, "%sContent-Disposition: attachment; filename=%s\r\n", http_header, file_name);
-	sprintf(http_header, "%sContent-Type: %s\r\n", http_header, "application/octet-stream");
+	sprintf(http_header, "%sContent-Type: %s\r\n", http_header, content_type);
 
-	sprintf(http_header, "%s\r\n", http_header); // \r\n 空行后是 body 数据
+	strcat(http_header, "\r\n"); // \r\n 空行后是 body 数据
 
-	if (send(sock_client, http_header, strlen(http_header), 0) < 0)
+	if (send(sock_client, http_header, strlen(http_header), 0) == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}

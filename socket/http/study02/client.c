@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#define PORT 8888
+#define PORT 9000
 #define SERVER_IP "127.0.0.1"
 
 char *method_type = "POST /user HTTP/1.1";

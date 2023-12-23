@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#define PORT 9001
+#define PORT 9000
 #define SERVER_IP "127.0.0.1"
 
 char *method_type = "POST /user HTTP/1.1";
@@ -33,9 +33,9 @@ void send_http_header(int sock_client, unsigned long http_body_length)
 		sprintf(http_header, "%sContent-Length: %lu\r\n", http_header, http_body_length);
 	}
 	sprintf(http_header, "%sContent-Type: %s\r\n", http_header, "application/octet-stream");
-	sprintf(http_header, "%s\r\n", http_header); // \r\n 空行后是 body 数据
+	strcat(http_header, "\r\n"); // \r\n 空行后是 body 数据
 
-	if (send(sock_client, http_header, strlen(http_header), 0) < 0)
+	if (send(sock_client, http_header, strlen(http_header), 0) == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}
@@ -44,7 +44,7 @@ void send_http_header(int sock_client, unsigned long http_body_length)
 void send_http_body(int sock_client, char *http_body, unsigned long len)
 {
 
-	if (send(sock_client, http_body, len, 0) < 0)
+	if (send(sock_client, http_body, len, 0) == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}
