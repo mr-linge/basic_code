@@ -41,8 +41,8 @@ clearerr(fp);
 const char *source_path = "/tmp/test.ipa";
 const char *target_path = "./test.ipa";
 
-#define ELEMENT_COUNT 0x100
-#define ELEMENT_SIZE 0x2
+#define ELEMENT_COUNT 0x200
+#define ELEMENT_SIZE 0x1
 
 int main()
 {
@@ -55,7 +55,7 @@ int main()
         exit(-1);
     }
 
-    FILE *fp2 = fopen(target_path, "ab+");
+    FILE *fp2 = fopen(target_path, "wb+");
     if (fp2 == NULL)
     {
         fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -84,6 +84,6 @@ int main()
 
     fclose(fp2);
     fclose(fp);
-
+    free(buff);
     return 0;
 }

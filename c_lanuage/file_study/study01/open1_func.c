@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -29,7 +31,7 @@
    O_NOFOLLOW 如果参数pathname 所指的文件为一符号连接, 则会令打开文件失败.
    O_DIRECTORY 如果参数pathname 所指的文件并非为一目录, 则会令打开文件失败。注：此为Linux2. 2 以后特有的旗标, 以避免一些系统安全问题.
 
-   参数mode 则有下列数种组合, 只有在建立新文件时才会生效, 此外真正建文件时的权限会受到umask 值所影响, 因此该文件权限应该为 (mode-umaks).
+   参数 mode 则有下列数种组合, 只有在建立新文件时才会生效, 此外真正建文件时的权限会受到umask 值所影响, 因此该文件权限应该为 (mode-umaks).
    S_IRWXU00700 权限, 代表该文件所有者具有可读、可写及可执行的权限.
    S_IRUSR 或S_IREAD, 00400 权限, 代表该文件所有者具有可读取的权限.
    S_IWUSR 或S_IWRITE, 00200 权限, 代表该文件所有者具有可写入的权限.
@@ -42,6 +44,7 @@
    S_IROTH 00004 权限, 代表其他用户具有可读的权限
    S_IWOTH 00002 权限, 代表其他用户具有可写入的权限.
    S_IXOTH 00001 权限, 代表其他用户具有可执行的权限.
+   注: 此处 mode 与 int chmod(const char *path, mode_t mode); 中的 mode 完全一样
 
    返回值：若所有欲核查的权限都通过了检查则返回0 值, 表示成功, 只要有一个权限被禁止则返回-1.
 
@@ -58,22 +61,7 @@
    EIO I/O 存取错误.
 
    附加说明：使用 access()作用户认证方面的判断要特别小心, 例如在access()后再作open()空文件可能会造成系统安全上的问题.
- * */
-
-/*
-   头文件：#include <unistd.h>
-
-   定义函数：ssize_t write (int fd, const void * buf, size_t count);
-
-   函数说明：write()会把参数buf 所指的内存写入count 个字节到参数fd 所指的文件内. 当然, 文件读写位置也会随之移动.
-
-   返回值：如果顺利write()会返回实际写入的字节数. 当有错误发生时则返回-1, 错误代码存入errno 中.
-
-   错误代码：
-   EINTR 此调用被信号所中断.
-   EAGAIN 当使用不可阻断I/O 时 (O_NONBLOCK), 若无数据可读取则返回此值.
-   EADF 参数fd 非有效的文件描述词, 或该文件已关闭.
- * */
+ **/
 
 /*
   头文件：#include <unistd.h>
@@ -91,29 +79,75 @@
   EINTR 此调用被信号所中断.
   EAGAIN 当使用不可阻断I/O 时(O_NONBLOCK), 若无数据可读取则返回此值.
   EBADF 参数fd 非有效的文件描述词, 或该文件已关闭.
- * */
+ **/
+
+/*
+   头文件：#include <unistd.h>
+
+   定义函数：ssize_t write (int fd, const void * buf, size_t count);
+
+   函数说明：write()会把参数buf 所指的内存写入count 个字节到参数fd 所指的文件内. 文件读写位置也会随之移动.
+
+   返回值：如果顺利write()会返回实际写入的字节数. 当有错误发生时则返回-1, 错误代码存入errno 中.
+
+   错误代码：
+   EINTR 此调用被信号所中断.
+   EAGAIN 当使用不可阻断I/O 时 (O_NONBLOCK), 若无数据可读取则返回此值.
+   EADF 参数fd 非有效的文件描述词, 或该文件已关闭.
+ **/
+
+const char *file_path = "./temp";
+
+void test_write()
+{
+  char buff[0x100] = {0};
+
+  int fd = open(file_path, O_WRONLY | O_CREAT);
+  if (fd == -1)
+  {
+    fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+    return;
+  }
+
+  char *test_str = "This is a test string.";
+  unsigned long len = write(fd, test_str, strlen(test_str));
+  if (len == -1)
+  {
+    fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+    return;
+  }
+  close(fd);
+}
+
+void test_read()
+{
+  char buff[0x100] = {0};
+
+  int fd = open(file_path, O_RDONLY);
+  if (fd == -1)
+  {
+    fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+    return;
+  }
+
+  unsigned long len = read(fd, buff, sizeof(buff));
+  if (len == -1)
+  {
+    fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+  }
+  close(fd);
+
+  for (unsigned long i = 0; i < strlen(buff); i++)
+  {
+    printf("%c", buff[i]);
+  }
+  puts("");
+}
 
 int main(int argc, char *argv[])
 {
-  char s[] = "Linux Programmer!\n", buffer[0x100];
-  int fd = open("/tmp/temp", O_WRONLY | O_CREAT);
-  if (fd == -1)
-  {
-    perror("open file fail");
-  }
-  long size_w = write(fd, s, sizeof(s));
-  if (size_w == -1)
-  {
-    perror("write fail!");
-  }
-  close(fd);
-  fd = open("/tmp/temp", O_RDONLY);
-  long size_r = read(fd, buffer, sizeof(buffer));
-  if (size_r == -1)
-  {
-    perror("read file fail");
-  }
-  close(fd);
-  printf("%s", buffer);
+  test_write();
+  puts("==========================");
+  test_read();
   return 0;
 }

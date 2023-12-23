@@ -1,23 +1,22 @@
 #include <stdio.h>
-#include <errno.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
 /*
-header file:
-#include <sys/stat.h>
+header: #include <sys/stat.h>
 
-function:
-int stat(const char *file_name, struct stat *buf);
+function: int stat(const char *file_name, struct stat *buf);
 
-Description:
- 通过文件名filename获取文件信息，并保存在buf所指的结构体stat中
+Description: 通过文件名filename获取文件信息，并保存在buf所指的结构体stat中
 
 params:
  file_name : file path
  buf       : struct stat cache
 
-retrun value:
+retrun:
  执行成功则返回0，失败返回-1，错误代码存于errno
     ENOENT         参数file_name指定的文件不存在
     ENOTDIR        路径中的目录存在但却非真正的目录
@@ -27,7 +26,6 @@ retrun value:
     ENOMEM         核心内存不足
     ENAMETOOLONG   参数file_name的路径名称太长
 
-struct stat in  Linux.
 struct stat {
     dev_t         st_dev;       //文件的设备编号
     ino_t         st_ino;       //节点
@@ -44,14 +42,20 @@ struct stat {
     time_t        st_ctime;     //最后一次改变时间(指属性)
 };
 **/
+
+const char *path = "/tmp/test.ipa";
+
 int main()
 {
     struct stat buf;
-    int ret = stat("/etc/hosts", &buf);
-    if(ret != 0) {
+    int status = stat(path, &buf);
+    if (status != 0)
+    {
         fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
         return -1;
     }
-    printf("/etc/hosts file size = %lld\n", buf.st_size);
+    printf("%s file size = %lld\n", path, buf.st_size);
+    printf("st_mode:0x%x\n", buf.st_mode);
+
     return 0;
 }

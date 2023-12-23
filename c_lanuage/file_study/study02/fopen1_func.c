@@ -4,7 +4,9 @@
 #include <stdlib.h>
 
 /*
-FILE *fopen(const char * filename, const char * mode);
+header: #include <stdio.h>
+
+function: FILE *fopen(const char * filename, const char * mode);
 Description: 打开文件生成文件指针fp, fp 会记录当前I/O的位置,可以对大文件分段读取
 
 params:
@@ -47,9 +49,11 @@ Description:
 从文件中读取字符串，但是在遇到第一个空格和换行符时，它会停止读取
 **/
 
+const char *file_path = "/tmp/test.txt";
+
 void test1()
 {
-   FILE *fp = fopen("/tmp/test.txt", "a+");
+   FILE *fp = fopen(file_path, "w+");
    if (fp == NULL)
    {
       fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -57,16 +61,25 @@ void test1()
    }
    fprintf(fp, "This is testing for fprintf...\n");
    fputs("This is testing for fputs...\n", fp);
+   fputs("This is testing for fputs...\n", fp);
+   fputs("This is testing for fputs...\n", fp);
+   fputs("This is testing for fputs...\n", fp);
+   fputs("This is testing for fputs...\n", fp);
+   fputs("This is testing for fputs...\n", fp);
+   fputs("This is testing for fputs...\n", fp);
+   fputs("This is testing for fputs...\n", fp);
+   fputs("This is testing for fputs...\n", fp);
+   fputs("This is testing for fputs...\n", fp);
+   fputs("This is testing for fputs...\n", fp);
 
    fclose(fp);
 }
 
 void test2()
 {
-   const unsigned int len = 0x400;
-   char buff[len] = {0};
+   char buff[BUFSIZ] = {0};
 
-   FILE *fp = fopen("/tmp/test.txt", "r");
+   FILE *fp = fopen(file_path, "r");
    if (fp == NULL)
    {
       fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -74,14 +87,17 @@ void test2()
    }
 
    fscanf(fp, "%s", buff);
-   printf("1: %s\n", buff);
+   printf("%s:%d %s\n", __FILE__, __LINE__, buff);
 
-   fgets(buff, len, fp);
-   printf("2: %s\n", buff);
+   fgets(buff, 0x10, fp);
+   printf("%s:%d %s\n", __FILE__, __LINE__, buff);
 
-   fgets(buff, len, fp);
-   printf("3: %s\n", buff);
-
+   // 按行依次读取文件所有内容
+   while (fgets(buff, BUFSIZ, fp) != NULL)
+   {
+      printf("%s:%d %s", __FILE__, __LINE__, buff);
+   }
+   puts("");
    fclose(fp);
 }
 

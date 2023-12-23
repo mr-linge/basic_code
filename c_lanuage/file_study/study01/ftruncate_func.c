@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -22,13 +24,18 @@ int main()
     int fd = open(path, O_CREAT | O_RDWR, 0666);
     if (fd == -1)
     {
-        perror("open file fail");
+        fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+        return -1;
     }
-    int ret = ftruncate(fd, 0);
-    if (ret == -1)
+
+    int status = ftruncate(fd, 0);
+    if (status == -1)
     {
-        perror("oftruncate");
+        fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+        return -1;
     }
+
     close(fd);
+
     return 0;
 }
