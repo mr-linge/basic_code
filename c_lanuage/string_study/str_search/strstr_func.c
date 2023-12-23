@@ -27,7 +27,7 @@ int main()
 		return -1;
 	}
 
-	printf("子字符串是： %s, 	addr : %p\n", ret, ret);
+	printf("子字符串是: %s, 	  addr: %p\n", ret, ret);
 
 	return(0);
 }

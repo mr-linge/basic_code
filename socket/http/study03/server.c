@@ -43,30 +43,35 @@ void send_http_header(int sock_client, unsigned long http_body_length)
 void send_http_body(int sock_client)
 {
 	char buff[BUFSIZ] = {0};
-	unsigned long size_count = 0;
-
-	FILE *fp = fopen(file_path, "rb+");
-	if (fp == NULL)
+	int fd = open(file_path, O_RDONLY);
+	if (fd == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
 
-	// 循环将文件 fp 中的内容读取到 buff 中
-	while ((size_count = fread(buff, sizeof(char), BUFSIZ, fp)) != 0)
+	unsigned long len = 0;
+	// 循环将文件 fd 中的内容读取到 buff 中
+	while ((len = read(fd, buff, BUFSIZ)) != 0)
 	{
-		if (send(sock_client, buff, size_count, 0) < 0)
+		if (len == -1) // I/O 错误
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+			break;
 		}
+		if (send(sock_client, buff, len, 0) == -1)
+		{
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+			exit(-1);
+		}
+		memset(buff, '\0', BUFSIZ);
 	}
 
-	fclose(fp);
+	close(fd);
 }
 
-void http_response(int sock_client, char *buff, unsigned long len)
+void http_response(int sock_client)
 {
-	printf("%s\n", buff);
 	struct stat buf;
 	int fd, ret;
 	fd = open(file_path, O_RDONLY);
@@ -83,9 +88,6 @@ void http_response(int sock_client, char *buff, unsigned long len)
 
 int main()
 {
-	char buff[BUFSIZ] = {0};
-	unsigned long len = 0;
-
 	// 定义 socket
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	// 定义 sockaddr_in
@@ -111,6 +113,8 @@ int main()
 	struct sockaddr_in claddr;
 	socklen_t length = sizeof(claddr);
 
+	char buff[BUFSIZ] = {0};
+	unsigned long i, len = 0;
 	int sock_client = 0;
 	while (1)
 	{
@@ -121,16 +125,26 @@ int main()
 			break;
 		}
 		memset(buff, '\0', BUFSIZ);
-		len = recv(sock_client, buff, BUFSIZ, 0);
-		// printf("recv len:%d\n", len);
-		if (len < 0 || len > BUFSIZ)
+
+		while ((len = recv(sock_client, buff, BUFSIZ, 0)) > 0) // 接收 客户端 发送过来的数据,要确保数据接受完
 		{
-			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-			close(sock_client);
-			break;
+			if (len == -1)
+			{
+				fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+				break;
+			}
+			for (i = 0; i < len; i++)
+			{
+				printf("%c", buff[i]);
+			}
+			printf("\n");
+			if (len != BUFSIZ) // 当实际读取的字节数 不等于 指定读取的字节数时 意味着数据已经读完了
+			{
+				break;
+			}
 		}
 
-		http_response(sock_client, buff, len);
+		http_response(sock_client);
 		close(sock_client);
 	}
 

@@ -6,16 +6,17 @@
  * */
 int main()
 {
-	char str[] = "mv a.c b.c";
-	char *p;
-	char *buff;
-	buff = str;
-	p = strsep(&buff, " ");
-	printf("buff:%s\n", buff);
-	while (p != NULL)
+	char p0[] = "mv a.c b.c";
+	char *p1 = p0;
+	char *p2 = strsep(&p1, " ");
+	printf("p0:%s\n", p0);
+	printf("p1:%s\n", p1);
+	printf("p2:%s\n", p2);
+
+	while (p2 != NULL)
 	{
-		printf("%s\n", p);
-		p = strsep(&buff, " ");
+		p2 = strsep(&p1, " ");
+		printf("p2:%s\n", p2);
 	}
 	return 0;
 }

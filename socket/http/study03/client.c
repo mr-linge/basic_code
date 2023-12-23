@@ -6,14 +6,18 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/shm.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #define PORT 9000
 #define SERVER_IP "127.0.0.1"
 
-char *method_type = "POST /user HTTP/1.1";
-char *client = "Android 8.1";
-char *token = "0eefffb6-32af-4fed-833c-866af540akdn";
-char *host = "jobs8.cn";
+const char *method_type = "POST /user HTTP/1.1";
+const char *client = "Android 8.1";
+const char *token = "0eefffb6-32af-4fed-833c-866af540akdn";
+const char *host = "jobs8.cn";
+const char *content_type = "application/json";
 
 const char *file_path = "./test.ipa";
 
@@ -23,11 +27,11 @@ void send_http_header(int sock_client, unsigned long http_body_length)
 
 	sprintf(http_header, "%s\r\n", method_type);
 	sprintf(http_header, "%sUser-Agent: %s\r\n", http_header, client);
-	sprintf(http_header, "%sAccept: */*\r\n", http_header);
+	strcat(http_header, "Accept: */*\r\n");
 	sprintf(http_header, "%sToken: %s\r\n", http_header, token);
 	sprintf(http_header, "%sHost: %s\r\n", http_header, host);
-	sprintf(http_header, "%sAccept-Encoding: gzip, deflate, br\r\n", http_header);
-	sprintf(http_header, "%sConnection: keep-alive\r\n", http_header);
+	strcat(http_header, "Accept-Encoding: gzip, deflate, br\r\n");
+	strcat(http_header, "Connection: keep-alive\r\n");
 	if (http_body_length > 0)
 	{
 		sprintf(http_header, "%sContent-Length: %lu\r\n", http_header, http_body_length);
@@ -60,66 +64,65 @@ void http_request(int sock_client)
 void handle_response(int sockfd)
 {
 	char buff[BUFSIZ] = {0};
-
-	unsigned long len = 0;
-	unsigned long body_length = 0;
-	len = recv(sockfd, buff, BUFSIZ, 0); // 读取时遇到 \r\n(空行)就完成一次读入。读取 http 协议数据, 第一次读取到的是 header
-	printf("%s", buff);
-	if (len > 0 && len <= BUFSIZ)
-	{
-		char *p = strstr(buff, "Content-Length:");
-		if (p == NULL)
-		{
-			printf("http response body is empty.\n");
-			return;
-		}
-		p += strlen("Content-Length:");
-		body_length = strtoul(p, NULL, 10);
-		printf("body_length:%lu\n", body_length);
-		if (body_length == 0)
-		{
-			printf("http response body is empty.\n");
-			return;
-		}
-	}
-	else
+	unsigned long i, len, write_len = 0;
+	len = recv(sockfd, buff, BUFSIZ, 0); // 接收的第一波数据,包含 http header 和 http body, 需要识别并分离第一波数据
+	if (len == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		return;
 	}
+	char *body = strstr(buff, "\r\n\r\n"); // http header 和 http body 以 \r\n\r\n 作为分割
+	if (body == NULL)
+	{
+		puts("http body not find");
+		return;
+	}
+	body += strlen("\r\n\r\n");
 
-	FILE *fp = fopen(file_path, "ab+");
-	if (fp == NULL)
+	char header[BUFSIZ] = {0};
+	memcpy(header, buff, (unsigned long)(body - buff));
+	for (i = 0; i < strlen(header); i++)
+	{
+		printf("%c", buff[i]);
+	}
+
+	// 准备把接收的数据写到本地文件里
+	int fd = open(file_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	if (fd == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
-	unsigned long size_count = 0; // 写入文件时每次写入的 size count
-	while (body_length > 0)
+
+	write_len = write(fd, body, len - strlen(header));
+	if (write_len == -1)
 	{
-		memset(buff, '\0', BUFSIZ);
-		len = recv(sockfd, buff, BUFSIZ, 0);
-		if (len > 0 && len <= BUFSIZ)
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
+	}
+
+	memset(buff, '\0', BUFSIZ);
+	// 如果 client 发送的数据不止一波,下面就是循环接受完以后所有的数据
+	while ((len = recv(sockfd, buff, BUFSIZ, 0)) > 0) // 接收 客户端 发送过来的数据,要确保数据接受完
+	{
+		if (len == -1)
 		{
-			size_count = fwrite(buff, sizeof(char), len, fp); // 将读取的文件写入到另一个地方 ./test.ipa
-			if (size_count != len && ferror(fp))
-			{
-				printf("写入文件:%s 时发生错误\n", file_path);
-				break;
-			}
-			clearerr(fp);
-			printf("%s:%d body_length:%lu len:%lu\n", __FILE__, __LINE__, body_length, len);
-			body_length -= len;
-		}
-		else
-		{
-			printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			break;
 		}
+		write_len = write(fd, buff, len);
+		if (write_len == -1)
+		{
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+			exit(-1);
+		}
+		memset(buff, '\0', BUFSIZ);
+		if (len != BUFSIZ) // 当实际读取的字节数 不等于 指定读取的字节数时 意味着数据已经读完了
+		{
+			break;
+		}
 	}
-	printf("%s:%d body_length:%lu\n", __FILE__, __LINE__, body_length);
-	fclose(fp);
+	close(fd);
 }
 
 int main(int argc, char *argv[])
