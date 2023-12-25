@@ -40,7 +40,7 @@ clearerr(fp);
 const char *source_path = "/tmp/test.ipa";
 const char *target_path = "./test.ipa";
 
-#define ELEMENT_COUNT 0x200
+#define ELEMENT_COUNT 0x400
 #define ELEMENT_SIZE 0x1
 
 int main()

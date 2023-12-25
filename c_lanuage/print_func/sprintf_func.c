@@ -1,28 +1,36 @@
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
 /*
-   sprintf() 函数在 C 语言中把一个整数转换成字符串
-   顾名思义，它用于将任何值打印成字符串。这个函数提供了一个将整数转换成字符串的简单方法。它的工作原理与 printf() 函数相同，但它并不直接在控制台打印一个值，而是返回一个格式化的字符串。返回值通常会被丢弃，但如果在操作过程中出现错误，它会返回 -1。
+Header:       #include <stdio.h>
+Function:     int sprintf(char *str, const char *format, [arg1, arg2, ... ]);
+Description:  按照 format 生成字符串, copy 到 str 指向的内存中
+params:
+   str          字符串指针
+   format       字符串的格式化模型
+   arg1, arg2   所需拼接的参数
 
-   sprintf() 语法
-   int sprintf(char *str, const char *format, [arg1, arg2, ... ]);
-   str 是一个指向 char 数据类型的指针。
-   format 是用来显示输出类型和占位符。
-   arg1, arg2 是要转换为字符串的整数。
+return:
+   如果成功,返回值为 format 格式化字符串的长度,失败返回-1
+ **/
 
-   返回值:
-   返回拼接后的字符长度
- * */
-int main(void) {
-	int number;
-	char text[0x400]; 
+int main()
+{
+  int retVal, arg1;
+  char *arg2 = NULL;
+  char text[0x100] = {0};
 
-	printf("Enter a number: ");
-	scanf("%d", &number);
+  arg1 = 0x10;
+  arg2 = "Success";
+  retVal = sprintf(text, "This is arg1:%d, arg2:%s,over.", arg1, arg2);
+  if (retVal == -1)
+  {
+    fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+    return -1;
+  }
+  printf("retVal = %d\n", retVal);
+  printf("text:%s\nlength = %lu\n", text, strlen(text));
 
-	int ret = sprintf(text, "This string is %d,over.", number);   
-	printf("ret = %d\n",ret);
-	printf("\nYou have entered: %s\n", text);
-
-	return 0;
+  return 0;
 }

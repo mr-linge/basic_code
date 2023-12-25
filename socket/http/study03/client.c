@@ -17,7 +17,7 @@ const char *method_type = "POST /user HTTP/1.1";
 const char *client = "Android 8.1";
 const char *token = "0eefffb6-32af-4fed-833c-866af540akdn";
 const char *host = "jobs8.cn";
-const char *content_type = "application/json";
+const char *content_type = "application/octet-stream";
 
 const char *file_path = "./test.ipa";
 
@@ -36,7 +36,7 @@ void send_http_header(int sock_client, unsigned long http_body_length)
 	{
 		sprintf(http_header, "%sContent-Length: %lu\r\n", http_header, http_body_length);
 	}
-	sprintf(http_header, "%sContent-Type: %s\r\n", http_header, "application/octet-stream");
+	sprintf(http_header, "%sContent-Type: %s\r\n", http_header, content_type);
 	strcat(http_header, "\r\n"); // \r\n 空行后是 body 数据
 
 	if (send(sock_client, http_header, strlen(http_header), 0) == -1)
