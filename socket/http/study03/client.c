@@ -38,7 +38,7 @@ void send_http_header(int sock_client, unsigned long http_body_length)
 	}
 	sprintf(http_header, "%sContent-Type: %s\r\n", http_header, content_type);
 	strcat(http_header, "\r\n"); // \r\n 空行后是 body 数据
-
+	// printf("%s:%d header len:%lu\n", __FILE__, __LINE__, strlen(http_header));
 	if (send(sock_client, http_header, strlen(http_header), 0) == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -47,7 +47,6 @@ void send_http_header(int sock_client, unsigned long http_body_length)
 
 void send_http_body(int sock_client, char *http_body, unsigned long len)
 {
-
 	if (send(sock_client, http_body, len, 0) == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -61,11 +60,13 @@ void http_request(int sock_client)
 	send_http_body(sock_client, http_body, strlen(http_body));
 }
 
-void handle_response(int sockfd)
+void parse_response(int sockfd)
 {
 	char buff[BUFSIZ] = {0};
 	unsigned long i, len, write_len = 0;
 	len = recv(sockfd, buff, BUFSIZ, 0); // 接收的第一波数据,包含 http header 和 http body, 需要识别并分离第一波数据
+	unsigned long content_length = 0;
+	// printf("%s:%d recv len:%lu\n", __FILE__, __LINE__, len);
 	if (len == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -81,6 +82,7 @@ void handle_response(int sockfd)
 
 	char header[BUFSIZ] = {0};
 	memcpy(header, buff, (unsigned long)(body - buff));
+	// printf("%s:%d header length:%lu\n", __FILE__, __LINE__, strlen(header));
 	for (i = 0; i < strlen(header); i++)
 	{
 		printf("%c", buff[i]);
@@ -102,13 +104,13 @@ void handle_response(int sockfd)
 	}
 
 	memset(buff, '\0', BUFSIZ);
-	// 如果 client 发送的数据不止一波,下面就是循环接受完以后所有的数据
-	while ((len = recv(sockfd, buff, BUFSIZ, 0)) > 0) // 接收 客户端 发送过来的数据,要确保数据接受完
+	// 循环接受完所有数据, recv 返回 0 时,server 关闭了连接, 此时数据发送完
+	while ((len = recv(sockfd, buff, BUFSIZ, 0)) != 0) // 接收 客户端 发送过来的数据,要确保数据接受完
 	{
 		if (len == -1)
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-			break;
+			exit(-1);
 		}
 		write_len = write(fd, buff, len);
 		if (write_len == -1)
@@ -117,10 +119,6 @@ void handle_response(int sockfd)
 			exit(-1);
 		}
 		memset(buff, '\0', BUFSIZ);
-		if (len != BUFSIZ) // 当实际读取的字节数 不等于 指定读取的字节数时 意味着数据已经读完了
-		{
-			break;
-		}
 	}
 	close(fd);
 }
@@ -142,8 +140,9 @@ int main(int argc, char *argv[])
 	// 向服务器发出请求
 	http_request(sockfd);
 	// 处理接收到的数据
-	handle_response(sockfd);
+	parse_response(sockfd);
 
 	close(sockfd);
+
 	return 0;
 }

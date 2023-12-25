@@ -61,19 +61,17 @@ int main(int argc, char *argv[])
 
 	char buff[BUFSIZ] = {0};
 	unsigned long len = recv(sockfd, buff, BUFSIZ, 0);
-	if (len > 0)
-	{
-		// printf("received data len:%02lu msg:", len);
-		for (unsigned long i = 0; i < len; i++)
-		{
-			printf("%c", buff[i]);
-		}
-		printf("\n");
-	}
-	else
+	if (len == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
 	}
+	// printf("received data len:%02lu msg:", len);
+	for (unsigned long i = 0; i < len; i++)
+	{
+		printf("%c", buff[i]);
+	}
+	printf("\n");
 
 	close(sockfd);
 	free(http_response);

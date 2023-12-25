@@ -86,6 +86,63 @@ void http_response(int sock_client)
 	send_http_body(sock_client);
 }
 
+// 解析获取到的 http 请求
+void parse_response(int sock_client)
+{
+	char buff[BUFSIZ] = {0};
+	unsigned long i, len, write_len = 0;
+	len = recv(sock_client, buff, BUFSIZ, 0); // 接收的第一波数据,包含 http header 和 http body, 需要识别并分离第一波数据
+	if (len == -1)
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
+	}
+	char *body = strstr(buff, "\r\n\r\n"); // http header 和 http body 以 \r\n\r\n 作为分割
+	if (body == NULL)
+	{
+		puts("http body not find");
+		return;
+	}
+	body += strlen("\r\n\r\n"); // body 开始的位置
+
+	char header[BUFSIZ] = {0};
+	memcpy(header, buff, (unsigned long)(body - buff)); // 获取到 http header
+	// printf("%s:%d header length:%lu\n", __FILE__, __LINE__, strlen(header));
+	for (i = 0; i < strlen(header); i++)
+	{
+		printf("%c", buff[i]);
+	}
+
+	// 获取 header 中的 Content-Length  的数据值
+	char *content = strstr(header, "Content-Length:");
+	content += strlen("Content-Length:");
+	unsigned long content_length = strtoul(content, NULL, 10);
+	if (content_length == 0)
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		return;
+	}
+
+	/*
+		recv 要保证接受完所有的数据,目前只有根本 header 中 Content-Length 来计算还未接收的数据
+	**/
+	unsigned long received_body_length = len - strlen(header);		  // 第一次 recv 已经接收到的 content 部分的长度
+	unsigned long remain_len = content_length - received_body_length; // content 还未接收的数据长度
+	printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
+	while (remain_len > 0)
+	{
+		len = recv(sock_client, buff, BUFSIZ, 0);
+		printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
+		for (i = 0; i < len; i++)
+		{
+			printf("%c", buff[i]);
+		}
+		printf("\n");
+
+		remain_len -= len;
+	}
+}
+
 int main()
 {
 	// 定义 socket
@@ -126,28 +183,11 @@ int main()
 		}
 		memset(buff, '\0', BUFSIZ);
 
-		while ((len = recv(sock_client, buff, BUFSIZ, 0)) > 0) // 接收 客户端 发送过来的数据,要确保数据接受完
-		{
-			if (len == -1)
-			{
-				fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-				break;
-			}
-			for (i = 0; i < len; i++)
-			{
-				printf("%c", buff[i]);
-			}
-			printf("\n");
-			if (len != BUFSIZ) // 当实际读取的字节数 不等于 指定读取的字节数时 意味着数据已经读完了
-			{
-				break;
-			}
-		}
+		parse_response(sock_client);
 
 		http_response(sock_client);
 		close(sock_client);
 	}
-
 	close(sockfd);
 
 	return 0;

@@ -42,7 +42,6 @@ void send_http_header(int sock_client, unsigned long http_body_length)
 
 void send_http_body(int sock_client, char *http_body, unsigned long len)
 {
-
 	if (send(sock_client, http_body, len, 0) < 0)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -74,20 +73,19 @@ int main(int argc, char *argv[])
 	http_request(sockfd);
 
 	char buff[BUFSIZ] = {0};
-	unsigned long len = recv(sockfd, buff, BUFSIZ, 0);
-	if (len > 0)
-	{
-		// printf("received data len:%02lu msg:", len);
-		for (unsigned long i = 0; i < len; i++)
-		{
-			printf("%c", buff[i]);
-		}
-		printf("\n");
-	}
-	else
+	unsigned long len = recv(sockfd, buff, BUFSIZ, 0); // 目前接收一次数据就能获取到所有client发送的数据
+	if (len == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
 	}
+
+	// printf("received data len:%02lu msg:", len);
+	for (unsigned long i = 0; i < len; i++)
+	{
+		printf("%c", buff[i]);
+	}
+	printf("\n");
 
 	close(sockfd);
 	return 0;

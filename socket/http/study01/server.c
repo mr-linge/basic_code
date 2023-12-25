@@ -104,12 +104,10 @@ int main()
 		}
 		memset(buff, '\0', sizeof(buff));
 		len = recv(sock_client, buff, sizeof(buff), 0);
-		// printf("recv len:%d\n", len);
-		if (len < 0)
+		if (len == -1)
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-			close(sock_client);
-			break;
+			exit(-1);
 		}
 
 		http_response(sock_client, buff, len);

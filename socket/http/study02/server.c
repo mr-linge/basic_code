@@ -85,27 +85,21 @@ int main()
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			close(sock_client);
-			break;
+			exit(-1);
 		}
 		memset(buff, '\0', BUFSIZ);
 
-		while ((len = recv(sock_client, buff, BUFSIZ, 0)) > 0) // 接收 客户端 发送过来的数据,要确保数据接受完
+		len = recv(sock_client, buff, BUFSIZ, 0); // 接收 客户端 发送过来的数据,目前只接收一次数据(这个缺陷 在 study03 里完善了)
+		if (len == -1)
 		{
-			if (len == -1)
-			{
-				fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-				break;
-			}
-			for (i = 0; i < len; i++)
-			{
-				printf("%c", buff[i]);
-			}
-			printf("\n");
-			if (len != BUFSIZ) // 当实际读取的字节数 不等于 指定读取的字节数时 意味着数据已经读完了
-			{
-				break;
-			}
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+			exit(-1);
 		}
+		for (i = 0; i < len; i++)
+		{
+			printf("%c", buff[i]);
+		}
+		printf("\n");
 
 		http_response(sock_client);
 		close(sock_client);
