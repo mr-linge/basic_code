@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+
 /*
    头文件：#include <string.h>
 
@@ -13,12 +14,11 @@
    注意：dest 与 src 所指的内存空间不能重叠，且 dest 要有足够的空间来容纳要复制的字符串。
 
    【返回值】返回dest 字符串起始地址。
- * */
+**/
 
 int main()
 {
-	char str[0x100];
-	memset(str, '\0', sizeof(str));
+	char str[0x100] = {0};
 	strcpy(str, "these ");
 	strcat(str, "strings ");
 	strcat(str, "are ");

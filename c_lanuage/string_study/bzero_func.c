@@ -3,26 +3,23 @@
 #include <stdlib.h>
 
 /*
-   头文件：#include <string.h>
+Header:       #include <string.h>
+Function:     void bzero(void *s, int n);
+Description:  将内存块的前n个字节清零,等价于 memset((void*)s, 0, size_t n)
 
-   bzero() 会将内存块（字符串）的前n个字节清零，其原型为：
-   void bzero(void *s, int n);
+params:
+s为指针,n 为需要清零的字节数
 
-   [参数]s为内存（字符串）指针，n 为需要清零的字节数。
-
-   bzero()会将参数s 所指的内存区域前n 个字节，全部设为零值。
-
-   实际上，bzero(void *s, int n) 等价于 memset((void*)s, 0,size_tn)，用来将内存块的前 n 个字节清零，但是 s 参数为指针，又很奇怪的位于 string.h 文件中，也可以用来清零字符串。
-
-   注意：bzero() 不是标准函数，没有在ANSI中定义，在VC6.0和MinGW5下编译没通过； gcc 和 clang 是支持的
+注意:
+bzero() 不是标准函数,没有在ANSI中定义,在VC6.0和MinGW5下编译没通过; gcc 和 clang 是支持的
  */
 
 int main()
 {
-  int len = 0x100;
+  unsigned long len = 0x100;
   char *s = (char *)malloc(len);
 
-  bzero(s, len); // struct initialization to zero
+  bzero(s, len);
 
   char *str = "Hello, will be success!";
   memcpy(s, str, strlen(str));

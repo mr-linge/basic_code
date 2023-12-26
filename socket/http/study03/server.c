@@ -127,7 +127,7 @@ void receive_data(int sock_client)
 	}
 
 	/*
-		recv 要保证接受完所有的数据,目前只有根本 header 中 Content-Length 来计算还未接收的数据
+		recv 要保证接受完所有的数据,目前只有根据 header 中 Content-Length 来计算还未接收的数据
 	**/
 	unsigned long received_body_length = len - strlen(header); // 第一次 recv 已经接收到的 content 部分的长度
 	for (i = 0; i < received_body_length; i++)
@@ -149,7 +149,6 @@ void receive_data(int sock_client)
 		{
 			printf("%c", buff[i]);
 		}
-		printf("\n");
 
 		remain_len -= len;
 		// printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);

@@ -3,10 +3,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-void main() {
-	uint8_t * text = (uint8_t *) calloc(16,1);
+int main()
+{
+	char *text = (char *)calloc(16, 1);
 	strcpy(text, "0123456789");
 	printf("text: %s\n", text);
-	char *filling = strrchr(text,'\0');
+	char *filling = strrchr(text, '\0');
 	printf("filling : %s\n", filling);
+
+	return 0;
 }

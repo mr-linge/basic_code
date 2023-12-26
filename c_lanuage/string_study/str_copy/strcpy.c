@@ -17,15 +17,16 @@
    返回值
    该函数返回一个指向最终的目标字符串 dest 的指针。
  * */
-int main() {
-	char src[40];
-	char dest[100];
 
-	memset(dest, '\0', sizeof(dest));
-	strcpy(src, "This is runoob.com");
-	strcpy(dest, src);
+int main()
+{
+  char src[40] = {0};
+  char dest[100] = {0};
 
-	printf("最终的目标字符串： %s\n", dest);
+  strcpy(src, "This is runoob.com");
+  strcpy(dest, src);
 
-	return(0);
+  printf("最终的目标字符串： %s\n", dest);
+
+  return (0);
 }

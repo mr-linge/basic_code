@@ -18,17 +18,18 @@
  * */
 
 // 生成解密目录
-void decrypt_directory(char *a2) {
-	char new_path[512];// 这样定义数组后接下来最好初始化一下，不然以后使用时可能会有些脏数据
-	memset(new_path,'\0',sizeof(new_path));
-	strncpy(new_path,a2,strlen(a2)-5);
-	printf("func \n%s====\n",new_path);
-	printf("func new_path length : %lu\n",sizeof(new_path));
-	printf("func new_path length : %lu\n",strlen(new_path));
+void decrypt_directory(char *a2)
+{
+  char new_path[512] = {0};
+  strncpy(new_path, a2, strlen(a2) - 5);
+  printf("func \n%s====\n", new_path);
+  printf("func new_path length : %lu\n", sizeof(new_path));
+  printf("func new_path length : %lu\n", strlen(new_path));
 }
 
-int main(int argc,char *argv[]) {
-	char a2[] = "./test/name1.txt.temp";
-	decrypt_directory(a2);
-	return 0;
+int main(int argc, char *argv[])
+{
+  char a2[] = "./test/name1.txt.temp";
+  decrypt_directory(a2);
+  return 0;
 }

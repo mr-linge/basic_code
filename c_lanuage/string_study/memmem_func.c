@@ -1,27 +1,23 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
 
 /*
-    Header:
-    #include <string.h>
-    
-    Function:
-    void *memmem(const void *haystack, size_t haystacklen, const void *needle, size_t needlelen);
+Header:         #include <string.h>
+Function:       void *memmem(const void *haystack, size_t haystacklen, const void *needle, size_t needlelen);
+Description:    在一块内存中寻找匹配另一块内存的内容的第一个位置
 
-    Description:
-    在一块内存中寻找匹配另一块内存的内容的第一个位置
-
-    param:
+param:
     haystack        待查找内存起始地址
     haystacklen     待查找内存大小
     needle          需匹配内存起始地址
     needlelen       需匹配内存大小
 
-    return value:
-    返回该位置的指针，如找不到，返回空指针
+return:
+    返回该位置的指针,如找不到返回空指针
 **/
+
 int main()
 {
     unsigned long buflen = 52;
