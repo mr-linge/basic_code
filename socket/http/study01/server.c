@@ -12,7 +12,7 @@ int listen_max = 20; // 最大并发数量
 
 const char *content_type = "application/json";
 
-void insert_http_header(char *http_response, char *body)
+void insert_http_header(char *response_data, char *body)
 {
 	char header[BUFSIZ] = {0};
 
@@ -24,23 +24,21 @@ void insert_http_header(char *http_response, char *body)
 	sprintf(header, "%sContent-Type: %s\r\n", header, content_type);
 	strcat(header, "\r\n"); // \r\n 换行后是 body
 
-	sprintf(http_response, "%s%s", header, body);
+	sprintf(response_data, "%s%s", header, body);
 }
 
 void send_data(int sock_client)
 {
 	char *http_body = "{\"code\":200,\"msg\":\"success\",\"data\":\"you will be success!\"}";
-	char *http_response = (char *)malloc(BUFSIZ);
-	memset(http_response, '\0', BUFSIZ);
-	insert_http_header(http_response, http_body);
-	if (send(sock_client, http_response, strlen(http_response), 0) < 0)
+	char response_data[BUFSIZ] = {0};
+	insert_http_header(response_data, http_body);
+	if (send(sock_client, response_data, strlen(response_data), 0) < 0)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}
-	free(http_response);
 }
 
-void received_data(int sock_client)
+void receive_data(int sock_client)
 {
 	char buff[BUFSIZ] = {0};
 	unsigned long i, len;
@@ -95,7 +93,7 @@ int main()
 		}
 
 		// 接收数据
-		received_data(sock_client);
+		receive_data(sock_client);
 		// 发送数据
 		send_data(sock_client);
 
