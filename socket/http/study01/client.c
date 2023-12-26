@@ -16,7 +16,7 @@ const char *token = "0eefffb6-32af-4fed-833c-866af540akdn";
 const char *host = "jobs8.cn";
 const char *content_type = "application/json";
 
-void insert_http_header(char *http_response, char *body)
+void insert_http_header(char *http_request, char *body)
 {
 	char header[BUFSIZ] = {0};
 
@@ -32,7 +32,38 @@ void insert_http_header(char *http_response, char *body)
 
 	strcat(header, "\r\n"); // http header 和 body 以空行为分隔 \r\n 换行后是 body
 
-	sprintf(http_response, "%s%s", header, body);
+	sprintf(http_request, "%s%s", header, body);
+}
+
+void send_data(int sockfd)
+{
+	char *http_body = "{\"key\":\"123456\",\"name\":\"Dio\",\"address\":\"BJ\"}";
+	char *http_request = (char *)malloc(BUFSIZ);
+	memset(http_request, '\0', BUFSIZ);
+	insert_http_header(http_request, http_body);
+	if (send(sockfd, http_request, strlen(http_request), 0) < 0) // 发送 http 请求,数据量少一次即可发送完
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
+	}
+	free(http_request);
+}
+
+void received_data(int sockfd)
+{
+	char buff[BUFSIZ] = {0};
+	unsigned long len = recv(sockfd, buff, BUFSIZ, 0); // 接收响应数据,数据量少一次即可接收完
+	if (len == -1)
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
+	}
+	// printf("received data len:%02lu msg:", len);
+	for (unsigned long i = 0; i < len; i++)
+	{
+		printf("%c", buff[i]);
+	}
+	puts("");
 }
 
 int main(int argc, char *argv[])
@@ -49,31 +80,11 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	char *http_body = "{\"key\":\"123456\",\"name\":\"Dio\",\"address\":\"BJ\"}";
-	char *http_response = (char *)malloc(BUFSIZ);
-	memset(http_response, '\0', BUFSIZ);
-	insert_http_header(http_response, http_body);
-	if (send(sockfd, http_response, strlen(http_response), 0) < 0)
-	{
-		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-		return -1;
-	}
-
-	char buff[BUFSIZ] = {0};
-	unsigned long len = recv(sockfd, buff, BUFSIZ, 0);
-	if (len == -1)
-	{
-		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-		exit(-1);
-	}
-	// printf("received data len:%02lu msg:", len);
-	for (unsigned long i = 0; i < len; i++)
-	{
-		printf("%c", buff[i]);
-	}
-	printf("\n");
+	// 发送数据
+	send_data(sockfd);
+	// 接收数据
+	received_data(sockfd);
 
 	close(sockfd);
-	free(http_response);
 	return 0;
 }

@@ -15,7 +15,7 @@ int listen_max = 10; // 最大并发数量
 const char *file_path = "/tmp/test.ipa";
 const char *file_name = "test.ipa";
 
-const char *content_type = "application/json";
+const char *content_type = "application/octet-stream";
 
 void send_http_header(int sock_client, unsigned long http_body_length)
 {
@@ -64,7 +64,6 @@ void send_http_body(int sock_client)
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(-1);
 		}
-		memset(buff, '\0', BUFSIZ);
 	}
 
 	close(fd);
@@ -73,12 +72,11 @@ void send_http_body(int sock_client)
 void http_response(int sock_client)
 {
 	struct stat buf;
-	int fd, ret;
-	fd = open(file_path, O_RDONLY);
-	ret = fstat(fd, &buf);
-	if (ret != 0)
+	int status = stat(file_path, &buf);
+	if (status == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
 	}
 	printf("%s file size : %llu\n", file_path, buf.st_size);
 
@@ -90,7 +88,7 @@ void http_response(int sock_client)
 void parse_response(int sock_client)
 {
 	char buff[BUFSIZ] = {0};
-	unsigned long i, len, write_len = 0;
+	unsigned long i, len = 0;
 	len = recv(sock_client, buff, BUFSIZ, 0); // 接收的第一波数据,包含 http header 和 http body, 需要识别并分离第一波数据
 	if (len == -1)
 	{
@@ -128,11 +126,16 @@ void parse_response(int sock_client)
 	**/
 	unsigned long received_body_length = len - strlen(header);		  // 第一次 recv 已经接收到的 content 部分的长度
 	unsigned long remain_len = content_length - received_body_length; // content 还未接收的数据长度
-	printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
+	// printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
 	while (remain_len > 0)
 	{
 		len = recv(sock_client, buff, BUFSIZ, 0);
-		printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
+		if (len == -1)
+		{
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+			exit(-1);
+		}
+		// printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
 		for (i = 0; i < len; i++)
 		{
 			printf("%c", buff[i]);
@@ -170,8 +173,6 @@ int main()
 	struct sockaddr_in claddr;
 	socklen_t length = sizeof(claddr);
 
-	char buff[BUFSIZ] = {0};
-	unsigned long i, len = 0;
 	int sock_client = 0;
 	while (1)
 	{
@@ -181,11 +182,13 @@ int main()
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			break;
 		}
-		memset(buff, '\0', BUFSIZ);
 
+		// 解析传送过来的 http 数据
 		parse_response(sock_client);
 
+		// 响应 http 请求,回传 http 数据
 		http_response(sock_client);
+
 		close(sock_client);
 	}
 	close(sockfd);

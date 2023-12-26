@@ -6,61 +6,94 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/shm.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #define PORT 9000
 #define SERVER_IP "127.0.0.1"
 
-char *method_type = "POST /user HTTP/1.1";
-char *client = "Android 8.1";
-char *token = "0eefffb6-32af-4fed-833c-866af540akdn";
-char *host = "jobs8.cn";
+const char *method_type = "POST /upload HTTP/1.1";
+const char *client = "Android 8.1";
+const char *token = "0eefffb6-32af-4fed-833c-866af540akdn";
+const char *host = "jobs8.cn";
+const char *content_type = "application/octet-stream";
+
+const char *file_path = "/tmp/test.ipa";
 
 void send_http_header(int sock_client, unsigned long http_body_length)
 {
-	char *http_header = (char *)malloc(BUFSIZ);
-	memset(http_header, '\0', BUFSIZ);
+	char http_header[BUFSIZ] = {0};
 
 	sprintf(http_header, "%s\r\n", method_type);
 	sprintf(http_header, "%sUser-Agent: %s\r\n", http_header, client);
-	sprintf(http_header, "%sAccept: */*\r\n", http_header);
+	strcat(http_header, "Accept: */*\r\n");
 	sprintf(http_header, "%sToken: %s\r\n", http_header, token);
 	sprintf(http_header, "%sHost: %s\r\n", http_header, host);
-	sprintf(http_header, "%sAccept-Encoding: gzip, deflate, br\r\n", http_header);
-	sprintf(http_header, "%sConnection: keep-alive\r\n", http_header);
+	strcat(http_header, "Accept-Encoding: gzip, deflate, br\r\n");
+	strcat(http_header, "Connection: keep-alive\r\n");
 	if (http_body_length > 0)
 	{
 		sprintf(http_header, "%sContent-Length: %lu\r\n", http_header, http_body_length);
 	}
-	sprintf(http_header, "%sContent-Type: %s\r\n\r\n", http_header, "application/json"); // http header 和 body 以空行为分隔 \r\n 换行后是 body
-
-	if (send(sock_client, http_header, strlen(http_header), 0) < 0)
+	sprintf(http_header, "%sContent-Type: %s\r\n", http_header, content_type);
+	strcat(http_header, "\r\n"); // \r\n 空行后是 body 数据
+	// printf("%s:%d header len:%lu\n", __FILE__, __LINE__, strlen(http_header));
+	if (send(sock_client, http_header, strlen(http_header), 0) == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}
-	free(http_header);
 }
 
-void send_http_body(int sock_client, char *http_body, unsigned long len)
+void send_http_body(int sock_client)
 {
-	if (send(sock_client, http_body, len, 0) < 0)
+	char buff[BUFSIZ] = {0};
+	int fd = open(file_path, O_RDONLY);
+	if (fd == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
 	}
+
+	unsigned long len = 0;
+	// 循环将文件 fd 中的内容读取到 buff 中
+	while ((len = read(fd, buff, BUFSIZ)) != 0)
+	{
+		if (len == -1) // I/O 错误
+		{
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+			exit(-1);
+		}
+		if (send(sock_client, buff, len, 0) == -1)
+		{
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+			exit(-1);
+		}
+	}
+
+	close(fd);
 }
 
 void http_request(int sock_client)
 {
-	char *http_body = "{\"key\":\"123456\",\"name\":\"Dio\",\"address\":\"BJ\"}";
-	send_http_header(sock_client, strlen(http_body));
-	send_http_body(sock_client, http_body, strlen(http_body));
+	struct stat buf;
+	int status = stat(file_path, &buf);
+	if (status == -1)
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
+	}
+	printf("%s file size : %llu\n", file_path, buf.st_size);
+
+	send_http_header(sock_client, buf.st_size);
+	send_http_body(sock_client);
 }
 
-// 解析获取到的 http 请求
-void parse_response(int sock_client)
+void parse_response(int sockfd)
 {
 	char buff[BUFSIZ] = {0};
-	unsigned long i, len = 0;
-	len = recv(sock_client, buff, BUFSIZ, 0); // 接收的第一波数据,包含 http header 和 http body, 需要识别并分离第一波数据
+	unsigned long i, len, write_len = 0;
+	len = recv(sockfd, buff, BUFSIZ, 0); // 接收的第一波数据,包含 http header 和 http body, 需要识别并分离第一波数据
 	if (len == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -95,23 +128,18 @@ void parse_response(int sock_client)
 	/*
 		recv 要保证接受完所有的数据,目前只有根本 header 中 Content-Length 来计算还未接收的数据
 	**/
-	unsigned long received_body_length = len - strlen(header); // 第一次 recv 已经接收到的 content 部分的长度
-	for (i = 0; i < received_body_length; i++)
-	{
-		printf("%c", body[i]);
-	}
-	puts("");
+	unsigned long received_body_length = len - strlen(header);		  // 第一次 recv 已经接收到的 content 部分的长度
 	unsigned long remain_len = content_length - received_body_length; // content 还未接收的数据长度
-	// printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
+	printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
 	while (remain_len > 0)
 	{
-		len = recv(sock_client, buff, BUFSIZ, 0);
+		len = recv(sockfd, buff, BUFSIZ, 0);
 		if (len == -1)
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(-1);
 		}
-		// printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
+		printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
 		for (i = 0; i < len; i++)
 		{
 			printf("%c", buff[i]);
@@ -119,9 +147,7 @@ void parse_response(int sock_client)
 		printf("\n");
 
 		remain_len -= len;
-		// printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
 	}
-	// printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
 }
 
 int main(int argc, char *argv[])
@@ -144,21 +170,7 @@ int main(int argc, char *argv[])
 	// 解析传送过来的 http 数据
 	parse_response(sockfd);
 
-	// char buff[BUFSIZ] = {0};
-	// unsigned long len = recv(sockfd, buff, BUFSIZ, 0); // 目前接收一次数据就能获取到所有client发送的数据
-	// if (len == -1)
-	// {
-	// 	fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-	// 	exit(-1);
-	// }
-
-	// // printf("received data len:%02lu msg:", len);
-	// for (unsigned long i = 0; i < len; i++)
-	// {
-	// 	printf("%c", buff[i]);
-	// }
-	// printf("\n");
-
 	close(sockfd);
+
 	return 0;
 }

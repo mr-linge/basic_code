@@ -13,7 +13,7 @@
 #define PORT 9000
 #define SERVER_IP "127.0.0.1"
 
-const char *method_type = "POST /user HTTP/1.1";
+const char *method_type = "POST /download HTTP/1.1";
 const char *client = "Android 8.1";
 const char *token = "0eefffb6-32af-4fed-833c-866af540akdn";
 const char *host = "jobs8.cn";
@@ -55,7 +55,7 @@ void send_http_body(int sock_client, char *http_body, unsigned long len)
 
 void http_request(int sock_client)
 {
-	char *http_body = "{\"key\":\"123456\",\"name\":\"Dio\",\"address\":\"BJ\"}";
+	char *http_body = "{\"file\":\"test.ipa\"}";
 	send_http_header(sock_client, strlen(http_body));
 	send_http_body(sock_client, http_body, strlen(http_body));
 }
@@ -103,7 +103,6 @@ void parse_response(int sockfd)
 		exit(-1);
 	}
 
-	memset(buff, '\0', BUFSIZ);
 	// 循环接受完所有数据, recv 返回 0 时,server 关闭了连接, 此时数据发送完
 	while ((len = recv(sockfd, buff, BUFSIZ, 0)) != 0) // 接收 客户端 发送过来的数据,要确保数据接受完
 	{
@@ -118,7 +117,6 @@ void parse_response(int sockfd)
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(-1);
 		}
-		memset(buff, '\0', BUFSIZ);
 	}
 	close(fd);
 }
@@ -139,7 +137,8 @@ int main(int argc, char *argv[])
 
 	// 向服务器发出请求
 	http_request(sockfd);
-	// 处理接收到的数据
+
+	// 解析传送过来的 http 数据
 	parse_response(sockfd);
 
 	close(sockfd);

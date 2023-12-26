@@ -27,32 +27,9 @@ void insert_http_header(char *http_response, char *body)
 	sprintf(http_response, "%s%s", header, body);
 }
 
-void http_response(int sock_client, char *buff, int len)
+void send_data(int sock_client)
 {
-	printf("%s\n", buff);
-	char *http_body = NULL;
-	char *p = strstr(buff, "Content-Length:");
-	if (p != NULL)
-	{
-		p += strlen("Content-Length:");
-
-		unsigned long val = strtoul(p, NULL, 10);
-		if (val == 0)
-		{
-			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-			return;
-		}
-		char content[val + 1];
-		memset(content, 0, val + 1);
-		memcpy(content, buff + (len - val), val);
-		// printf("request length:%lu body:\n%s\n", val, content);
-		http_body = "{\"code\":200,\"msg\":\"success\",\"data\":\"you will be success!\"}";
-	}
-	else
-	{
-		http_body = "Client Http body is empty.";
-	}
-
+	char *http_body = "{\"code\":200,\"msg\":\"success\",\"data\":\"you will be success!\"}";
 	char *http_response = (char *)malloc(BUFSIZ);
 	memset(http_response, '\0', BUFSIZ);
 	insert_http_header(http_response, http_body);
@@ -61,6 +38,23 @@ void http_response(int sock_client, char *buff, int len)
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}
 	free(http_response);
+}
+
+void received_data(int sock_client)
+{
+	char buff[BUFSIZ] = {0};
+	unsigned long i, len;
+	len = recv(sock_client, buff, sizeof(buff), 0); // 数据量少,一次即可接收完成
+	if (len == -1)
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
+	}
+	for (i = 0; i < len; i++)
+	{
+		printf("%c", buff[i]);
+	}
+	puts("");
 }
 
 int main()
@@ -87,30 +81,24 @@ int main()
 	}
 
 	// 客户端信息
-	char buff[BUFSIZ] = {0};
 	struct sockaddr_in claddr;
 	socklen_t length = sizeof(claddr);
 
 	int sock_client;
-	unsigned long len;
 	while (1)
 	{
 		sock_client = accept(sockfd, (struct sockaddr *)&claddr, &length);
 		if (sock_client < 0)
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-			close(sock_client);
-			break;
-		}
-		memset(buff, '\0', sizeof(buff));
-		len = recv(sock_client, buff, sizeof(buff), 0);
-		if (len == -1)
-		{
-			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(-1);
 		}
 
-		http_response(sock_client, buff, len);
+		// 接收数据
+		received_data(sock_client);
+		// 发送数据
+		send_data(sock_client);
+
 		close(sock_client);
 	}
 
