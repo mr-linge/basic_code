@@ -103,7 +103,7 @@ void receive_data(int sockfd)
 	}
 
 	// 循环接受完所有数据, recv 返回 0 时,server 关闭了连接, 此时数据发送完
-	while ((len = recv(sockfd, buff, BUFSIZ, 0)) != 0) // 接收 客户端 发送过来的数据,要确保数据接受完
+	while ((len = recv(sockfd, buff, BUFSIZ, 0)) != 0)
 	{
 		if (len == -1)
 		{

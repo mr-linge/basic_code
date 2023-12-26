@@ -84,7 +84,7 @@ void send_data(int sock_client)
 	send_http_body(sock_client);
 }
 
-// 解析获取到的 http 请求
+// 解析获取到的 http 数据
 void receive_data(int sock_client)
 {
 	char buff[BUFSIZ] = {0};
@@ -129,9 +129,13 @@ void receive_data(int sock_client)
 	/*
 		recv 要保证接受完所有的数据,目前只有根本 header 中 Content-Length 来计算还未接收的数据
 	**/
-	unsigned long received_body_length = len - strlen(header);		  // 第一次 recv 已经接收到的 content 部分的长度
+	unsigned long received_body_length = len - strlen(header); // 第一次 recv 已经接收到的 content 部分的长度
+	for (i = 0; i < received_body_length; i++)
+	{
+		printf("%c", body[i]);
+	}
 	unsigned long remain_len = content_length - received_body_length; // content 还未接收的数据长度
-	printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
+	// printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
 	while (remain_len > 0)
 	{
 		len = recv(sock_client, buff, BUFSIZ, 0);
@@ -140,7 +144,7 @@ void receive_data(int sock_client)
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(-1);
 		}
-		printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
+		// printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
 		for (i = 0; i < len; i++)
 		{
 			printf("%c", buff[i]);
@@ -148,8 +152,10 @@ void receive_data(int sock_client)
 		printf("\n");
 
 		remain_len -= len;
-		printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
+		// printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
 	}
+	// printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
+	puts("");
 }
 
 int main()

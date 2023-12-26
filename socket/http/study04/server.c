@@ -131,7 +131,6 @@ void receive_data(int sock_client)
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(-1);
 		}
-		memset(buff, '\0', BUFSIZ);
 
 		remain_len -= len;
 	}
