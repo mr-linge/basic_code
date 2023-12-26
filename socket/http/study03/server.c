@@ -69,7 +69,7 @@ void send_http_body(int sock_client)
 	close(fd);
 }
 
-void http_response(int sock_client)
+void send_data(int sock_client)
 {
 	struct stat buf;
 	int status = stat(file_path, &buf);
@@ -85,7 +85,7 @@ void http_response(int sock_client)
 }
 
 // 解析获取到的 http 请求
-void parse_response(int sock_client)
+void receive_data(int sock_client)
 {
 	char buff[BUFSIZ] = {0};
 	unsigned long i, len = 0;
@@ -98,7 +98,7 @@ void parse_response(int sock_client)
 	char *body = strstr(buff, "\r\n\r\n"); // http header 和 http body 以 \r\n\r\n 作为分割
 	if (body == NULL)
 	{
-		puts("http body not find");
+		printf("%s:%d enter not match\n", __FILE__, __LINE__);
 		return;
 	}
 	body += strlen("\r\n\r\n"); // body 开始的位置
@@ -112,12 +112,17 @@ void parse_response(int sock_client)
 	}
 
 	// 获取 header 中的 Content-Length  的数据值
-	char *content = strstr(header, "Content-Length:");
-	content += strlen("Content-Length:");
-	unsigned long content_length = strtoul(content, NULL, 10);
+	char *content_info = strstr(header, "Content-Length:");
+	if (content_info == NULL)
+	{
+		printf("%s:%d Content-Length not match\n", __FILE__, __LINE__);
+		return;
+	}
+	content_info += strlen("Content-Length:");
+	unsigned long content_length = strtoul(content_info, NULL, 10);
 	if (content_length == 0)
 	{
-		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		printf("%s:%d Content-Length is not a vaild number\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -126,7 +131,7 @@ void parse_response(int sock_client)
 	**/
 	unsigned long received_body_length = len - strlen(header);		  // 第一次 recv 已经接收到的 content 部分的长度
 	unsigned long remain_len = content_length - received_body_length; // content 还未接收的数据长度
-	// printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
+	printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
 	while (remain_len > 0)
 	{
 		len = recv(sock_client, buff, BUFSIZ, 0);
@@ -135,7 +140,7 @@ void parse_response(int sock_client)
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(-1);
 		}
-		// printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
+		printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
 		for (i = 0; i < len; i++)
 		{
 			printf("%c", buff[i]);
@@ -143,6 +148,7 @@ void parse_response(int sock_client)
 		printf("\n");
 
 		remain_len -= len;
+		printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
 	}
 }
 
@@ -183,11 +189,11 @@ int main()
 			break;
 		}
 
-		// 解析传送过来的 http 数据
-		parse_response(sock_client);
+		// 接收传送过来的 http 数据
+		receive_data(sock_client);
 
 		// 响应 http 请求,回传 http 数据
-		http_response(sock_client);
+		send_data(sock_client);
 
 		close(sock_client);
 	}

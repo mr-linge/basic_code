@@ -53,19 +53,18 @@ void send_http_body(int sock_client, char *http_body, unsigned long len)
 	}
 }
 
-void http_request(int sock_client)
+void send_data(int sock_client)
 {
 	char *http_body = "{\"file\":\"test.ipa\"}";
 	send_http_header(sock_client, strlen(http_body));
 	send_http_body(sock_client, http_body, strlen(http_body));
 }
 
-void parse_response(int sockfd)
+void receive_data(int sockfd)
 {
 	char buff[BUFSIZ] = {0};
 	unsigned long i, len, write_len = 0;
 	len = recv(sockfd, buff, BUFSIZ, 0); // 接收的第一波数据,包含 http header 和 http body, 需要识别并分离第一波数据
-	unsigned long content_length = 0;
 	// printf("%s:%d recv len:%lu\n", __FILE__, __LINE__, len);
 	if (len == -1)
 	{
@@ -75,7 +74,7 @@ void parse_response(int sockfd)
 	char *body = strstr(buff, "\r\n\r\n"); // http header 和 http body 以 \r\n\r\n 作为分割
 	if (body == NULL)
 	{
-		puts("http body not find");
+		printf("%s:%d enter not match\n", __FILE__, __LINE__);
 		return;
 	}
 	body += strlen("\r\n\r\n");
@@ -136,10 +135,10 @@ int main(int argc, char *argv[])
 	}
 
 	// 向服务器发出请求
-	http_request(sockfd);
+	send_data(sockfd);
 
-	// 解析传送过来的 http 数据
-	parse_response(sockfd);
+	// 接收传送过来的 http 数据
+	receive_data(sockfd);
 
 	close(sockfd);
 

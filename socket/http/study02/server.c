@@ -41,7 +41,7 @@ void send_http_body(int sock_client, char *body, unsigned long len)
 	}
 }
 
-void http_response(int sock_client)
+void send_data(int sock_client)
 {
 	char *http_body = "{\"code\":200,\"msg\":\"success\",\"data\":\"you will be success!\"}";
 	send_http_header(sock_client, strlen(http_body));
@@ -49,7 +49,7 @@ void http_response(int sock_client)
 }
 
 // 解析获取到的 http 请求
-void parse_response(int sock_client)
+void receive_data(int sock_client)
 {
 	char buff[BUFSIZ] = {0};
 	unsigned long i, len = 0;
@@ -62,7 +62,7 @@ void parse_response(int sock_client)
 	char *body = strstr(buff, "\r\n\r\n"); // http header 和 http body 以 \r\n\r\n 作为分割
 	if (body == NULL)
 	{
-		puts("http body not find");
+		printf("%s:%d enter not match\n", __FILE__, __LINE__);
 		return;
 	}
 	body += strlen("\r\n\r\n"); // body 开始的位置
@@ -76,12 +76,17 @@ void parse_response(int sock_client)
 	}
 
 	// 获取 header 中的 Content-Length  的数据值
-	char *content = strstr(header, "Content-Length:");
-	content += strlen("Content-Length:");
-	unsigned long content_length = strtoul(content, NULL, 10);
+	char *content_info = strstr(header, "Content-Length:");
+	if (content_info == NULL)
+	{
+		printf("%s:%d Content-Length not match\n", __FILE__, __LINE__);
+		return;
+	}
+	content_info += strlen("Content-Length:");
+	unsigned long content_length = strtoul(content_info, NULL, 10);
 	if (content_length == 0)
 	{
-		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		printf("%s:%d Content-Length is not a vaild number\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -146,7 +151,6 @@ int main()
 
 	int sock_client;
 	unsigned long i, len;
-	// char buff[BUFSIZ] = {0};
 	while (1)
 	{
 		sock_client = accept(sockfd, (struct sockaddr *)&claddr, &length);
@@ -155,25 +159,12 @@ int main()
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(-1);
 		}
-		// memset(buff, '\0', BUFSIZ);
 
-		// len = recv(sock_client, buff, BUFSIZ, 0); // 接收 客户端 发送过来的数据,目前只接收一次数据(这个缺陷 在 study03 里完善了)
-		// if (len == -1)
-		// {
-		// 	fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-		// 	exit(-1);
-		// }
-		// for (i = 0; i < len; i++)
-		// {
-		// 	printf("%c", buff[i]);
-		// }
-		// printf("\n");
-
-		// 解析传送过来的 http 数据
-		parse_response(sock_client);
+		// 接收传送过来的 http 数据
+		receive_data(sock_client);
 
 		// 响应 http 请求,回传 http 数据
-		http_response(sock_client);
+		send_data(sock_client);
 
 		close(sock_client);
 	}

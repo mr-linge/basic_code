@@ -38,18 +38,16 @@ void insert_http_header(char *http_request, char *body)
 void send_data(int sockfd)
 {
 	char *http_body = "{\"key\":\"123456\",\"name\":\"Dio\",\"address\":\"BJ\"}";
-	char *http_request = (char *)malloc(BUFSIZ);
-	memset(http_request, '\0', BUFSIZ);
+	char http_request[BUFSIZ] = {0};
 	insert_http_header(http_request, http_body);
 	if (send(sockfd, http_request, strlen(http_request), 0) < 0) // 发送 http 请求,数据量少一次即可发送完
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
-	free(http_request);
 }
 
-void received_data(int sockfd)
+void receive_data(int sockfd)
 {
 	char buff[BUFSIZ] = {0};
 	unsigned long len = recv(sockfd, buff, BUFSIZ, 0); // 接收响应数据,数据量少一次即可接收完
@@ -83,7 +81,7 @@ int main(int argc, char *argv[])
 	// 发送数据
 	send_data(sockfd);
 	// 接收数据
-	received_data(sockfd);
+	receive_data(sockfd);
 
 	close(sockfd);
 	return 0;
