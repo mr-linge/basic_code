@@ -6,46 +6,80 @@
 #include <netinet/in.h>
 #include <sys/socket.h> // socket
 #include <sys/shm.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #define PORT 9000
-int listen_max = 20; // 最大并发数量
+int listen_max = 10; // 最大并发数量
 
-const char *content_type = "application/json";
+const char *file_path = "./html/index.html";
 
-void send_http_header(int sock_client, unsigned long body_length)
+const char *content_type = "text/html; charset=utf-8";
+
+void send_http_header(int sock_client, unsigned long http_body_length)
 {
-	char header[BUFSIZ] = {0};
+	char http_header[BUFSIZ] = {0};
 
-	strcat(header, "HTTP/1.1 200 OK\r\n");
-	strcat(header, "Server: Apache Server V1.0\r\n");
-	strcat(header, "Accept-Ranges: bytes\r\n");
-	strcat(header, "Connection: close\r\n");
-	if (body_length > 0)
+	strcat(http_header, "HTTP/1.1 200 OK\r\n");
+	strcat(http_header, "Server: Apache Server V1.0\r\n");
+	strcat(http_header, "Accept-Ranges: bytes\r\n");
+	strcat(http_header, "Connection: close\r\n");
+	if (http_body_length > 0)
 	{
-		sprintf(header, "%sContent-Length: %lu\r\n", header, body_length);
+		sprintf(http_header, "%sContent-Length: %lu\r\n", http_header, http_body_length);
 	}
-	sprintf(header, "%sContent-Type: %s\r\n", header, content_type);
+	sprintf(http_header, "%sContent-Type: %s\r\n", http_header, content_type);
 
-	strcat(header, "\r\n"); // http header 和 body 以空行为分隔 \r\n 换行后是 body
-	if (send(sock_client, header, strlen(header), 0) == -1)
+	strcat(http_header, "\r\n"); // \r\n 空行后是 body 数据
+
+	if (send(sock_client, http_header, strlen(http_header), 0) == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 	}
 }
 
-void send_http_body(int sock_client, char *body, unsigned long len)
+void send_http_body(int sock_client)
 {
-	if (send(sock_client, body, len, 0) == -1)
+	char buff[BUFSIZ] = {0};
+	int fd = open(file_path, O_RDONLY);
+	if (fd == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
 	}
+
+	unsigned long len = 0;
+	// 循环将文件 fd 中的内容读取到 buff 中
+	while ((len = read(fd, buff, BUFSIZ)) != 0)
+	{
+		if (len == -1) // I/O 错误
+		{
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+			break;
+		}
+		if (send(sock_client, buff, len, 0) == -1)
+		{
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+			exit(-1);
+		}
+	}
+
+	close(fd);
 }
 
 void send_data(int sock_client)
 {
-	char *http_body = "{\"code\":200,\"msg\":\"success\",\"data\":\"you will be success!\"}";
-	send_http_header(sock_client, strlen(http_body));
-	send_http_body(sock_client, http_body, strlen(http_body));
+	struct stat buf;
+	int status = stat(file_path, &buf);
+	if (status == -1)
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
+	}
+	printf("%s file size : %llu\n", file_path, buf.st_size);
+
+	send_http_header(sock_client, buf.st_size);
+	send_http_body(sock_client);
 }
 
 // 解析获取到的 http 请求
@@ -71,6 +105,7 @@ void receive_data(int sock_client)
 
 	char *header = (char *)malloc(header_len);
 	len = recv(sock_client, header, header_len, 0);
+	// printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
 	if (len == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
@@ -78,13 +113,28 @@ void receive_data(int sock_client)
 	}
 	printf("%s", header);
 
-	char *body = (char *)malloc(BUFSIZ * 0x10);
-	memset(body, 0, BUFSIZ * 0x10);
-	// 循环接受完所有数据, recv 返回 0 时, client 关闭了连接, 此时数据发送完
-	while ((len = recv(sock_client, body + index, BUFSIZ, 0)) != 0)
+	char *content_info = strstr(header, "Content-Length:");
+	if (content_info == NULL)
 	{
-		// printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
-		if (len < 0)
+		printf("%s:%d Content-Length not match\n", __FILE__, __LINE__);
+		return;
+	}
+	content_info += strlen("Content-Length:");
+	content_length = strtoul(content_info, NULL, 10);
+	if (content_length == 0)
+	{
+		printf("%s:%d Content-Length is not a vaild number\n", __FILE__, __LINE__);
+		return;
+	}
+
+	/*
+		recv 要保证接受完所有的数据,目前只有根据 header 中 Content-Length 来计算还未接收的数据
+	**/
+	char *body = (char *)malloc(content_length);
+	while (index < content_length)
+	{
+		len = recv(sock_client, body + index, BUFSIZ, 0);
+		if (len == -1)
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(-1);
@@ -125,28 +175,24 @@ int main()
 	struct sockaddr_in claddr;
 	socklen_t length = sizeof(claddr);
 
-	int sock_client;
-	unsigned long i, len;
+	int sock_client = 0;
 	while (1)
 	{
 		sock_client = accept(sockfd, (struct sockaddr *)&claddr, &length);
 		if (sock_client < 0)
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-			exit(-1);
+			break;
 		}
 
 		// 接收传送过来的 http 数据
 		receive_data(sock_client);
-		shutdown(sockfd, SHUT_RD); // 关闭 read 读取流
 
 		// 响应 http 请求,回传 http 数据
 		send_data(sock_client);
-		shutdown(sockfd, SHUT_WR); // 发送数据完毕关闭 writing side, 对端的 recv 返回 0 可以作为接收完数据的标志
 
 		close(sock_client);
 	}
-
 	close(sockfd);
 
 	return 0;
