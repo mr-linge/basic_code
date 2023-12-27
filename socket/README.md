@@ -1,8 +1,8 @@
 # socket
 
 Socket 是对 TCP/IP 协议族的一种封装,是应用层与TCP/IP协议族通信的中间软件抽象层。从设计模式的角度看来,Socket其实就是一个门面模式,它把复杂的TCP/IP协议族隐藏在Socket接口后面,对用户来说,一组简单的接口就是全部,让Socket去组织数据,以符合指定的协议。
-Socket 还可以认为是一种网络间不同计算机上的进程通信的一种方法,利用三元组（ip地址,协议,端口）就可以唯一标识网络中的进程,网络中的进程通信可以利用这个标志与其它进程进行交互。
-socket起源于Unix,而Unix/Linux基本哲学之一就是“一切皆文件”,都可以用“打开open –> 读写write/read –> 关闭close”模式来操作。Socket就是该模式的一个实现,socket即是一种特殊的文件,一些socket函数就是对其进行的操作（读/写IO、打开、关闭）
+Socket 还可以认为是一种网络间不同计算机上的进程通信的一种方法,利用三元组(ip地址,协议,端口)就可以唯一标识网络中的进程,网络中的进程通信可以利用这个标志与其它进程进行交互。
+socket起源于Unix,而Unix/Linux基本哲学之一就是“一切皆文件”,都可以用“打开open –> 读写write/read –> 关闭close”模式来操作。Socket就是该模式的一个实现,socket即是一种特殊的文件,一些socket函数就是对其进行的操作(读/写IO、打开、关闭)
 Socket编程常用接口
 socket():       创建一个通信的管道
 bind():         server把一个地址三元组绑定到 socket 上
@@ -114,7 +114,6 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t addrlen);
 至此服务器与客户已经建立好连接了。可以调用网络I/O进行读写操作了,即实现了网咯中不同进程之间的通信！网络I/O操作有下面几组:
 read()/write()
 recv()/send()
-readv()/writev()
 recvmsg()/sendmsg()
 recvfrom()/sendto()
 
@@ -123,7 +122,7 @@ recvfrom()/sendto()
 `# include <sys/types.h>`
 `# include <sys/socket.h>`
 ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
-ssize_t sendmsg(int sockfd, struct msghdr*msg, int flags);
+ssize_t sendmsg(int sockfd, struct msghdr *msg, int flags);
 
 参数说明:
 第1个参数
@@ -151,7 +150,7 @@ msg_flags :只有 recvmsg 使用 msg_flags 成员。recvmsg 被调用时,flags �
 flags   用于传入控制信息,一般包括以下几个
 MSG_DONTROUTE               send可用
 MSG_DONWAIT                 send与recv都可用
-MSG_PEEK                    recv可用
+MSG_PEEK                    recv可用,只复制缓冲区内容并不会清除缓冲区里的数据,下次还可以读取得到
 MSG_WAITALL                 recv可用
 MSG_OOB                     send可用
 MSG_EOR                     send recv都可用
@@ -168,18 +167,12 @@ int send(SOCKET socket, char *buf, int len, int flags);
 第二个参数指明一个存放应用程序要发送数据的缓冲区
 第三个参数指明实际要发送的数据的字节数
 第四个参数一般置0
-不论是客户还是服务器应用程序都用send函数来向TCP连接的另一端发送数据。
-客户程序一般用send函数向服务器发送请求,而服务器则通常用send函数来向客户程序发送应答。
-这里只描述同步Socket的send函数的执行流程。当调用该函数时,send先比较待发送数据的长度len和套接字s的发送缓冲的长度, 如果len大于s的发送缓冲区的长度,该函数返回SOCKET_ERROR；如果len小于或者等于s的发送缓冲区的长度,那么send先检查协议是否正在发送s的发送缓冲中的数据,如果是就等待协议把数据发送完,如果协议还没有开始发送s的发送缓冲中的数据或者s的发送缓冲中没有数据,那么send就比较s的发送缓冲区的剩余空间和len,如果len大于剩余空间大小send就一直等待协议把s的发送缓冲中的数据发送完,如果len小于剩余空间大小send就仅仅把buf中的数据copy到剩余空间里（注意并不是send把s的发送缓冲中的数据传到连接的另一端的,而是协议的,send仅仅是把buf中的数据copy到s的发送缓冲区的剩余空间里）。
+当调用该函数时,send先比较待发送数据的长度len和套接字发送缓冲的长度, 如果len大于s的发送缓冲区的长度,该函数返回SOCKET_ERROR；如果len小于或者等于s的发送缓冲区的长度,那么send先检查协议是否正在发送s的发送缓冲中的数据,如果是就等待协议把数据发送完,如果协议还没有开始发送s的发送缓冲中的数据或者s的发送缓冲中没有数据,那么send就比较s的发送缓冲区的剩余空间和len,如果len大于剩余空间大小send就一直等待协议把s的发送缓冲中的数据发送完,如果len小于剩余空间大小send就仅仅把buf中的数据copy到剩余空间里（注意并不是send把s的发送缓冲中的数据传到连接的另一端的,而是协议的,send仅仅是把buf中的数据copy到s的发送缓冲区的剩余空间里）。
 
 返回值:
 <0      出错,errno被设置
 =0      对方连接关闭
 >0      成功,返回发送的字节数
-
-要注意send函数把buf中的数据成功copy到s的发送缓冲的剩余空间里后它就返回了,但是此时这些数据并不一定马上被传到连接的另一端。如果协议在后续的传送过程中出现网络错误的话,那么下一个Socket函数就会返回SOCKET_ERROR。（每一个除send外的Socket函数在执行的最开始总要先等待套接字的发送缓冲中的数据被协议传送完毕才能继续,如果在等待时出现网络错误,那么该Socket函数就返回SOCKET_ERROR）。
-
-注意:在Unix系统下,如果send在等待协议传送数据时网络断开的话,调用send的进程会接收到一个SIGPIPE信号,进程对该信号的默认处理是进程终止。
 
 ##### recv
 
@@ -188,21 +181,15 @@ int recv(SOCKET socket, char *buf, int len, int flags);
 第二个参数指明一个缓冲区,该缓冲区用来存放recv函数接收到的数据
 第三个参数指明buf的长度
 第四个参数一般置0
-不论是客户还是服务器应用程序都用recv函数从TCP连接的另一端接收数据。
-这里只描述同步Socket的recv函数的执行流程。当应用程序调用recv函数时,recv先等待s的发送缓冲中的数据被协议传送完毕,如果协议在传送s的发送缓冲中的数据时出现网络错误,那么recv函数返回SOCKET_ERROR,如果s的发送缓冲中没有数据或者数据被协议成功发送完毕后,recv先检查套接字s的接收缓冲区,如果s接收缓冲区中没有数据或者协议正在接收数据,那么recv就一直等待,只到协议把数据接收完毕。当协议把数据接收完毕,recv函数就把s的接收缓冲中的数据copy到buf中（注意协议接收到的数据可能大于buf的长度,所以在这种情况下要调用几次recv函数才能把s的接收缓冲中的数据copy完。recv函数仅仅是copy数据,真正的接收数据是协议来完成的）,recv函数返回其实际copy的字节数。如果recv在copy时出错,那么它返回SOCKET_ERROR；如果recv函数在等待协议接收数据时网络中断了,那么它返回0。
+flags:
+MSG_PEEK                    只复制缓冲区内容并不会清除缓冲区里的数据,下次还可以读取得到
+
+调用recv函数时,recv先等待s的发送缓冲中的数据被协议传送完毕,如果协议在传送s的发送缓冲中的数据时出现网络错误,那么recv函数返回SOCKET_ERROR,如果s的发送缓冲中没有数据或者数据被协议成功发送完毕后,recv先检查套接字s的接收缓冲区,如果s接收缓冲区中没有数据或者协议正在接收数据,那么recv就一直等待,直到协议把数据接收完毕。当协议把数据接收完毕,recv函数就把s的接收缓冲中的数据copy到buf中(注意协议接收到的数据可能大于buf的长度,所以在这种情况下要调用几次recv函数才能把s的接收缓冲中的数据copy完。recv函数仅仅是copy数据,真正的接收数据是协议来完成的)
 
 返回值:
 <0      出错, 同时errno被设置
 =0      对方调用了close API来关闭连接
 >0      成功,返回接收到的数据大小
-
-注意:在Unix系统下,如果recv函数在等待协议接收数据时网络断开了,那么调用recv的进程会接收到一个SIGPIPE信号,进程对该信号的默认处理是进程终止。
-
-tcp协议本身是可靠的,并不等于应用程序用tcp发送数据就一定是可靠的.不管是否阻塞,send发送的大小,并不代表对端recv到多少的数据.
-
-在阻塞模式下, send函数的过程是将应用程序请求发送的数据拷贝到发送缓存中发送并得到确认后再返回.但由于发送缓存的存在,表现为:如果发送缓存大小比请求发送的大小要大,那么send函数立即返回,同时向网络中发送数据;否则,send向网络发送缓存中不能容纳的那部分数据,并等待对端确认后再返回(接收端只要将数据收到接收缓存中,就会确认,并不一定要等待应用程序调用recv);
-
-在非阻塞模式下,send函数的过程仅仅是将数据拷贝到协议栈的缓存区而已,如果缓存区可用空间不够,则尽能力的拷贝,返回成功拷贝的大小;如缓存区可用空间为0,则返回-1,同时设置errno为EAGAIN.
 
 ### close()函数
 

@@ -52,30 +52,42 @@ void send_data(int sock_client)
 void receive_data(int sock_client)
 {
 	char buff[BUFSIZ] = {0};
-	unsigned long i, len = 0;
-	len = recv(sock_client, buff, BUFSIZ, 0); // 接收的第一波数据,包含 http header 和 http body, 需要识别并分离第一波数据
+	unsigned long index = 0, len = 0, header_len = 0, content_length = 0;
+	len = recv(sock_client, buff, BUFSIZ, MSG_PEEK); // 接收的第一波数据,包含 http header 和 http body, 需要识别并分离第一波数据
+	// printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
 	if (len == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
-	char *body = strstr(buff, "\r\n\r\n"); // http header 和 http body 以 \r\n\r\n 作为分割
-	if (body == NULL)
+	char *header_end_position = strstr(buff, "\r\n\r\n"); // http header 和 http body 以 \r\n\r\n 作为分割
+	if (header_end_position == NULL)
 	{
 		printf("%s:%d enter not match\n", __FILE__, __LINE__);
 		return;
 	}
-	body += strlen("\r\n\r\n"); // body 开始的位置
+	header_end_position += strlen("\r\n\r\n"); // header 结束的位置
+	header_len = (unsigned long)(header_end_position - buff);
 
-	char header[BUFSIZ] = {0};
-	memcpy(header, buff, (unsigned long)(body - buff)); // 获取到 http header
-	// printf("%s:%d header length:%lu\n", __FILE__, __LINE__, strlen(header));
-	for (i = 0; i < strlen(header); i++)
+	char *header = (char *)malloc(header_len);
+	len = recv(sock_client, header, header_len, 0);
+	// printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
+	if (len == -1)
 	{
-		printf("%c", buff[i]);
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		exit(-1);
 	}
+	printf("%s", header);
 
-	// 获取 header 中的 Content-Length  的数据值
+	// int body_len = 0;
+	// int retVal = sscanf(header, "Connection: keep-alive\r\nContent-Length: %d\r\n", &body_len);
+	// printf("%s:%d retVal:%d\n", __FILE__, __LINE__, retVal);
+	// if (retVal == -1)
+	// {
+	// 	printf("%s:%d Content-Length is not find\n", __FILE__, __LINE__);
+	// }
+	// printf("%s:%d body_len:%d\n", __FILE__, __LINE__, body_len);
+
 	char *content_info = strstr(header, "Content-Length:");
 	if (content_info == NULL)
 	{
@@ -83,51 +95,32 @@ void receive_data(int sock_client)
 		return;
 	}
 	content_info += strlen("Content-Length:");
-	unsigned long content_length = strtoul(content_info, NULL, 10);
+	content_length = strtoul(content_info, NULL, 10);
 	if (content_length == 0)
 	{
 		printf("%s:%d Content-Length is not a vaild number\n", __FILE__, __LINE__);
 		return;
 	}
-	// unsigned long content_length = 0;
-	// int retVal = sscanf(header, "Content-Length: %lu", &content_length);
-	// printf("%s:%d retVal:%d\n", __FILE__, __LINE__, retVal);
-	// if (retVal == -1)
-	// {
-	// 	printf("%s:%d Content-Length is not find\n", __FILE__, __LINE__);
-	// 	return;
-	// }
-	// printf("%s:%d content_length:%lu\n", __FILE__, __LINE__, content_length);
 
 	/*
 		recv 要保证接受完所有的数据,目前只有根据 header 中 Content-Length 来计算还未接收的数据
 	**/
-	unsigned long received_body_length = len - strlen(header); // 第一次 recv 已经接收到的 content 部分的长度
-	for (i = 0; i < received_body_length; i++)
+	char *body = (char *)malloc(content_length);
+	while (index < content_length)
 	{
-		printf("%c", body[i]);
-	}
-	unsigned long remain_len = content_length - received_body_length; // content 还未接收的数据长度
-	// printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
-	while (remain_len > 0)
-	{
-		len = recv(sock_client, buff, BUFSIZ, 0);
+		len = recv(sock_client, body + index, BUFSIZ, 0);
 		if (len == -1)
 		{
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(-1);
 		}
-		// printf("%s:%d len:%lu\n", __FILE__, __LINE__, len);
-		for (i = 0; i < len; i++)
-		{
-			printf("%c", buff[i]);
-		}
-
-		remain_len -= len;
-		// printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
+		index += len;
 	}
-	// printf("%s:%d remain_len:%lu\n", __FILE__, __LINE__, remain_len);
+	printf("%s", body);
 	puts("");
+
+	free(header);
+	free(body);
 }
 
 int main()

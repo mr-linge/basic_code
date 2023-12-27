@@ -24,8 +24,8 @@ int main()
     char str1[0x10], str2[0x10], str3[0x10];
     int year;
 
-    unsigned long retVal = sscanf(buff, "Yeah, %s %s %s %d", str1, str2, str3, &year);
-    printf("retVal:%lu\n", retVal);
+    int retVal = sscanf(buff, "Yeah, %s %s %s %d", str1, str2, str3, &year);
+    printf("retVal:%d\n", retVal);
     if (retVal < 0)
     {
         printf("%s:%d match fail\n", __FILE__, __LINE__);
