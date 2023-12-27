@@ -9,4 +9,4 @@ client:
 all: server client
 
 clean:
-	@-rm -rf server client  test.ipa
+	@-rm -rf server client 

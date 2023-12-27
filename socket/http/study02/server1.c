@@ -79,15 +79,6 @@ void receive_data(int sock_client)
 	}
 	printf("%s", header);
 
-	// int body_len = 0;
-	// int retVal = sscanf(header, "Connection: keep-alive\r\nContent-Length: %d\r\n", &body_len);
-	// printf("%s:%d retVal:%d\n", __FILE__, __LINE__, retVal);
-	// if (retVal == -1)
-	// {
-	// 	printf("%s:%d Content-Length is not find\n", __FILE__, __LINE__);
-	// }
-	// printf("%s:%d body_len:%d\n", __FILE__, __LINE__, body_len);
-
 	char *content_info = strstr(header, "Content-Length:");
 	if (content_info == NULL)
 	{

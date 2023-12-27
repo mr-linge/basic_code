@@ -89,15 +89,6 @@ void receive_data(int sock_client)
 		printf("%s:%d Content-Length is not a vaild number\n", __FILE__, __LINE__);
 		return;
 	}
-	// unsigned long content_length = 0;
-	// int retVal = sscanf(header, "Content-Length: %lu", &content_length);
-	// printf("%s:%d retVal:%d\n", __FILE__, __LINE__, retVal);
-	// if (retVal == -1)
-	// {
-	// 	printf("%s:%d Content-Length is not find\n", __FILE__, __LINE__);
-	// 	return;
-	// }
-	// printf("%s:%d content_length:%lu\n", __FILE__, __LINE__, content_length);
 
 	/*
 		recv 要保证接受完所有的数据,目前只有根据 header 中 Content-Length 来计算还未接收的数据

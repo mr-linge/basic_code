@@ -1,3 +1,3 @@
 # http 构造
 
-http 发送数据可以分多次发送,http header 和 body 也可以分两次发送
+socket 实现一个 http 发送和接收, 主要实现了接收数据的解析. 根据 header 中 Content-Length 来计算 需要接收的数据量

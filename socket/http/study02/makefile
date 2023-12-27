@@ -12,4 +12,4 @@ client:
 all: server server1 client
 
 clean:
-	@-rm -rf server client server1
+	@-rm -rf server server1 client 

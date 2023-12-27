@@ -122,7 +122,7 @@ recvfrom()/sendto()
 `# include <sys/types.h>`
 `# include <sys/socket.h>`
 ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
-ssize_t sendmsg(int sockfd, struct msghdr *msg, int flags);
+ssize_t sendmsg(int sockfd, struct msghdr*msg, int flags);
 
 参数说明:
 第1个参数
@@ -182,7 +182,7 @@ int recv(SOCKET socket, char *buf, int len, int flags);
 第三个参数指明buf的长度
 第四个参数一般置0
 flags:
-MSG_PEEK                    只复制缓冲区内容并不会清除缓冲区里的数据,下次还可以读取得到
+MSG_PEEK                    只复制缓冲区数据并不会清除缓冲区里的数据,下次还可以读取得到缓区里这段数据
 
 调用recv函数时,recv先等待s的发送缓冲中的数据被协议传送完毕,如果协议在传送s的发送缓冲中的数据时出现网络错误,那么recv函数返回SOCKET_ERROR,如果s的发送缓冲中没有数据或者数据被协议成功发送完毕后,recv先检查套接字s的接收缓冲区,如果s接收缓冲区中没有数据或者协议正在接收数据,那么recv就一直等待,直到协议把数据接收完毕。当协议把数据接收完毕,recv函数就把s的接收缓冲中的数据copy到buf中(注意协议接收到的数据可能大于buf的长度,所以在这种情况下要调用几次recv函数才能把s的接收缓冲中的数据copy完。recv函数仅仅是copy数据,真正的接收数据是协议来完成的)
 
@@ -191,7 +191,7 @@ MSG_PEEK                    只复制缓冲区内容并不会清除缓冲区里�
 =0      对方调用了close API来关闭连接
 >0      成功,返回接收到的数据大小
 
-### close()函数
+### close() 关闭连接
 
 在服务器与客户端建立连接之后,会进行一些读写操作,完成了读写操作就要关闭相应的socket描述字,好比操作完打开的文件要调用fclose关闭打开的文件。
 
@@ -201,3 +201,14 @@ int close(int fd);
 close一个TCP socket的缺省行为时把该socket标记为以关闭,然后立即返回到调用进程。该描述字不能再由调用进程使用,也就是说不能再作为read或write的第一个参数。
 
 注意:close操作只是使相应socket描述字的引用计数-1,只有当引用计数为0的时候,才会触发TCP客户端向服务器发送终止连接请求。
+
+## shutdown 精细化关闭连接
+
+int     shutdown(int fd, int mode);
+
+mode:
+SHUT_RD         0              shut down the reading side
+SHUT_WR         1              shut down the writing side
+SHUT_RDWR       2              shut down both sides
+
+精细化关闭连接.

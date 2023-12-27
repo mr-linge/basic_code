@@ -4,7 +4,7 @@
 /*
 Header:     #include <stdio.h>
 Function:   int sscanf(const char *str, const char *format, ...);
-Description: 从 str 读取 format 格式化字符串
+Description: 从 str 读取 format 格式化字符串(遇到空格式匹配就结束,有很大的局限性)
 
 params:
 参数

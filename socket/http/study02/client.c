@@ -98,5 +98,6 @@ int main(int argc, char *argv[])
 	receive_data(sockfd);
 
 	close(sockfd);
+
 	return 0;
 }

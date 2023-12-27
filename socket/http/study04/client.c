@@ -13,13 +13,13 @@
 #define PORT 9000
 #define SERVER_IP "127.0.0.1"
 
-const char *method_type = "POST /upload HTTP/1.1";
+const char *method_type = "POST /download HTTP/1.1";
 const char *client = "Android 8.1";
 const char *token = "0eefffb6-32af-4fed-833c-866af540akdn";
 const char *host = "jobs8.cn";
 const char *content_type = "application/octet-stream";
 
-const char *file_path = "/tmp/test.ipa";
+const char *file_path = "./test.ipa";
 
 void send_http_header(int sock_client, unsigned long http_body_length)
 {
@@ -45,54 +45,62 @@ void send_http_header(int sock_client, unsigned long http_body_length)
 	}
 }
 
-void send_http_body(int sock_client)
+void send_http_body(int sock_client, char *http_body, unsigned long len)
+{
+	if (send(sock_client, http_body, len, 0) == -1)
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+	}
+}
+
+void send_data(int sock_client)
+{
+	char *http_body = "{\"file\":\"test.ipa\"}";
+	send_http_header(sock_client, strlen(http_body));
+	send_http_body(sock_client, http_body, strlen(http_body));
+}
+
+void receive_data(int sockfd)
 {
 	char buff[BUFSIZ] = {0};
-	int fd = open(file_path, O_RDONLY);
+	unsigned long i, len, write_len = 0;
+	len = recv(sockfd, buff, BUFSIZ, 0); // 接收的第一波数据,包含 http header 和 http body, 需要识别并分离第一波数据
+	// printf("%s:%d recv len:%lu\n", __FILE__, __LINE__, len);
+	if (len == -1)
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+		return;
+	}
+	char *body = strstr(buff, "\r\n\r\n"); // http header 和 http body 以 \r\n\r\n 作为分割
+	if (body == NULL)
+	{
+		printf("%s:%d enter not match\n", __FILE__, __LINE__);
+		return;
+	}
+	body += strlen("\r\n\r\n");
+
+	char header[BUFSIZ] = {0};
+	memcpy(header, buff, (unsigned long)(body - buff));
+	// printf("%s:%d header length:%lu\n", __FILE__, __LINE__, strlen(header));
+	for (i = 0; i < strlen(header); i++)
+	{
+		printf("%c", buff[i]);
+	}
+
+	// 准备把接收的数据写到本地文件里
+	int fd = open(file_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 	if (fd == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
 
-	unsigned long len = 0;
-	// 循环将文件 fd 中的内容读取到 buff 中
-	while ((len = read(fd, buff, BUFSIZ)) != 0)
-	{
-		if (len == -1) // I/O 错误
-		{
-			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-			exit(-1);
-		}
-		if (send(sock_client, buff, len, 0) == -1)
-		{
-			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
-			exit(-1);
-		}
-	}
-
-	close(fd);
-}
-
-void send_data(int sock_client)
-{
-	struct stat buf;
-	int status = stat(file_path, &buf);
-	if (status == -1)
+	write_len = write(fd, body, len - strlen(header));
+	if (write_len == -1)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 		exit(-1);
 	}
-	printf("%s file size : %llu\n", file_path, buf.st_size);
-
-	send_http_header(sock_client, buf.st_size);
-	send_http_body(sock_client);
-}
-
-void receive_data(int sockfd)
-{
-	char buff[BUFSIZ] = {0};
-	unsigned long i, len = 0;
 
 	// 循环接受完所有数据, recv 返回 0 时,server 关闭了连接, 此时数据发送完
 	while ((len = recv(sockfd, buff, BUFSIZ, 0)) != 0)
@@ -102,12 +110,14 @@ void receive_data(int sockfd)
 			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
 			exit(-1);
 		}
-		for (i = 0; i < len; i++)
+		write_len = write(fd, buff, len);
+		if (write_len == -1)
 		{
-			printf("%c", buff[i]);
+			fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+			exit(-1);
 		}
 	}
-	puts("");
+	close(fd);
 }
 
 int main(int argc, char *argv[])
