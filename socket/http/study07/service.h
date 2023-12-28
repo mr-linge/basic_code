@@ -7,13 +7,19 @@
 #include <sys/socket.h> // socket
 #include <sys/shm.h>
 #include <sys/stat.h>
-#include "common_header.h"
+#include "http_handler.h"
 
-struct HTTP_DATA *get_data(struct HTTP_DATA *request);
-struct HTTP_DATA *post_data(struct HTTP_DATA *request);
-struct HTTP_DATA *download(struct HTTP_DATA *request);
-struct HTTP_DATA *upload(struct HTTP_DATA *request);
+// GET 请求
+int get_data(int sock_client);
+// POST 请求
+int post_data(int sock_client);
 
-struct HTTP_DATA *get_html(struct HTTP_DATA *request);
+// 下载文件
+int download(int sock_client);
+// 上传文件
+int upload(int sock_client);
 
-struct HTTP_DATA *other(struct HTTP_DATA *request);
+// 返回 html
+int get_html(int sock_client);
+
+int other(int sock_client);

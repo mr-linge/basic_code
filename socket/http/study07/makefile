@@ -1,7 +1,7 @@
 cc = gcc
 
 server:
-	@$(cc) main.c server.c service.c http_parse.c -o server
+	@$(cc) main.c server.c service.c http_handler.c -o server
 
 client:
 	@$(cc) client.c -o client
