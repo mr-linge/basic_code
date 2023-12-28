@@ -17,7 +17,7 @@ const char *method_type = "POST /upload HTTP/1.1";
 const char *client = "Android 8.1";
 const char *token = "0eefffb6-32af-4fed-833c-866af540akdn";
 const char *host = "jobs8.cn";
-const char *content_type = "application/octet-stream";
+const char *content_type = "multipart/form-data;";
 
 const char *file_path = "/tmp/test.ipa";
 
