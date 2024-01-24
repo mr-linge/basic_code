@@ -18,12 +18,12 @@ dynamic_library: static_library
 #	 ${cc} -c func.c -o func.o
 #	 ${cc} -shared -fPIC -static func.o -o libmymath.so -L./ -lmymath
 
-program: dynamic_library
+main: dynamic_library
 #	${cc} -Wl,-rpath=./ -o main main.c -L./ -lmymath
 	${cc} -o main main.c -L./ -lmymath
 
 
-all: program
+all: main
 # 环境变量LD_LIBRARY_PATH指定动态库搜索路径(在 shell 里执行)
 	export LD_LIBRARY_PATH=./
 # 默认的动态库搜索路径 /lib  /usr/lib

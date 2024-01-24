@@ -19,7 +19,7 @@
 
 ### 动态链接库
 
-动态链接库就是把目标文件(object file)链接在一起生成位置独立代码。
+动态链接库就是把目标文件(object file)链接在一起生成位置独立代码
 
 ### 静态链接库和动态链接库的区别  
 
@@ -31,24 +31,18 @@
 
 既可链接静态库也可链接动态库。按如下次序依次查找,找不到就报错
 
-#### 1. -L<path> -l<name> 所指定的依赖库
+#### 指定依赖库
 
 -L  指定依赖库查找路径
 -l  指定要链接的依赖库的名称
 例如:
 gcc main.c -o main -L./ -lmymath
-在 ./ 目录下链接 libmymath.so或libmymath.a,当目录下同时有静态库和动态库时,优先链接动态库.
+在 ./ 目录下链接 libmymath.so或libmymath.a,当目录下同时有静态库和动态库时,优先链接动态库
 
-Linux系统默认的C语言依赖库是 /usr/lib 下的 libc.so和libc.a,如果用到的C系统函数没有在libc.so或libc.a中,需要指定要链接的库.
+Linux系统默认的C语言依赖库是 /usr/lib 下的 libc.so和libc.a,如果用到的C系统函数没有在libc.so或libc.a中,需要指定要链接的库
 如下:
-# include <math.h>       需要链接libm.so或libm.a  编译时指定要链接的库 -lm
-# include <dlfcn.h>      编译时指定要链接的库 -ldl
-
-#### 2. 系统依赖库默认查找目录
-
-/lib                系统启动时用到的库安装在这个目录中(系统启动时可能还没有挂载/usr/lib)
-/usr/lib            标准库安装的目录
-/usr/local/lib      非标准或实验性的库安装在这个目录中
+`# include <math.h>`       需要链接libm.so或libm.a  编译时指定要链接的库 -lm
+`# include <dlfcn.h>`      编译时指定要链接的库 -ldl
 
 ### 运行时
 
@@ -66,8 +60,8 @@ gcc -Wl,-rpath=./ -o main main.c
 export LD_LIBRARY_PATH=./
 指定运行时动态库查找路径为 ./
 
-#### 3. 系统依赖库默认查找目录
+### 系统依赖库默认查找目录
 
-/lib                系统启动时用到的库安装在这个目录中(系统启动时可能还没有挂载/usr/lib)
-/usr/lib            标准库安装的目录
-/usr/local/lib      非标准或实验性的库安装在这个目录中
+/lib/                系统启动时用到的库安装在这个目录中(系统启动时可能还没有挂载/usr/lib)
+/usr/lib/            标准库安装的目录
+/usr/local/lib/      非标准或实验性的库安装在这个目录中
