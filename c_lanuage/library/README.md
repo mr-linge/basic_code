@@ -35,8 +35,8 @@
 -L  指定依赖库查找路径
 -l  指定要链接的依赖库的名称
 可链接静态库也可链接动态库,例如:
-gcc main.c -o main -L./ -lmymath              在路径 ./ 下链接动态库 libmymath.so
 gcc -static main.c -o main -L./ -lmymath      在路径 ./ 下链接静态库 libmymath.a
+gcc main.c -o main -L./ -lmymath              在路径 ./ 下优先链接动态库 libmymath.so,其次链接静态库 libmymath.a
 
 Linux系统默认的C语言依赖库是 /usr/lib/ 下的 libc.so和libc.a,如果用到的C系统函数没在libc.so或libc.a中,需要指定要依赖库。
 如下:
