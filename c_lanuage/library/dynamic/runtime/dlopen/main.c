@@ -3,9 +3,6 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
-// 动态链接库路径
-#define LIB_CACULATE_PATH "./libcaculate.so"
-
 // 函数指针
 typedef int (*CAC_FUNC)(int, int);
 
@@ -17,13 +14,14 @@ int main()
 	char *error;
 	CAC_FUNC cac_func = NULL;
 
+	const char *lib_path = "./libcaculate.so";
 	// 打开动态链接库
-	handle = dlopen(LIB_CACULATE_PATH, RTLD_LAZY);
+	handle = dlopen(lib_path, RTLD_LAZY);
 	printf("handle = %p\n", handle);
 	if ((error = dlerror()) != NULL)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
-		exit(EXIT_FAILURE);
+		return -1;
 	}
 
 	// 获取一个函数
@@ -31,7 +29,7 @@ int main()
 	if ((error = dlerror()) != NULL)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
-		exit(EXIT_FAILURE);
+		return -1;
 	}
 	printf("add: %d\n", cac_func1(2, 7));
 

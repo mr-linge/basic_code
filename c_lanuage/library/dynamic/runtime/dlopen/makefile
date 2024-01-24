@@ -1,13 +1,13 @@
 cc = gcc
 
 # 生成动态链接库
-dylib: caculate.c
+dylib:
 	@$(cc) -fPIC -shared caculate.c -o libcaculate.so
 
-program: 
+main: 
 	@$(cc) main.c -o main -ldl
 
-all: dylib program
+all: dylib main
 	@./main
 
 clean:
