@@ -1,4 +1,4 @@
-# 静态链接库
+# 静态库
 
 archive options :
 ar : archive 压缩, object file 压缩成 static library

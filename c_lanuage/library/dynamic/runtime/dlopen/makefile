@@ -1,6 +1,6 @@
 cc = gcc
 
-# 生成动态链接库
+# 生成动态库
 dylib:
 	@$(cc) -fPIC -shared caculate.c -o libcaculate.so
 
