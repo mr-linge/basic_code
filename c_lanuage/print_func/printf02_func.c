@@ -13,7 +13,8 @@ int main()
 	int len = 3;
 	printf("%0*d", len, num);
 
-	printf("\n");
+	int ret_val = printf("\n");
+	printf("ret_val:%d\n",ret_val);
 
 	return 0;
 }
