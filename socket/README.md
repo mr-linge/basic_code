@@ -156,7 +156,7 @@ MSG_OOB                     send可用
 MSG_EOR                     send recv都可用
 
 返回值:
-成功返回读入或者写出的字节数,出错返回 -1 并设置 errno。
+成功返回读入或者写出的字节数,出错返回 -1 并设置 errno
 
 #### recv()/send()
 
@@ -211,4 +211,4 @@ SHUT_RD         0              shut down the reading side
 SHUT_WR         1              shut down the writing side
 SHUT_RDWR       2              shut down both sides
 
-精细化关闭连接.
+精细化关闭连接

@@ -1,3 +1,0 @@
-gcc -no-pie write.c -o main
-
-./main `pidof ./tracee` A352A0 helloworldyouwillbesuccess

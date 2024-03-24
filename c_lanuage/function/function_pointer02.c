@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/****************
+/*
   函数指针作为某个函数的参数
   函数指针变量可以作为某个函数的参数来使用的，回调函数就是一个通过函数指针调用的函数。
 
@@ -17,13 +17,13 @@
   实例中我们定义了回调函数 getNextRandomValue，它返回一个随机值，它作为一个函数指针传递给 populate_array 函数。
 
   populate_array 将调用 10 次回调函数，并将回调函数的返回值赋值给数组。
- * *****************/
-
+**/
 
 // 回调函数
 void populate_array(int *array, size_t arraySize, int (*getNextValue)(void))
 {
-	for (size_t i=0; i<arraySize; i++) {
+	for (size_t i = 0; i < arraySize; i++)
+	{
 		array[i] = getNextValue();
 	}
 }
@@ -39,7 +39,8 @@ int main()
 	int myarray[10];
 	/* getNextRandomValue 不能加括号，否则无法编译，因为加上括号之后相当于传入此参数时传入了 int , 而不是函数指针*/
 	populate_array(myarray, 10, &getNextRandomValue);
-	for(int i = 0; i < 10; i++) {
+	for (int i = 0; i < 10; i++)
+	{
 		printf("%d ", myarray[i]);
 	}
 	puts("");

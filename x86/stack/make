@@ -1,2 +1,0 @@
-gcc -no-pie ptrace_util.c main.c -o main
-./main `pidof ./tracee`

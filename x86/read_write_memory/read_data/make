@@ -1,3 +1,0 @@
-gcc -no-pie read.c -o main
-
-./main `pidof ./tracee` a352a0

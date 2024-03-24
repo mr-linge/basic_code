@@ -3,7 +3,8 @@
 /*
  * 一维数组
  */
-int main() {
+int main()
+{
 	int a[3] = {2, 3, 4};
 	printf("a[0] = %d\n", a[0]);
 

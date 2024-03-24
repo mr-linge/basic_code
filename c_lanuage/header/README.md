@@ -1,4 +1,6 @@
-# 头文件 .h
-\\ #include header.h 相当于用 header.h 头文件里的内容替换 #include header.h
-\\ #include <stdio.h>  到系统默认目录 /usr/include 找到 stdio.h 头文件,并用stdio.h里的内容 替换 #include <stdio.h>
-\\ #include "./dir/xxx.h"  用 ./dir/xxx.h 头文件内容替换 #include "./dir/xxx.h"
+# 头文件
+
+`#include <xxx.h>` 直接到系统默认动态库目录里去寻找动态库
+`#include "xxx.h"` 先到指定目录寻找动态库,如果没找到再到系统默认动态库目录里去寻找动态库
+
+预编译阶段 会递归展开头文件, header.h 里的代码会被复制到引用它的文件里

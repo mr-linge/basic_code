@@ -10,6 +10,6 @@ p3: pthread_03.c block_queue.c
 	$(cc) pthread_03.c block_queue.c -o pthread_03 -lpthread
 
 clean:
-	@- rm -rf pthread_01
-	@- rm -rf pthread_02
-	@- rm -rf pthread_03
+	@-rm -rf pthread_01
+	@-rm -rf pthread_02
+	@-rm -rf pthread_03

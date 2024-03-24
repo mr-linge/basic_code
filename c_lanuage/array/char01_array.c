@@ -10,14 +10,15 @@
    因为\0是字符串的结束标记。
    所以，如果想要创建一个字符串，记得加上结束符\0，不然后果很严重，会访问到一些垃圾数据。
  **/
-int main() {
-	char a[3] = {'m', 'j', '\0'}; 	// 添加了结束符\0
-	char b[] = {'i', 's'};        	// 假设忘记添加结束符\0
+int main()
+{
+	char a[3] = {'m', 'j', '\0'}; // 添加了结束符\0
+	char b[] = {'i', 's'};		  // 假设忘记添加结束符\0
 	// or
 	// char b[] = "is";
-	printf("string a：%s", a);     	// 输出字符串a
-	printf("\n");                 	// 换行
-	printf("string b：%s\n", b);   	// 输出字符串b
+	printf("string a:%s", a);	// 输出字符串a
+	printf("\n");				// 换行
+	printf("string b:%s\n", b); // 输出字符串b
 
 	return 0;
 }

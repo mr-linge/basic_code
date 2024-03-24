@@ -1,13 +1,10 @@
+cc=clang
 
+server:
+	$(cc) server.c -o server
 
-server: Server.c
-	@gcc Server.c -o server
-	@./server
-
-client: Client.c
-	@gcc Client.c -o client
-	@./client
+client:
+	$(cc) client.c -o client
 
 clean:
 	@-rm server client
-	@clear

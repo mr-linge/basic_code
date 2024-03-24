@@ -58,6 +58,12 @@ add x0, x1, [x2]        ; 将寄存器 x1 的值加上寄存器 x2 的值作为�
 sub     两个数相减
 sub x0, x1, x2          ; 将寄存器 x1 和 x2 的值相减后保存到寄存器 x0 中
 
+MADD Rd, Rn, Rm, Ra
+Rd = Ra + Rn * Rm
+
+MSUB Rd, Rn, Rm, Ra  
+Rd = Ra - Rn * Rm
+
 ## 跳转
 
 相对地址寻址(目标地址是相对PC的偏移地址)
