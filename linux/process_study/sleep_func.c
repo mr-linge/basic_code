@@ -7,7 +7,7 @@
  * unsigned int sleep(unsigned int seconds);
  *
  * Description:
- * sleep()会令目前的进程暂停, 直到达到参数seconds 所指定的时间, 或是被信号所中断.
+ * sleep()会令当前的进程暂停, 直到达到参数seconds 所指定的时间, 或是被信号所中断.
  * return value:
  * 若进程暂停到参数seconds 所指定的时间则返回0, 若有信号中断则返回剩余秒数.
  * */

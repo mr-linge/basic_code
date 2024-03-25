@@ -1,34 +1,4 @@
-信号介绍
-
-Signal          Description
-SIGHUP          终止进程,终端线路挂断
-SIGINT          终止进程,中断进程
-SIGQUIT         建立CORE文件终止进程,并且生成core文件
-SIGILL          建立CORE文件  非法指令
-SIGTRAP         建立CORE文件  跟踪自陷
-SIGBUS          建立CORE文件  总线错误
-SIGSEGV         建立CORE文件  段非法错误
-SIGFPE          建立CORE文件  浮点异常
-SIGIOT          建立CORE文件  执行I/O自陷
-SIGKILL         终止进程杀死进程
-SIGPIPE         终止进程向一个没有读进程的管道写数据
-SIGALARM        终止进程计时器到时
-SIGTERM         终止进程软件终止信号
-SIGSTOP         停止进程非终端来的停止信号
-SIGTSTP         停止进程终端来的停止信号
-SIGCONT         忽略信号继续执行一个停止的进程
-SIGURG          忽略信号I/O紧急信号
-SIGIO           忽略信号描述符上可以进行I/O
-SIGCHLD         忽略信号当子进程停止或退出时通知父进程
-SIGTTOU         停止进程后台进程写终端
-SIGTTIN         停止进程后台进程读终端
-SIGXGPU         终止进程CPU时限超时
-SIGXFSZ         终止进程文件长度过长
-SIGWINCH        忽略信号窗口大小发生变化
-SIGPROF         终止进程统计分布图用计时器到时
-SIGUSR1         终止进程用户定义信号1
-SIGUSR2         终止进程用户定义信号2
-SIGVTALRM       终止进程虚拟计时器到时
+# 信号
 
 1 SIGHUP 本信号在用户终端连接(正常或非正常)结束时发出, 通常是在终端的控
 制进程结束时, 通知同一session内的各个作业, 这时它们与控制终端不再关联
