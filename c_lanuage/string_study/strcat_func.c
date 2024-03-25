@@ -18,11 +18,11 @@
 
 int main()
 {
-	char str[0x100] = {0};
-	strcpy(str, "these ");
-	strcat(str, "strings ");
-	strcat(str, "are ");
-	strcat(str, "concatenated.");
-	puts(str);
-	return 0;
+   char str[0x100] = {0};
+   strcpy(str, "these ");
+   strcat(str, "strings ");
+   strcat(str, "are ");
+   strcat(str, "concatenated.");
+   puts(str);
+   return 0;
 }

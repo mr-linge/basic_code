@@ -6,7 +6,7 @@ extern char **environ;
 
 int main(int argc, char *argv[])
 {
-	printf("file:%s, line:%d, pid:%d\n", __FILE__, __LINE__, getpid());
+  	printf("%s:%d pid:%d\n", __FILE__, __LINE__, getpid());
 	printf("---------------------- argement ----------------------\n");
 	printf("argc:%d\n", argc);
 	for (int i = 0; i < argc; i++)
@@ -20,6 +20,6 @@ int main(int argc, char *argv[])
 		printf("environ[%d]:%s\n", i, environ[i]);
 	}
 
-	printf("file:%s, line:%d, pid:%d\n", __FILE__, __LINE__, getpid());
+  	printf("%s:%d pid:%d\n", __FILE__, __LINE__, getpid());
 	return 0;
 }

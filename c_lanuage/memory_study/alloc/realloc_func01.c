@@ -12,17 +12,21 @@
    4. realloc 并不保证调整后的内存空间和原来的内存空间保持同一内存地址。相反，realloc 返回的指针很可能指向一个新的地址。所以在代码中，我们必须将realloc返回的值，重新赋值
  * */
 
-int main () {
+int main()
+{
 	char *p;
-	p=(char *)malloc(100);
-	if(p)
-		printf("Memory Allocated at: %p\n",p);
+	p = (char *)malloc(100);
+	if (p)
+		printf("Memory Allocated at: %p\n", p);
 	else
 		printf("Not Enough Memory!/n");
-	char *new_p=(char *)realloc(p,256);
-	if(new_p) {
-		printf("Memory Reallocated at: %p\n",new_p);
-	} else {
+	char *new_p = (char *)realloc(p, 256);
+	if (new_p)
+	{
+		printf("Memory Reallocated at: %p\n", new_p);
+	}
+	else
+	{
 		printf("Not Enough Memory!/n");
 		free(p);
 		p = NULL;

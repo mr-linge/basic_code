@@ -20,17 +20,18 @@ Return:
 
 int main(int argc, char *argv[])
 {
-  printf("file:%s, line:%d, pid:%d\n", __FILE__, __LINE__, getpid());
-  const char *filepath = "../target";
+  printf("%s:%d pid:%d\n", __FILE__, __LINE__, getpid());
+  const char *filepath = "./image";
   char *const argv_new[] = {"param1", "param2", NULL};
   char *const envp_new[] = {"AA=11", "BB=22", NULL};
   int ret = execve(filepath, argv_new, envp_new);
   if (ret < 0)
   {
-		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
+    fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
     return -1;
   }
 
-  printf("file:%s, line:%d, pid:%d\n", __FILE__, __LINE__, getpid());
+  printf("%s:%d pid:%d\n", __FILE__, __LINE__, getpid());
+
   return 0;
 }
