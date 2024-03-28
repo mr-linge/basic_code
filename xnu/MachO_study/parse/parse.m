@@ -6,10 +6,28 @@ void parse(void *mem) {
     
     printf("-----------------> header <-----------------\n");
     struct mach_header_64 *header = (struct mach_header_64 *)mem;
-    printf("magic:      %08X\n",header->magic);
+    printf("magic:      %08X\t",header->magic);
+    if (header->magic == MH_MAGIC_64) {
+        printf("MH_MAGIC_64\n");
+    }else if(header->magic == MH_CIGAM_64) {
+        printf("MH_CIGAM_64\n");
+    }else if(header->magic == MH_MAGIC) {
+        printf("MH_MAGIC\n");
+    }else if(header->magic == MH_CIGAM) {
+        printf("MH_CIGAM\n");
+    }else {
+        printf("\n");
+    }
     printf("cputype:    %08X\n",header->cputype);
-    printf("cputype:    %08X\n",header->cpusubtype);
-    printf("filetype:   %08X\n",header->filetype);
+    printf("cpusubtype: %08X\n",header->cpusubtype);
+    printf("filetype:   %08X\t",header->filetype);
+    if (header->filetype == MH_EXECUTE) {
+        printf("MH_EXECUTE\n");
+    }else if (header->filetype == 0x6) {
+        printf("MH_DYLIB\n");
+    }else {
+        printf("\n");
+    }
     printf("ncmds:      %08X\n",header->ncmds);       // Number of Load commands
     printf("sizeofcmds: %08X\n",header->sizeofcmds);  // Size of Load commands
     printf("flags:      %08X\n",header->flags);

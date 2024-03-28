@@ -1,17 +1,13 @@
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 
 /*
-#include <sys/wait.h>
-#include <sys/types.h>
-
-funtcion:
-pid_t wait(int *status);
+Header: #include <sys/wait.h>
+Funtcion: pid_t wait(int *status);
 
 Description:
 wait()会暂时停止目前进程的执行, 直到有信号来到或子进程结束. 如果在调用wait()时子进程已经结束, 则wait()会立即返回子进程结束状态值. 子进程的结束状态值会由参数status 返回, 而子进程的进程识别码也会一快返回.

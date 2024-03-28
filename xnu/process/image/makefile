@@ -17,10 +17,9 @@ main:
 
 # 签名 Mach-O 可执行文件
 sign: 
-	@/usr/bin/codesign --force --sign - --entitlements entitlements.plist ${outfile}
+	@/usr/bin/codesign --force --sign - ${outfile}
 
 all: main sign
-	@scp -r -P 2222 ${outfile} root@localhost:/Applications/
 
 clean:
 	@-rm -rf $(outfile)

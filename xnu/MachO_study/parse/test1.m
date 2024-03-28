@@ -11,8 +11,8 @@
 int main(int argc, char *argv[])
 {
     int fd;
-    unsigned char *mem;
     struct stat st;
+    unsigned char *mem;
     
     if (argc < 2)
     {
@@ -26,14 +26,12 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     
-    /* file property, want to get file size. */
     if (fstat(fd, &st) < 0)
     {
         fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, strerror(errno));
         exit(-1);
     }
     
-    /* Map the executable into memory */
     mem = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (mem == MAP_FAILED)
     {
