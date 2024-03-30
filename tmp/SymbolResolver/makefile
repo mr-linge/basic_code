@@ -4,7 +4,7 @@ arch=arm64
 framework=Foundation
 SDK_path=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
 
-source=main.m ./library/arm64/libdobby.a
+source=main.m macho/*.cc
 outfile=main
 
 main:

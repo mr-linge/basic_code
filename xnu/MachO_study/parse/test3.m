@@ -27,12 +27,12 @@ int lookup_module_info(const struct mach_header **image_header, char *module_nam
         const char *			    imageFilePath = image_info.imageFilePath;
 		if (flag == 0) {
             if(strstr(imageFilePath, module_name) != NULL) { // 采用模糊匹配,模块名包含module即返回
-				 *image_header = image_info.imageLoadAddress;;
+				 *image_header = image_info.imageLoadAddress;
                 return 0;
             }
         }else {  
             if(strcmp(imageFilePath, module_name) == 0) {   // strcmp 准确匹配
-                *image_header = image_info.imageLoadAddress;;
+                *image_header = image_info.imageLoadAddress;
                 return 0;
             }
         } 
