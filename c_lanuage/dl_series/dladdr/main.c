@@ -6,6 +6,11 @@
 // 函数指针
 typedef int (*CAC_FUNC)(int, int);
 
+int func_max(int p1, int p2)
+{
+	return p1 > p2 ? p1 : p2;
+}
+
 int main()
 {
 	printf("****************** pid:%d *******************\n", getpid());
@@ -13,6 +18,7 @@ int main()
 	void *handle;
 	char *error;
 	CAC_FUNC cac_func = NULL;
+	int status = 0, p1 = 20, p2 = 10;
 
 	const char *lib_path = "./libcaculate.so";
 	// 打开动态链接库
@@ -30,44 +36,50 @@ int main()
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
 		return -1;
 	}
-	printf("add: %d\n", cac_func1(2, 7));
-
-	cac_func = (CAC_FUNC)dlsym(handle, "sub");
-	printf("%d cac_func: %p\n", __LINE__, cac_func);
-	printf("sub: %d\n", cac_func(9, 2));
-
-	cac_func = (CAC_FUNC)dlsym(handle, "mul");
-	printf("%d cac_func: %p\n", __LINE__, cac_func);
-	printf("mul: %d\n", cac_func(3, 2));
+	printf("%d add 			vaddr:%p\n", __LINE__, cac_func1);
+	printf("%d add(%d,%d) = %d\n", __LINE__, p1, p2, cac_func1(p1, p2));
 
 	cac_func = dlsym(handle, "div");
-	printf("%d cac_func: %p\n", __LINE__, cac_func);
-	printf("div: %d\n", cac_func(8, 2));
+	printf("%d div 			vaddr:%p\n", __LINE__, cac_func);
+	printf("%d div(%d,%d) = %d\n", __LINE__, p1, p2, cac_func(p1, p2));
+
+	printf("%d func_max 	vaddr:%p\n", __LINE__, &func_max);
+	printf("%d func_max(%d,%d) = %d\n", __LINE__, p1, p2, func_max(p1, p2));
 
 	Dl_info *info = (Dl_info *)malloc(sizeof(Dl_info));
-	int status = dladdr(cac_func, info);
-	printf("status:%d\n",status);
+	status = dladdr(cac_func, info);
+	printf("status:%d\n", status);
 	if ((error = dlerror()) != NULL)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
 		return -1;
 	}
-	printf("dli_fname:%s\n",info->dli_fname);
-	printf("dli_fbase:%p\n",info->dli_fbase);
-	printf("dli_sname:%s\n",info->dli_sname);
-	printf("dli_saddr:%p\n",info->dli_saddr);
+	printf("dli_fname:%s\n", info->dli_fname);
+	printf("dli_fbase:%p\n", info->dli_fbase);
+	printf("dli_sname:%s\n", info->dli_sname);
+	printf("dli_saddr:%p\n", info->dli_saddr);
 
 	status = dladdr(&printf, info);
-	printf("status:%d\n",status);
 	if ((error = dlerror()) != NULL)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
 		return -1;
 	}
-	printf("dli_fname:%s\n",info->dli_fname);
-	printf("dli_fbase:%p\n",info->dli_fbase);
-	printf("dli_sname:%s\n",info->dli_sname);
-	printf("dli_saddr:%p\n",info->dli_saddr);
+	printf("dli_fname:%s\n", info->dli_fname);
+	printf("dli_fbase:%p\n", info->dli_fbase);
+	printf("dli_sname:%s\n", info->dli_sname);
+	printf("dli_saddr:%p\n", info->dli_saddr);
+
+	status = dladdr(&func_max, info);
+	if ((error = dlerror()) != NULL)
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
+		return -1;
+	}
+	printf("dli_fname:%s\n", info->dli_fname);
+	printf("dli_fbase:%p\n", info->dli_fbase);
+	printf("dli_sname:%s\n", info->dli_sname);
+	printf("dli_saddr:%p\n", info->dli_saddr);
 
 	// 关闭动态链接库,关闭后该动态库就会从 当前进程中 移除
 	dlclose(handle);

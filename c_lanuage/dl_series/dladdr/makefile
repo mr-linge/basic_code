@@ -10,4 +10,4 @@ main:
 all: dylib main
 
 clean:
-	@-rm ./main ./libcaculate.so
+	@-rm -rf ./main ./libcaculate.so
