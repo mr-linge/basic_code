@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-// 跟结构体变量一样，结构体数组也有3种定义方式
+// 跟结构体变量一样,结构体数组也有3种定义方式
 struct Teacher1
 {
     char *name;
@@ -29,7 +29,7 @@ struct
 
 int main()
 {
-    // 也可以用数组下标访问每一个结构体元素，跟普通数组的用法是一样的
+    // 也可以用数组下标访问每一个结构体元素,跟普通数组的用法是一样的
     struct Teacher1 teaArr[5] = {{"Dio", 37}, {"JJ", 30}, {"MJ", 27}, {"JJ", 30}, {"MJ", 27}};
     struct Teacher1 tea = teaArr[0];
     printf("teaArr[0]  name:%s,age:%d\n", tea.name, tea.age);

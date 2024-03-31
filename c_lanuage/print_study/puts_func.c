@@ -4,13 +4,13 @@
 /*
 Header:     #include <stdio.h>
 Function:   int puts(const char *str)
-Description:把一个字符串写入到标准输出 stdout，直到空字符，但不包括空字符。换行符会被追加到输出中
+Params:
+   str      要被写入的 C 字符串
 
-params:
- str -- 这是要被写入的 C 字符串。
+Description:把一个字符串写入到标准输出 stdout,直到空字符,但不包括空字符。换行符会被追加到输出中
 
-retrun:
- 如果成功,该函数返回一个非负值为字符串长度（包括末尾的 \0），如果发生错误则返回 EOF
+Retrun:
+   如果成功,该函数返回一个非负值为字符串长度(包括末尾的 \0),如果发生错误则返回 EOF
 **/
 
 int main()

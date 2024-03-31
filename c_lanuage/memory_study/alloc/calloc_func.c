@@ -3,20 +3,24 @@
 #include <string.h>
 
 /*
-   函数原型：
-   void * calloc(size_t numElements, size_t sizeOfElement);
-   函数功能：
-   与malloc相似，参数sizeOfElement为单位元素长度（例如：sizeof(int)），numElements为元素个数，即在内存中申请numElements * sizeOfElement字节大小的连续内存空间。
+Function: void * calloc(size_t num, size_t size);
+Params:
+num       单位元素长度
+size      元素个数
 
-   注意:
-   函数calloc() 会将所分配的内存空间中的每一位都初始化为零
- * */
+Description: 在内存中申请 num * size 字节大小的连续内存空间,并将内存空间置0
+
+Return:
+   成功,返回一个指针,指向已分配大小的内存
+   失败,则返回 NULL
+**/
 
 int main()
 {
-  char *s = (char *)calloc(64, sizeof(char));
-  strcpy(s, "helloworld");
-  puts(s);
+  char *ptr = (char *)calloc(64, sizeof(char));
+  strcpy(ptr, "helloworld");
+  puts(ptr);
 
+  free(ptr);
   return 0;
 }

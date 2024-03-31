@@ -17,7 +17,7 @@ return:
 
 int main()
 {
-	const char src[50] = "Hello world! To be  linux expert.";
+	char src[50] = "Hello world! To be  linux expert.";
 
 	char d[50];
 	// 将字符串复制到数组 d1 中

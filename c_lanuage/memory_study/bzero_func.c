@@ -12,7 +12,7 @@ s为指针,n 为需要清零的字节数
 
 注意:
 bzero() 不是标准函数,没有在ANSI中定义,在VC6.0和MinGW5下编译没通过; gcc 和 clang 是支持的
- */
+**/
 
 int main()
 {
