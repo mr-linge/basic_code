@@ -1,4 +1,4 @@
-cc=clang++
+cc=clang
 
 arch=arm64
 framework=Foundation
