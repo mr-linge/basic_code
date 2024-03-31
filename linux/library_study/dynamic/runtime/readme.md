@@ -36,6 +36,27 @@ symbol          动态库中函数的名称
 功能: dlsym 根据动态链接库操作句柄(handle)与符号(symbol) 获取 symbol 在进程中的虚拟地址
 返回值: 符号对应的虚拟地址
 
+### dladdr
+
+Header: `#include <dlfcn.h>`
+Function: int dladdr(const void *addr, Dl_info *info);
+Params:
+addr        符号(symbol) 虚拟地址
+info        接收 symbol 信息的结构体指针
+
+typedef struct {
+    const char *dli_fname;  /* Pathname of shared object that contains address */
+    void       *dli_fbase;  /* Base address at which shared object is loaded */
+    const char *dli_sname;  /* Name of symbol whose definition overlaps addr */
+    oid       *dli_saddr;   /* Exact address of symbol named in dli_sname */
+} Dl_info;
+
+Description: 根据符号的虚拟地址,查看符号相关信息
+
+Return:
+成功 retval > 0
+失败 retval <= 0, 错误信息放在 dlerror 里
+
 ### dlclose
 
 Header: `#include <dlfcn.h>`
