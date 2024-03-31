@@ -146,6 +146,22 @@ void parse(const struct mach_header *image_header, char *symbol_name_pattern) {
     }
 }
 
+void dylib_info(const void *addr) {
+    char *error;
+	Dl_info *info = (Dl_info *)malloc(sizeof(Dl_info));
+	int status = dladdr(addr, info);
+	// printf("status:%d\n",status);
+	if ((error = dlerror()) != NULL)
+	{
+		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
+		return;
+	}
+	printf("dli_fname:%s\n",info->dli_fname);
+	printf("dli_fbase:%p\n",info->dli_fbase);
+	printf("dli_sname:%s\n",info->dli_sname);
+	printf("dli_saddr:%p\n",info->dli_saddr);
+}
+
 // https://opensource.apple.com/source/dyld/dyld-195.6/include/mach-o/dyld_images.h.auto.html
 int main(int argc, char *argv[])
 {
@@ -153,14 +169,21 @@ int main(int argc, char *argv[])
         printf("param is not right!\n");
         return -1;
     }
-	  // show_all_image_info();
-    // printf("dlopen vaddr:%p\n",&dlopen);
-    // printf("dlsym  vaddr:%p\n",&dlsym);
-    // printf("printf vaddr:%p\n",&printf);
-    // printf("puts   vaddr:%p\n",&puts);
-    // printf("malloc vaddr:%p\n",&malloc);
+	// show_all_image_info();
+    // printf("dlopen\n");
+    // dylib_info(&dlopen);
+    // printf("dlsym\n");
+    // dylib_info(&dlsym);
+    // printf("printf\n");
+    // dylib_info(&printf);
+    // printf("puts\n");
+    // dylib_info(&puts);
+    // printf("malloc\n");
+    // dylib_info(&malloc);
+    printf("SecKeyCreateWithData\n");
+    dylib_info(&SecKeyCreateWithData);
 
-	  char *module_name_pattern = argv[1];
+	char *module_name_pattern = argv[1];
     char *symbol_name_pattern = NULL;
     if(argc == 3) {
         symbol_name_pattern = argv[2];
@@ -180,17 +203,5 @@ int main(int argc, char *argv[])
 
     parse(image_header, symbol_name_pattern);
 
-    // const char *image_name;
-    // unsigned long vmaddr_slide;
-    // const struct mach_header *image_header = NULL;
-    // for (unsigned int i = 0 ; i < _dyld_image_count(); ++i) {
-    //     image_name = _dyld_get_image_name(i);
-    //     // vmaddr_slide = _dyld_get_image_vmaddr_slide(i);
-    //     // image_header = _dyld_get_image_header(i);
-    //     // printf("%3d name:%s vmaddr_slide:0x%lx header:%p\n",i,image_name,vmaddr_slide,image_header);
-    //     parse(image_header, symbol_name_pattern);
-    //     printf("==================== %d is end ====================\n", i);
-    // }
-
-	  return 0;
+	return 0;
 }

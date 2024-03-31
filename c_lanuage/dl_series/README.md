@@ -1,4 +1,4 @@
-# 运行时装载动态库
+# 装载动态库
 
 一个进程可能依赖多个动态库,通常是在进程启动时将必要的动态库装载入进程虚拟内存中,不过也可使用 dlopen dlsym dlclose 在程序运行过程中动态地加载和卸载动态库
 
@@ -48,7 +48,7 @@ typedef struct {
     const char *dli_fname;  /* Pathname of shared object that contains address */
     void       *dli_fbase;  /* Base address at which shared object is loaded */
     const char *dli_sname;  /* Name of symbol whose definition overlaps addr */
-    oid       *dli_saddr;   /* Exact address of symbol named in dli_sname */
+    void       *dli_saddr;  /* Exact address of symbol named in dli_sname */
 } Dl_info;
 
 Description: 根据符号的虚拟地址,查看符号相关信息
