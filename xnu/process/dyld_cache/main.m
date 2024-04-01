@@ -149,8 +149,7 @@ void parse(const struct mach_header *image_header, char *symbol_name_pattern) {
 void dylib_info(const void *addr) {
     char *error;
 	Dl_info *info = (Dl_info *)malloc(sizeof(Dl_info));
-	int status = dladdr(addr, info);
-	// printf("status:%d\n",status);
+	dladdr(addr, info);
 	if ((error = dlerror()) != NULL)
 	{
 		fprintf(stderr, "%s:%d error: %s\n", __FILE__, __LINE__, error);
@@ -169,17 +168,6 @@ int main(int argc, char *argv[])
         printf("param is not right!\n");
         return -1;
     }
-	// show_all_image_info();
-    // printf("dlopen\n");
-    // dylib_info(&dlopen);
-    // printf("dlsym\n");
-    // dylib_info(&dlsym);
-    // printf("printf\n");
-    // dylib_info(&printf);
-    // printf("puts\n");
-    // dylib_info(&puts);
-    // printf("malloc\n");
-    // dylib_info(&malloc);
     printf("SecKeyCreateWithData\n");
     dylib_info(&SecKeyCreateWithData);
 
